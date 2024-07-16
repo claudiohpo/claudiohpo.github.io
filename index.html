@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Formulário de Entrega de Peças</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.4.1/jspdf.debug.js"
+      integrity="sha384-THVO/sM0mFD9h7dfSndI6TS0PgAGavwKvB5hAxRRvc0o9cPLohB0wb/PTA7LdUHs"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+    <style>
+      /* Reset básico para remover margens e paddings padrão */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5;
+        color: #333;
+        padding: 10px;
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 1.5em;
+      }
+
+      form {
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+
+      input[type="text"],
+      input[type="date"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+
+      button {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        font-size: 1em;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background-color: #0056b3;
+      }
+
+      table {
+        width: 100%;
+        margin-bottom: 10px;
+        border-collapse: collapse;
+      }
+
+      table,
+      th,
+      td {
+        border: 1px solid #ccc;
+      }
+
+      th,
+      td {
+        padding: 8px;
+        text-align: left;
+      }
+
+      canvas {
+        display: block;
+        width: 100%;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+
+      @media (max-width: 375px) {
+        h1 {
+          font-size: 1.2em;
+        }
+
+        form {
+          padding: 15px;
+        }
+
+        input[type="text"],
+        input[type="date"] {
+          padding: 8px;
+        }
+
+        button {
+          padding: 8px;
+          font-size: 0.9em;
+        }
+
+        canvas {
+          height: 100px;
+        }
+      }
+
+      @media screen and (orientation: landscape) {
+        canvas {
+          width: 50%;
+          height: auto;
+        }
+      }
+
+      footer {
+        text-align: center;
+        margin-top: 20px;
+        padding: 10px;
+        background-color: #f0f0f0;
+        border-top: 1px solid #ccc;
+        font-size: 0.8em;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Formulário de Entrega de Peças</h1>
+
+    <form id="deliveryForm">
+      <label for="data">Data:</label>
+      <input type="date" id="data" name="data" required />
+
+      <label for="nomeRecebedor">Nome do Recebedor:</label>
+      <input type="text" id="nomeRecebedor" name="nomeRecebedor" required />
+
+      <label for="nomeTecnico">Nome Técnico:</label>
+      <input type="text" id="nomeTecnico" name="nomeTecnico" required />
+
+      <h3>Código, Número de Série, Nota Fiscal:</h3>
+      <table id="serialTable">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Número de Série</th>
+            <th>Nota Fiscal</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <input type="text" id="codigoPeca" placeholder="Código da Peça" />
+      <input type="text" id="serialProxxi" placeholder="Número de Série" />
+      <input type="text" id="notaFiscal" placeholder="Nota Fiscal" />
+      <button type="button" onclick="addRow()">Adicionar</button>
+
+      <label for="assinatura">Assinatura Recebedor:</label>
+      <canvas id="signatureCanvas" width="300" height="150"></canvas>
+      <button type="button" onclick="clearSignature()">
+        Limpar Assinatura
+      </button>
+
+      <button type="button" onclick="generatePDF()">Gerar PDF</button>
+    </form>
+
+    <footer>&copy; 2024 Diego Sakai. Todos os direitos reservados.</footer>
+
+    <script>
+      var canvas = document.getElementById("signatureCanvas");
+      var ctx = canvas.getContext("2d");
+      var isDrawing = false;
+
+      function addRow() {
+        var codigoPecaInput = document.getElementById("codigoPeca");
+        var serialInput = document.getElementById("serialProxxi");
+        var notaFiscalInput = document.getElementById("notaFiscal");
+        var serialTable = document
+          .getElementById("serialTable")
+          .getElementsByTagName("tbody")[0];
+
+        if (
+          codigoPecaInput.value !== "" &&
+          serialInput.value !== "" &&
+          notaFiscalInput.value !== ""
+        ) {
+          var newRow = serialTable.insertRow();
+          var codigoCell = newRow.insertCell(0);
+          var serialCell = newRow.insertCell(1);
+          var notaFiscalCell = newRow.insertCell(2);
+
+          codigoCell.textContent = codigoPecaInput.value;
+          serialCell.textContent = serialInput.value;
+          notaFiscalCell.textContent = notaFiscalInput.value;
+
+          codigoPecaInput.value = "";
+          serialInput.value = "";
+          notaFiscalInput.value = "";
+        }
+      }
+
+      function clearSignature() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+
+      function generatePDF() {
+        var doc = new jsPDF({
+          format: "letter",
+          orientation: "portrait",
+        });
+
+        var data = document.getElementById("data").value;
+        var nomeRecebedor = document.getElementById("nomeRecebedor").value;
+        var nomeTecnico = document.getElementById("nomeTecnico").value;
+
+        var serialTable = document
+          .getElementById("serialTable")
+          .getElementsByTagName("tbody")[0];
+
+        var rows = [];
+        for (var i = 0, row; (row = serialTable.rows[i]); i++) {
+          rows.push({
+            codigo: row.cells[0].textContent,
+            serial: row.cells[1].textContent,
+            notaFiscal: row.cells[2].textContent,
+          });
+        }
+
+        doc.text("Data: " + data, 10, 10);
+        doc.text("Nome do Recebedor: " + nomeRecebedor, 10, 20);
+        doc.text("Nome Técnico: " + nomeTecnico, 10, 30);
+
+        var y = 40;
+        doc.text("Código, Número de Série, Nota Fiscal:", 10, y);
+        y += 10;
+        rows.forEach(function (item) {
+          doc.text(
+            item.codigo + " - " + item.serial + " - " + item.notaFiscal,
+            10,
+            y
+          );
+          y += 10;
+        });
+
+        y += 10;
+        doc.text("Assinatura Recebedor:", 10, y);
+
+        var signatureData = canvas.toDataURL();
+        doc.addImage(signatureData, "PNG", 10, y + 10, 100, 50);
+
+        var now = new Date();
+        var timestamp = now
+          .toISOString()
+          .replace(/[:\-]/g, "")
+          .replace(/\..*$/, "")
+          .replace("T", "_");
+
+        doc.save("formulario_entrega_pecas_" + timestamp + ".pdf");
+      }
+
+      canvas.addEventListener("mousedown", startDrawing);
+      canvas.addEventListener("mousemove", draw);
+      canvas.addEventListener("mouseup", stopDrawing);
+      canvas.addEventListener("mouseout", stopDrawing);
+      canvas.addEventListener("touchstart", startDrawing);
+      canvas.addEventListener("touchmove", draw);
+      canvas.addEventListener("touchend", stopDrawing);
+      canvas.addEventListener("touchcancel", stopDrawing);
+
+      function getTouchPos(canvasDom, touchEvent) {
+        var rect = canvasDom.getBoundingClientRect();
+        return {
+          x:
+            ((touchEvent.touches[0].clientX - rect.left) / rect.width) *
+            canvasDom.width,
+          y:
+            ((touchEvent.touches[0].clientY - rect.top) / rect.height) *
+            canvasDom.height,
+        };
+      }
+
+      function startDrawing(event) {
+        isDrawing = true;
+        var pos = event.type.includes("touch")
+          ? getTouchPos(canvas, event)
+          : {
+              x:
+                ((event.clientX - canvas.offsetLeft) / canvas.clientWidth) *
+                canvas.width,
+              y:
+                ((event.clientY - canvas.offsetTop) / canvas.clientHeight) *
+                canvas.height,
+            };
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+        event.preventDefault();
+      }
+
+      function draw(event) {
+        if (isDrawing) {
+          var pos = event.type.includes("touch")
+            ? getTouchPos(canvas, event)
+            : {
+                x:
+                  ((event.clientX - canvas.offsetLeft) / canvas.clientWidth) *
+                  canvas.width,
+                y:
+                  ((event.clientY - canvas.offsetTop) / canvas.clientHeight) *
+                  canvas.height,
+              };
+          ctx.lineTo(pos.x, pos.y);
+          ctx.stroke();
+          event.preventDefault();
+        }
+      }
+
+      function stopDrawing(event) {
+        if (isDrawing) {
+          ctx.stroke();
+          ctx.closePath();
+          isDrawing = false;
+        }
+        event.preventDefault();
+      }
+    </script>
+  </body>
+</html>
