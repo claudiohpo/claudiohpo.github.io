@@ -1,146 +1,144 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Formulário de Entrega de Peças</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
-    <style>
-        /* Reset básico para remover margens e paddings padrão */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Formulário de Entrega de Peças</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+  <style>
+    /* Reset básico para remover margens e paddings padrão */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-            color: #333;
-            padding: 10px;
-        }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      color: #333;
+      padding: 10px;
+    }
 
-        h1 {
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 1.5em;
-        }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 1.5em;
+    }
 
-        form {
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
+    form {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
 
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
 
-        input[type="text"],
-        input[type="date"] {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
+    input[type="text"],
+    input[type="date"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
 
-        button {
-            display: block;
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            font-size: 1em;
-            cursor: pointer;
-        }
+    button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 1em;
+      cursor: pointer;
+    }
 
-        button:hover {
-            background-color: #0056b3;
-        }
+    button:hover {
+      background-color: #0056b3;
+    }
 
-        table {
-            width: 100%;
-            margin-bottom: 10px;
-            border-collapse: collapse;
-        }
+    table {
+      width: 100%;
+      margin-bottom: 10px;
+      border-collapse: collapse;
+    }
 
-        table,
-        th,
-        td {
-            border: 1px solid #ccc;
-        }
+    table,
+    th,
+    td {
+      border: 1px solid #ccc;
+    }
 
-        th,
-        td {
-            padding: 8px;
-            text-align: left;
-        }
+    th,
+    td {
+      padding: 8px;
+      text-align: left;
+    }
 
-        canvas {
-            display: block;
-            width: 100%;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
+    canvas {
+      display: block;
+      width: 100%;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
 
-        @media (max-width: 375px) {
-            h1 {
-                font-size: 1.2em;
-            }
+    @media (max-width: 375px) {
+      h1 {
+        font-size: 1.2em;
+      }
 
-            form {
-                padding: 15px;
-            }
+      form {
+        padding: 15px;
+      }
 
-            input[type="text"],
-            input[type="date"] {
-                padding: 8px;
-            }
+      input[type="text"],
+      input[type="date"] {
+        padding: 8px;
+      }
 
-            button {
-                padding: 8px;
-                font-size: 0.9em;
-            }
+      button {
+        padding: 8px;
+        font-size: 0.9em;
+      }
 
-            canvas {
-                height: 100px;
-            }
-        }
+      canvas {
+        height: 100px;
+      }
+    }
 
-        @media screen and (orientation: landscape) {
-            canvas {
-                width: 50%;
-                height: auto;
-            }
-        }
+    @media screen and (orientation: landscape) {
+      canvas {
+        width: 50%;
+        height: auto;
+      }
+    }
 
-        footer {
-            text-align: center;
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #f0f0f0;
-            border-top: 1px solid #ccc;
-            font-size: 0.8em;
-        }
-    </style>
+    footer {
+      text-align: center;
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #f0f0f0;
+      border-top: 1px solid #ccc;
+      font-size: 0.8em;
+    }
+  </style>
 </head>
-
 <body>
-    <h1>Formulário de Entrega de Peças</h1>
+  <h1>Formulário de Entrega de Peças</h1>
 
-    <form id="deliveryForm">
-        <label for="data"><strong>Data:</strong></label>
+  <form id="deliveryForm">
+    <label for="data"><strong>Data:</strong></label>
         <input type="date" id="data" name="data" required />
 
         <label for="nomeRecebedor"><strong>Nome do Recebedor:</strong></label>
@@ -149,165 +147,165 @@
         <label for="nomeTecnico"><strong>Nome Técnico:</strong></label>
         <input type="text" id="nomeTecnico" name="nomeTecnico" required />
 
-        <!-- <h3>Código, Número de Série, Nota Fiscal:</h3> -->
-        <table id="serialTable">
-            <thead>
-                <tr>
-                    <th>Código</th>
-                    <th>Número de Série</th>
-                    <th>Nota Fiscal</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
+    <!---<h3>Código, Número de Série, Nota Fiscal:</h3> --->
+    <table id="serialTable">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Número de Série</th>
+          <th>Nota Fiscal</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
 
-        <div>
-            <input type="text" id="codigoPeca" placeholder="Código da Peça" autocapitalize="characters"/>
-            <button type="button" onclick="iniciarLeituraCodigo('codigoPeca')">Ler Código</button>
-            <div id="camera-preview-codigoPeca" style="width: 100%; height: auto"></div>
-        </div>
+    <div>
+      <input type="text" id="codigoPeca" placeholder="Código da Peça" autocapitalize="characters"/>
+      <button type="button" onclick="iniciarLeituraCodigo('codigoPeca')">Ler Código</button>
+      <div id="camera-preview-codigoPeca" style="width: 100%; height: auto"></div>
+  </div>
 
-        <div>
-            <input type="text" id="serialProxxi" placeholder="Número de Série" autocapitalize="characters"/>
-            <button type="button" onclick="iniciarLeituraCodigo('serialProxxi')">Ler Código</button>
-            <div id="camera-preview-serialProxxi" style="width: 100%; height: auto"></div>
-        </div>
+  <div>
+      <input type="text" id="serialProxxi" placeholder="Número de Série" autocapitalize="characters"/>
+      <button type="button" onclick="iniciarLeituraCodigo('serialProxxi')">Ler Código</button>
+      <div id="camera-preview-serialProxxi" style="width: 100%; height: auto"></div>
+  </div>
 
-        <div>
-            <input type="text" id="notaFiscal" placeholder="Nota Fiscal" autocapitalize="characters"/>
-            <button type="button" onclick="iniciarLeituraCodigo('notaFiscal')">Ler Código</button>
-            <div id="camera-preview-notaFiscal" style="width: 100%; height: auto"></div>
-        </div>
+  <div>
+      <input type="text" id="notaFiscal" placeholder="Nota Fiscal" autocapitalize="characters"/>
+      <button type="button" onclick="iniciarLeituraCodigo('notaFiscal')">Ler Código</button>
+      <div id="camera-preview-notaFiscal" style="width: 100%; height: auto"></div>
+  </div>
 
-        <button type="button" onclick="addRow()">Adicionar</button>
+    <button type="button" onclick="addRow()">Adicionar</button>
 
-        <label for="assinatura">Assinatura Recebedor:</label>
-        <canvas id="signatureCanvas" width="300" height="150"></canvas>
-        <button type="button" onclick="limparAssinatura()">Limpar Assinatura</button>
+    <label for="assinatura">Assinatura Recebedor:</label>
+    <canvas id="signatureCanvas" width="300" height="150"></canvas>
+    <button type="button" onclick="limparAssinatura()">Limpar Assinatura</button>
 
-        <button type="button" onclick="gerarPDF()">Gerar PDF</button>
-    </form>
+    <button type="button" onclick="gerarPDF()">Gerar PDF</button>
+  </form>
 
-    <footer>
-        &copy; 2024 Diego Sakai & Cláudio Henrique. Todos os direitos reservados.
-    </footer>
+  <footer>
+    &copy; 2024 Diego Sakai & Cláudio Henrique. Todos os direitos reservados.
+  </footer>
 
-    <script>
-        const { jsPDF } = window.jspdf;
+  <script>
+    const { jsPDF } = window.jspdf;
 
-        var canvas = document.getElementById("signatureCanvas");
-        var ctx = canvas.getContext("2d");
-        var isDrawing = false;
+    var canvas = document.getElementById("signatureCanvas");
+    var ctx = canvas.getContext("2d");
+    var isDrawing = false;
 
-        function addRow() {
-            var codigoPecaInput = document.getElementById("codigoPeca");
-            var serialInput = document.getElementById("serialProxxi");
-            var notaFiscalInput = document.getElementById("notaFiscal");
-            var serialTable = document.getElementById("serialTable").getElementsByTagName("tbody")[0];
+    function addRow() {
+      var codigoPecaInput = document.getElementById("codigoPeca");
+      var serialInput = document.getElementById("serialProxxi");
+      var notaFiscalInput = document.getElementById("notaFiscal");
+      var serialTable = document.getElementById("serialTable").getElementsByTagName("tbody")[0];
 
-            if (codigoPecaInput.value !== "" && serialInput.value !== "" && notaFiscalInput.value !== "") {
-                var newRow = serialTable.insertRow();
-                var codigoCell = newRow.insertCell(0);
-                var serialCell = newRow.insertCell(1);
-                var notaFiscalCell = newRow.insertCell(2);
-                var actionsCell = newRow.insertCell(3);
+      if (codigoPecaInput.value !== "" && serialInput.value !== "" && notaFiscalInput.value !== "") {
+        var newRow = serialTable.insertRow();
+        var codigoCell = newRow.insertCell(0);
+        var serialCell = newRow.insertCell(1);
+        var notaFiscalCell = newRow.insertCell(2);
+        var actionsCell = newRow.insertCell(3);
 
-                codigoCell.textContent = codigoPecaInput.value;
-                serialCell.textContent = serialInput.value;
-                notaFiscalCell.textContent = notaFiscalInput.value;
+        codigoCell.textContent = codigoPecaInput.value;
+        serialCell.textContent = serialInput.value;
+        notaFiscalCell.textContent = notaFiscalInput.value;
 
-                var editButton = document.createElement("button");
-                editButton.textContent = "Editar";
-                editButton.onclick = function () {
-                    editarLinha(newRow);
-                };
-                actionsCell.appendChild(editButton);
+        var editButton = document.createElement("button");
+        editButton.textContent = "Editar";
+        editButton.onclick = function () {
+          editarLinha(newRow);
+        };
+        actionsCell.appendChild(editButton);
 
-                var deleteButton = document.createElement("button");
-                deleteButton.textContent = "Excluir";
-                deleteButton.onclick = function () {
-                    excluirLinha(newRow);
-                };
-                actionsCell.appendChild(deleteButton);
+        var deleteButton = document.createElement("button");
+        deleteButton.textContent = "Excluir";
+        deleteButton.onclick = function () {
+          excluirLinha(newRow);
+        };
+        actionsCell.appendChild(deleteButton);
 
-                codigoPecaInput.value = "";
-                serialInput.value = "";
-                notaFiscalInput.value = "";
-            }
+        codigoPecaInput.value = "";
+        serialInput.value = "";
+        notaFiscalInput.value = "";
+      }
+    }
+
+    function editarLinha(linha) {
+      var celulas = linha.getElementsByTagName("td");
+      document.getElementById("codigoPeca").value = celulas[0].textContent;
+      document.getElementById("serialProxxi").value = celulas[1].textContent;
+      document.getElementById("notaFiscal").value = celulas[2].textContent;
+
+      linha.parentNode.removeChild(linha);
+    }
+
+    function excluirLinha(linha) {
+      linha.parentNode.removeChild(linha);
+    }
+
+    function limparAssinatura() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function iniciarLeituraCodigo(idInput) {
+      Quagga.init(
+        {
+          inputStream: {
+            name: "Live",
+            type: "LiveStream",
+            target: document.querySelector(`#camera-preview-${idInput}`),
+            constraints: {
+              facingMode: "environment", // ou "user" para câmera frontal
+            },
+          },
+          locator: {
+            patchSize: "medium",
+            halfSample: true,
+          },
+          numOfWorkers: navigator.hardwareConcurrency,
+          decoder: {
+            readers: [
+              "code_128_reader",
+              "code_39_reader",
+              "codabar_reader",
+            ],
+          },
+          locate: true,
+        },
+        function (err) {
+          if (err) {
+            console.error(err);
+            return;
+          }
+          console.log("Inicialização concluída. Pronto para iniciar");
+          Quagga.start();
         }
+      );
 
-        function editarLinha(linha) {
-            var celulas = linha.getElementsByTagName("td");
-            document.getElementById("codigoPeca").value = celulas[0].textContent;
-            document.getElementById("serialProxxi").value = celulas[1].textContent;
-            document.getElementById("notaFiscal").value = celulas[2].textContent;
+      Quagga.onDetected(function (result) {
+        var codigo = result.codeResult.code;
+        document.getElementById(idInput).value = codigo;
+        fecharPopupCamera();
+      });
+    }
 
-            linha.parentNode.removeChild(linha);
-        }
+    function abrirPopupCamera() {
+      var popup = document.getElementById("popupCamera");
+      popup.style.display = "block";
+    }
 
-        function excluirLinha(linha) {
-            linha.parentNode.removeChild(linha);
-        }
+    function fecharPopupCamera() {
+      var popup = document.getElementById("popupCamera");
+      popup.style.display = "none";
+      Quagga.stop();
+    }
 
-        function limparAssinatura() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
-
-        function iniciarLeituraCodigo(idInput) {
-            Quagga.init(
-                {
-                    inputStream: {
-                        name: "Live",
-                        type: "LiveStream",
-                        target: document.querySelector(`#camera-preview-${idInput}`),
-                        constraints: {
-                            facingMode: "environment", // ou "user" para câmera frontal
-                        },
-                    },
-                    locator: {
-                        patchSize: "medium",
-                        halfSample: true,
-                    },
-                    numOfWorkers: navigator.hardwareConcurrency,
-                    decoder: {
-                        readers: [
-                            "code_128_reader",
-                            "code_39_reader",
-                            "codabar_reader",
-                        ],
-                    },
-                    locate: true,
-                },
-                function (err) {
-                    if (err) {
-                        console.error(err);
-                        return;
-                    }
-                    console.log("Inicialização concluída. Pronto para iniciar");
-                    Quagga.start();
-                }
-            );
-
-            Quagga.onDetected(function (result) {
-                var codigo = result.codeResult.code;
-                document.getElementById(idInput).value = codigo;
-                fecharPopupCamera();
-            });
-        }
-
-        function abrirPopupCamera() {
-            var popup = document.getElementById("popupCamera");
-            popup.style.display = "block";
-        }
-
-        function fecharPopupCamera() {
-            var popup = document.getElementById("popupCamera");
-            popup.style.display = "none";
-            Quagga.stop();
-        }
-
-        function gerarPDF() {
+    function gerarPDF() {
             var doc = new jsPDF();
             var proxxi_logo_base64 = "data:image/jpeg;base64,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"
 
@@ -391,71 +389,70 @@
         }
 
 
-        canvas.addEventListener("mousedown", startDrawing);
-        canvas.addEventListener("mousemove", draw);
-        canvas.addEventListener("mouseup", stopDrawing);
-        canvas.addEventListener("mouseout", stopDrawing);
-        canvas.addEventListener("touchstart", startDrawing);
-        canvas.addEventListener("touchmove", draw);
-        canvas.addEventListener("touchend", stopDrawing);
-        canvas.addEventListener("touchcancel", stopDrawing);
+    canvas.addEventListener("mousedown", startDrawing);
+    canvas.addEventListener("mousemove", draw);
+    canvas.addEventListener("mouseup", stopDrawing);
+    canvas.addEventListener("mouseout", stopDrawing);
+    canvas.addEventListener("touchstart", startDrawing);
+    canvas.addEventListener("touchmove", draw);
+    canvas.addEventListener("touchend", stopDrawing);
+    canvas.addEventListener("touchcancel", stopDrawing);
 
-        function getTouchPos(canvasDom, touchEvent) {
-            var rect = canvasDom.getBoundingClientRect();
-            return {
-                x:
-                    ((touchEvent.touches[0].clientX - rect.left) / rect.width) *
-                    canvasDom.width,
-                y:
-                    ((touchEvent.touches[0].clientY - rect.top) / rect.height) *
-                    canvasDom.height,
+    function getTouchPos(canvasDom, touchEvent) {
+      var rect = canvasDom.getBoundingClientRect();
+      return {
+        x:
+          ((touchEvent.touches[0].clientX - rect.left) / rect.width) *
+          canvasDom.width,
+        y:
+          ((touchEvent.touches[0].clientY - rect.top) / rect.height) *
+          canvasDom.height,
+      };
+    }
+
+    function startDrawing(event) {
+      isDrawing = true;
+      var pos = event.type.includes("touch")
+        ? getTouchPos(canvas, event)
+        : {
+            x:
+              ((event.clientX - canvas.offsetLeft) / canvas.clientWidth) *
+              canvas.width,
+            y:
+              ((event.clientY - canvas.offsetTop) / canvas.clientHeight) *
+              canvas.height,
+          };
+      ctx.beginPath();
+      ctx.moveTo(pos.x, pos.y);
+      event.preventDefault();
+    }
+
+    function draw(event) {
+      if (isDrawing) {
+        var pos = event.type.includes("touch")
+          ? getTouchPos(canvas, event)
+          : {
+              x:
+                ((event.clientX - canvas.offsetLeft) / canvas.clientWidth) *
+                canvas.width,
+              y:
+                ((event.clientY - canvas.offsetTop) / canvas.clientHeight) *
+                canvas.height,
             };
-        }
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+        event.preventDefault();
+      }
+    }
 
-        function startDrawing(event) {
-            isDrawing = true;
-            var pos = event.type.includes("touch")
-                ? getTouchPos(canvas, event)
-                : {
-                    x:
-                        ((event.clientX - canvas.offsetLeft) / canvas.clientWidth) *
-                        canvas.width,
-                    y:
-                        ((event.clientY - canvas.offsetTop) / canvas.clientHeight) *
-                        canvas.height,
-                };
-            ctx.beginPath();
-            ctx.moveTo(pos.x, pos.y);
-            event.preventDefault();
-        }
-
-        function draw(event) {
-            if (isDrawing) {
-                var pos = event.type.includes("touch")
-                    ? getTouchPos(canvas, event)
-                    : {
-                        x:
-                            ((event.clientX - canvas.offsetLeft) / canvas.clientWidth) *
-                            canvas.width,
-                        y:
-                            ((event.clientY - canvas.offsetTop) / canvas.clientHeight) *
-                            canvas.height,
-                    };
-                ctx.lineTo(pos.x, pos.y);
-                ctx.stroke();
-                event.preventDefault();
-            }
-        }
-
-        function stopDrawing(event) {
-            if (isDrawing) {
-                ctx.stroke();
-                ctx.closePath();
-                isDrawing = false;
-            }
-            event.preventDefault();
-        }
-    </script>
+    function stopDrawing(event) {
+      if (isDrawing) {
+        ctx.stroke();
+        ctx.closePath();
+        isDrawing = false;
+      }
+      event.preventDefault();
+    }
+  </script>
 </body>
-
 </html>
