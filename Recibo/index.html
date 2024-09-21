@@ -327,16 +327,21 @@
             var formDataObject = {};
             formData.forEach(function (value, key) {formDataObject[key] = value;});
 
-            /*// Ajustar a data para o formato DD-MM-AAAA
+            // Ajustar a data para o formato DD-MM-AAAA
             var dataArray = formDataObject.data.split("-");
-            var dataFormatada = `${dataArray[2]}-${dataArray[1]}-${dataArray[0]}`;*/
+            var dataFormatadaPDF = `${dataArray[2]}-${dataArray[1]}-${dataArray[0]}`;
+
+            // Criar a data corretamente usando o fuso horário local
+            var data = new Date(dataArray[0], dataArray[1] - 1, dataArray[2]); // Mês é zero-indexado
+
 
             // Converter a data no formato "26 de Setembro de 2024"
-            var data = new Date(formDataObject.data);
             var dataFormatada = data.toLocaleDateString('pt-BR', {
                 day: 'numeric',
                 month: 'long',
-                year: 'numeric',});
+                year: 'numeric',
+            });
+
 
             // Textos em negrito para "Data:", "Nome do Recebedor:" e "Nome Técnico:"
             doc.setFontSize(12);
@@ -387,14 +392,14 @@
 
             // Linha logo abaixo da assinatura
             finalY += 35; // Ajustar para a altura da assinatura
-            doc.setLineWidth(0.9);
+            doc.setLineWidth(0.8);
             doc.line(15, finalY, 100, finalY); // Desenhar a linha abaixo da assinatura
 
             // Nome do Recebedor logo abaixo da linha
             doc.text(`${formDataObject.nomeRecebedor}`, 20, finalY + 4);
 
             // Salvar PDF com a data no formato DD-MM-AAAA
-            doc.save("form_entrega_pecas_" + dataFormatada + ".pdf");
+            doc.save("form_entrega_pecas_" + dataFormatadaPDF + ".pdf");
         }
 
 
