@@ -206,7 +206,7 @@
             var notaFiscalInput = document.getElementById("notaFiscal");
             var serialTable = document.getElementById("serialTable").getElementsByTagName("tbody")[0];
 
-            if (codigoPecaInput.value !== "" && serialInput.value !== "" && notaFiscalInput.value !== "") {
+            if (codigoPecaInput.value !== "" && serialInput.value !== "" /*&& notaFiscalInput.value !== ""*/) {
                 var newRow = serialTable.insertRow();
                 var codigoCell = newRow.insertCell(0);
                 var serialCell = newRow.insertCell(1);
@@ -334,14 +334,12 @@
             // Criar a data corretamente usando o fuso horário local
             var data = new Date(dataArray[0], dataArray[1] - 1, dataArray[2]); // Mês é zero-indexado
 
-
             // Converter a data no formato "26 de Setembro de 2024"
             var dataFormatada = data.toLocaleDateString('pt-BR', {
                 day: 'numeric',
                 month: 'long',
                 year: 'numeric',
             });
-
 
             // Textos em negrito para "Data:", "Nome do Recebedor:" e "Nome Técnico:"
             doc.setFontSize(12);
