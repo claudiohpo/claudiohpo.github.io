@@ -173,28 +173,23 @@
 
         <div>
             <input type="text" id="codigoPeca" placeholder="Código da Peça" autocapitalize="characters"/>
-            <button type="button" onclick="iniciarLeituraCodigo('codigoPeca')">Ler Código</button>
+<!--            <button type="button" onclick="iniciarLeituraCodigo('codigoPeca')">Ler Código</button>-->
             <div id="camera-preview-codigoPeca" style="width: 100%; height: auto"></div>
         </div>
 
         <div>
             <input type="text" id="serialProxxi" placeholder="Número de Série" autocapitalize="characters"/>
-            <button type="button" onclick="iniciarLeituraCodigo('serialProxxi')">Ler Código</button>
+<!--            <button type="button" onclick="iniciarLeituraCodigo('serialProxxi')">Ler Código</button>-->
             <div id="camera-preview-serialProxxi" style="width: 100%; height: auto"></div>
         </div>
 
         <div>
             <input type="text" id="notaFiscal" placeholder="Nota Fiscal" autocapitalize="characters"/>
-            <button type="button" onclick="iniciarLeituraCodigo('notaFiscal')">Ler Código</button>
+<!--            <button type="button" onclick="iniciarLeituraCodigo('notaFiscal')">Ler Código</button>-->
             <div id="camera-preview-notaFiscal" style="width: 100%; height: auto"></div>
         </div>
 
         <button type="button" onclick="addRow()">Adicionar</button>
-
-<!--        <div>-->
-<!--            <input type="text" id="inputCompleto" placeholder="Código da Peça, Serial, Nota Fiscal" autocapitalize="on" rows="4" style="width: 100%;"></textarea>-->
-<!--            <button type="button" onclick="addRowFull()">Adicionar</button>-->
-<!--        </div>-->
 
         <div>
             <label for="inputCompleto"><strong>Preencha os códigos separados por vírgula, espaço ou ponto: </strong></label>
@@ -263,7 +258,7 @@
             var serialTable = document.getElementById("serialTable").getElementsByTagName("tbody")[0];
 
             if (codigoPecaInput.value !== "") {
-                // Dividir o texto do input em partes, separadas por vírgulas
+                // Dividir o texto do input em partes, separadas por vírgulas, espaços ou pontos
                 var valores = codigoPecaInput.value.split(/[, .]+/);
 
 
