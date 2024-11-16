@@ -51,6 +51,15 @@
             border-radius: 4px;
         }
 
+        textarea {
+            width: 100%; /* Ocupa 100% da largura disponível */
+            padding: 10px; /* Espaçamento interno */
+            border: 1px solid #ccc; /* Borda padrão */
+            border-radius: 4px; /* Arredondar os cantos */
+            font-size: 1em; /* Tamanho da fonte */
+            resize: vertical; /* Permitir redimensionamento apenas na altura */
+        }
+
         button {
             display: block;
             width: 100%;
@@ -182,6 +191,18 @@
 
         <button type="button" onclick="addRow()">Adicionar</button>
 
+<!--        <div>-->
+<!--            <input type="text" id="inputCompleto" placeholder="Código da Peça, Serial, Nota Fiscal" autocapitalize="on" rows="4" style="width: 100%;"></textarea>-->
+<!--            <button type="button" onclick="addRowFull()">Adicionar</button>-->
+<!--        </div>-->
+
+        <div>
+            <label for="inputCompleto"><strong>Preencha os dados (Código, Serial, Nota Fiscal):</strong></label>
+            <textarea id="inputCompleto" placeholder="Código da Peça, Serial, Nota Fiscal" autocapitalize="characters" rows="4" style="width: 100%;"></textarea>
+            <button type="button" onclick="addRowFull()">Adicionar</button>
+        </div>
+
+
         <label for="assinatura">Assinatura Recebedor:</label>
         <canvas id="signatureCanvas" width="300" height="150"></canvas>
         <button type="button" onclick="limparAssinatura()">Limpar Assinatura</button>
@@ -236,6 +257,54 @@
                 notaFiscalInput.value = "";
             }
         }
+
+        function addRowFull() {
+            var codigoPecaInput = document.getElementById("inputCompleto");
+            var serialTable = document.getElementById("serialTable").getElementsByTagName("tbody")[0];
+
+            if (codigoPecaInput.value !== "") {
+                // Dividir o texto do input em partes, separadas por vírgulas
+                var valores = codigoPecaInput.value.split(",");
+
+                // Validar que o número de valores seja múltiplo de 3 (código, serial, nota fiscal)
+                if (valores.length % 3 !== 0) {
+                    alert("Por favor, insira valores múltiplos de 3 (código, número de série, nota fiscal) separados por vírgula.");
+                    return;
+                }
+
+                // Iterar pelos valores e preencher as linhas da tabela
+                for (let i = 0; i < valores.length; i += 3) {
+                    var newRow = serialTable.insertRow();
+                    var codigoCell = newRow.insertCell(0);
+                    var serialCell = newRow.insertCell(1);
+                    var notaFiscalCell = newRow.insertCell(2);
+                    var actionsCell = newRow.insertCell(3);
+
+                    codigoCell.textContent = valores[i].trim();
+                    serialCell.textContent = valores[i + 1].trim();
+                    notaFiscalCell.textContent = valores[i + 2].trim();
+
+                    // Adicionar botões de ação
+                    var editButton = document.createElement("button");
+                    editButton.textContent = "Editar";
+                    editButton.onclick = function () {
+                        editarLinha(newRow);
+                    };
+                    actionsCell.appendChild(editButton);
+
+                    var deleteButton = document.createElement("button");
+                    deleteButton.textContent = "Excluir";
+                    deleteButton.onclick = function () {
+                        excluirLinha(newRow);
+                    };
+                    actionsCell.appendChild(deleteButton);
+                }
+
+                // Limpar o campo de entrada após adicionar as linhas
+                codigoPecaInput.value = "";
+            }
+        }
+
 
         function editarLinha(linha) {
             var celulas = linha.getElementsByTagName("td");
