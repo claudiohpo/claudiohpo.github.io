@@ -264,7 +264,8 @@
 
             if (codigoPecaInput.value !== "") {
                 // Dividir o texto do input em partes, separadas por vírgulas
-                var valores = codigoPecaInput.value.split(",") || codigoPecaInput.value.split(" ") || codigoPecaInput.value.split(",");
+                var valores = codigoPecaInput.value.split(/[, .]+/);
+
 
                 // Validar que o número de valores seja múltiplo de 3 (código, serial, nota fiscal)
                 if (valores.length % 3 !== 0) {
