@@ -1,5 +1,3 @@
-# Conteúdo do README.md
-readme_content = """
 # Formulário de Entrega de Peças
 
 Este projeto é um sistema em **HTML, CSS e JavaScript** para gerenciamento da entrega de peças, incluindo cadastro de informações, assinatura digital e geração de relatórios em PDF.
@@ -84,7 +82,7 @@ Este projeto é um sistema em **HTML, CSS e JavaScript** para gerenciamento da e
 
 ## 👨‍💻 Autores
 
-- [Diego Sakai](https://github.com/disakai)  
+- [Diego Sakai](https://github.com/sakaidi)  
 - [Cláudio Henrique](https://github.com/claudiohpo)  
 
 📅 Última alteração: **21/09/2024**  
