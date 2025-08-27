@@ -1,10 +1,5 @@
-const BACKEND_URL = ""; // ex: https://claudio-km.vercel.app
-
-const res = await fetch(`${BACKEND_URL}/api/km`, {
-  method: 'POST',
-  headers: {'Content-Type': 'application/json'},
-  body: JSON.stringify(payload)
-});
+// script.js — usa rota relativa e não usa top-level await
+const BACKEND_URL = ""; // deixa vazio para usar mesmo domínio (/api/*)
 
 const form = document.getElementById("kmForm");
 const msg = document.getElementById("msg");
@@ -43,18 +38,22 @@ form.addEventListener("submit", async (e) => {
   };
 
   try {
-    const res = await fetch(`${BACKEND_URL}/api/km`, {
+    const res = await fetch("/api/km", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
 
-    if (!res.ok) throw new Error(`Erro ${res.status}`);
+    if (!res.ok) {
+      const text = await res.text().catch(() => null);
+      throw new Error(`Erro ${res.status} ${text || ""}`);
+    }
+
     msg.style.color = "green";
     msg.textContent = "Registro salvo com sucesso.";
     form.reset();
   } catch (err) {
-    console.error(err);
+    console.error("Erro ao salvar:", err);
     msg.style.color = "orange";
     msg.textContent =
       "Falha ao salvar. Registro salvo localmente no navegador.";
@@ -64,11 +63,10 @@ form.addEventListener("submit", async (e) => {
   }
 });
 
-// Download CSV (tenta backend, senão gera local)
 downloadBtn.addEventListener("click", async () => {
   try {
-    const res = await fetch(`${BACKEND_URL}/api/report?format=csv`);
-    if (!res.ok) throw new Error();
+    const res = await fetch("/api/report?format=csv");
+    if (!res.ok) throw new Error("Erro ao baixar CSV");
     const csv = await res.text();
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
@@ -78,6 +76,7 @@ downloadBtn.addEventListener("click", async () => {
     a.click();
     URL.revokeObjectURL(url);
   } catch (e) {
+    console.warn("Fallback CSV local", e);
     const stored = JSON.parse(localStorage.getItem("km_pending") || "[]");
     if (stored.length === 0) {
       alert("Nenhum dado disponível para relatório local.");
