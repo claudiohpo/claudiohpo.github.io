@@ -5,9 +5,15 @@
     --muted: #666;
 }
 
+/* básico */
 * {
     box-sizing: border-box;
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+/* layout geral — centralizado horizontalmente */
+html, body {
+    height: 100%;
 }
 
 body {
@@ -16,9 +22,8 @@ body {
     color: #111;
     min-height: 100vh;
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    /* empilha main + footer verticalmente */
+    flex-direction: column; /* empilha main + footer verticalmente */
+    align-items: center;    /* centraliza horizontalmente os filhos do body */
     padding: 16px;
 }
 
@@ -32,11 +37,10 @@ body {
     box-shadow: 0 6px 20px rgba(20, 30, 50, 0.08);
 
     margin: 16px 0;
-    /* centraliza horizontalmente; mantém um espaçamento superior */
-    flex: 0 0 auto;
-    /* garante altura conforme conteúdo */
+    flex: 0 0 auto; /* não estica verticalmente */
 }
 
+/* Tipografia e form */
 h1 {
     margin: 0 0 14px 0;
     font-size: 20px;
@@ -113,9 +117,15 @@ footer {
 
     display: flex;
     justify-content: center;
-    
 }
 
+footer .footer-inner {
+    width: 100%;
+    max-width: 720px;
+    box-sizing: border-box;
+}
+
+/* links do footer */
 footer a {
     color: var(--accent);
     text-decoration: none;
@@ -133,7 +143,8 @@ footer a:hover {
     }
 
     .container {
-        margin: 12px auto 6px;
+        margin: 12px 0 6px;
+        padding: 14px;
     }
 
     footer {
@@ -141,4 +152,45 @@ footer a:hover {
         padding: 10px;
         font-size: 12px;
     }
+}
+
+/* ===== Bloco com maior especificidade para garantir centralização (colar no fim do arquivo) ===== */
+
+/* Seletores específicos para evitar sobrescritas por outros CSS */
+body > .container,
+html body > .container {
+  width: 100%;
+  max-width: 720px;
+  box-sizing: border-box;
+  background: var(--card);
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 6px 20px rgba(20, 30, 50, 0.08);
+  margin: 16px 0;
+  position: relative;
+  left: auto;
+  right: auto;
+  float: none !important;
+}
+
+/* Garante que estilos inline não atrapalhem */
+body > .container[style] {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Garante o wrapper do footer com a mesma largura do container */
+footer {
+  display: flex;
+  justify-content: center;
+}
+footer .footer-inner {
+  width: 100%;
+  max-width: 720px;
+}
+
+/* Pequenas tweaks mobile finais */
+@media (max-width: 520px) {
+  body > .container { margin: 12px 0; padding: 14px; }
+  footer .footer-inner { padding: 0 6px; }
 }
