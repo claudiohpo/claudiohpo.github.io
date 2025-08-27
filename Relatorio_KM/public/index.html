@@ -1,64 +1,67 @@
 <!doctype html>
 <html lang="pt-BR">
+
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Registro de KM Rodados</title>
-<link rel="stylesheet" href="styles.css" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Registro de KM Rodados</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body>
-<main class="container">
-<h1>Registro de KM Rodados</h1>
+  <main class="container">
+    <h1>Registro de KM Rodados</h1>
 
 
-<form id="kmForm">
-<label>
-Data *
-<input type="date" id="data" name="data" required />
-</label>
+    <form id="kmForm">
+      <label>
+        Data *
+        <input type="date" id="data" name="data" required />
+      </label>
 
 
-<label>
-Chamado
-<input type="text" id="chamado" name="chamado" placeholder="Opcional" />
-</label>
+      <label>
+        Chamado
+        <input type="text" id="chamado" name="chamado" placeholder="Opcional" />
+      </label>
 
 
-<label>
-Local *
-<input type="text" id="local" name="local" required placeholder="Ex.: São Paulo - Cliente X" />
-</label>
+      <label>
+        Local *
+        <input type="text" id="local" name="local" required placeholder="Ex.: São Paulo - Cliente X" />
+      </label>
 
 
-<div class="row">
-<label>
-KM saída *
-<input type="number" id="kmSaida" name="kmSaida" required min="0" step="1" />
-</label>
-<label>
-KM chegada *
-<input type="number" id="kmChegada" name="kmChegada" required min="0" step="1" />
-</label>
-</div>
+      <div class="row">
+        <label>
+          KM saída *
+          <input type="number" id="kmSaida" name="kmSaida" required min="0" step="1" />
+        </label>
+        <label>
+          KM chegada *
+          <input type="number" id="kmChegada" name="kmChegada" required min="0" step="1" />
+        </label>
+      </div>
 
 
-<label>
-Observações
-<textarea id="observacoes" name="observacoes" rows="3" placeholder="Opcional"></textarea>
-</label>
+      <label>
+        Observações
+        <textarea id="observacoes" name="observacoes" rows="3" placeholder="Opcional"></textarea>
+      </label>
 
 
-<div class="actions">
-<button type="submit">Salvar</button>
-<button type="button" id="downloadCsv">Baixar relatório (CSV)</button>
-</div>
+      <div class="actions">
+        <button type="submit">Salvar</button>
+        <button type="button" id="downloadCsv">Baixar relatório (CSV)</button>
+      </div>
 
 
-<p id="msg" class="msg"></p>
-</form>
-</main>
+      <p id="msg" class="msg"></p>
+    </form>
+  </main>
 
 
-<script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
+
 </html>
