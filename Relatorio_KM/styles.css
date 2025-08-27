@@ -101,9 +101,9 @@ button#downloadCsv {
 
 /* Rodapé */
 footer {
-  margin-top: 8px;
+  margin-top: auto;
   text-align: center;
-  padding: 12px 10px;
+  padding: 12px;
   color: var(--muted);
   font-size: 14px;
   border-top: 1px solid #e3e6ee;
