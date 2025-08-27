@@ -16,7 +16,8 @@ body {
     color: #111;
     min-height: 100vh;
     display: flex;
-    flex-direction: column; /* empilha main + footer verticalmente */
+    flex-direction: column;
+    /* empilha main + footer verticalmente */
     padding: 16px;
 }
 
@@ -29,12 +30,12 @@ body {
     padding: 18px;
     box-shadow: 0 6px 20px rgba(20, 30, 50, 0.08);
 
-    margin: 16px auto 8px; /* centraliza horizontalmente; mantém um espaçamento superior */
-    /* REMOVIDO: flex: 1 0 auto;  <-- isso fazia a caixa esticar */
-    flex: 0 0 auto; /* garante altura conforme conteúdo (opcional) */
+    margin: 16px auto 8px;
+    /* centraliza horizontalmente; mantém um espaçamento superior */
+    flex: 0 0 auto;
+    /* garante altura conforme conteúdo */
 }
 
-/* restante do seu CSS (sem mudanças, só mantive aqui para referência) */
 h1 {
     margin: 0 0 14px 0;
     font-size: 20px;
@@ -101,35 +102,37 @@ button#downloadCsv {
 
 /* Rodapé */
 footer {
-  margin-top: 8px;
-  text-align: center;
-  padding: 12px 10px;
-  color: var(--muted);
-  font-size: 14px;
-  border-top: 1px solid #e3e6ee;
+    margin-top: auto;
+    text-align: center;
+    padding: 12px;
+    color: var(--muted);
+    font-size: 14px;
+    border-top: 1px solid #e3e6ee;
 }
 
 footer a {
-  color: var(--accent);
-  text-decoration: none;
-  font-weight: 600;
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
 }
 
 footer a:hover {
-  text-decoration: underline;
+    text-decoration: underline;
 }
 
-/* mobile: reduzir ainda mais */
+/* mobile */
 @media (max-width: 520px) {
-  body {
-    padding: 12px;
-  }
-  .container {
-    margin: 12px auto 6px;
-  }
-  footer {
-    margin-top: 6px;
-    padding: 10px;
-    font-size: 12px;
-  }
+    body {
+        padding: 12px;
+    }
+
+    .container {
+        margin: 12px auto 6px;
+    }
+
+    footer {
+        margin-top: 6px;
+        padding: 10px;
+        font-size: 12px;
+    }
 }
