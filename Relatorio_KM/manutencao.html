@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Manutenção de Registros de KM</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* Estilos específicos para a página de manutenção */
+    .container {
+      max-width: 1200px;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+    
+    th {
+      background-color: #f2f2f2;
+      font-weight: bold;
+    }
+    
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    
+    .actions {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .btn-editar, .btn-excluir {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    
+    .btn-editar {
+      background-color: #4CAF50;
+      color: white;
+    }
+    
+    .btn-excluir {
+      background-color: #f44336;
+      color: white;
+    }
+    
+    .filtros {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .filtros label {
+      display: flex;
+      flex-direction: column;
+      font-size: 14px;
+    }
+    
+    .pagination {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+      gap: 10px;
+    }
+    
+    .pagination button {
+      padding: 8px 12px;
+      background-color: #1f6feb;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    .pagination button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .modal-content {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 500px;
+    }
+    
+    .modal-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <h1>Manutenção de Registros de KM</h1>
+    
+    <div class="filtros">
+      <label>
+        Data Inicial
+        <input type="date" id="filtroDataInicio">
+      </label>
+      
+      <label>
+        Data Final
+        <input type="date" id="filtroDataFim">
+      </label>
+      
+      <label>
+        Local
+        <input type="text" id="filtroLocal" placeholder="Filtrar por local">
+      </label>
+      
+      <button id="btnAplicarFiltros" style="align-self: flex-end;">Aplicar Filtros</button>
+    </div>
+    
+    <div id="tabela-container">
+      <table id="tabelaRegistros">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Chamado</th>
+            <th>Local</th>
+            <th>KM Saída</th>
+            <th>KM Chegada</th>
+            <th>KM Total</th>
+            <th>Observações</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Os registros serão carregados aqui via JavaScript -->
+        </tbody>
+      </table>
+    </div>
+    
+    <div class="pagination">
+      <button id="btnAnterior" disabled>Anterior</button>
+      <span id="infoPagina">Página 1 de 1</span>
+      <button id="btnProximo" disabled>Próximo</button>
+    </div>
+    
+    <div style="margin-top: 20px;">
+      <button id="btnVoltar">Voltar para Cadastro</button>
+      <button id="btnBaixarRelatorio">Baixar Relatório Completo</button>
+    </div>
+    
+    <!-- Modal de confirmação de exclusão -->
+    <div id="modalExcluir" class="modal">
+      <div class="modal-content">
+        <h3>Confirmar Exclusão</h3>
+        <p>Tem certeza que deseja excluir este registro?</p>
+        <div class="modal-buttons">
+          <button id="btnCancelarExclusao">Cancelar</button>
+          <button id="btnConfirmarExclusao">Excluir</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Modal de edição -->
+    <div id="modalEditar" class="modal">
+      <div class="modal-content">
+        <h3>Editar Registro</h3>
+        <form id="formEditar">
+          <input type="hidden" id="editId">
+          
+          <label>
+            Data *
+            <input type="date" id="editData" required>
+          </label>
+          
+          <label>
+            Chamado
+            <input type="text" id="editChamado" placeholder="Opcional">
+          </label>
+          
+          <label>
+            Local *
+            <input type="text" id="editLocal" required placeholder="Ex.: São Paulo - Cliente X">
+          </label>
+          
+          <div class="row">
+            <label>
+              KM saída *
+              <input type="number" id="editKmSaida" required min="0" step="1">
+            </label>
+            <label>
+              KM chegada *
+              <input type="number" id="editKmChegada" required min="0" step="1">
+            </label>
+          </div>
+          
+          <label>
+            Observações
+            <textarea id="editObservacoes" rows="3" placeholder="Opcional"></textarea>
+          </label>
+          
+          <div class="modal-buttons">
+            <button type="button" id="btnCancelarEdicao">Cancelar</button>
+            <button type="submit">Salvar Alterações</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <script src="manutencao.js"></script>
+</body>
+</html>

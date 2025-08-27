@@ -1,4 +1,4 @@
-// script.js — usa rota relativa e não usa top-level await
+// script.js — atualizado com botão para manutenção
 const BACKEND_URL = ""; // deixa vazio para usar mesmo domínio (/api/*)
 
 const form = document.getElementById("kmForm");
@@ -106,3 +106,11 @@ downloadBtn.addEventListener("click", async () => {
     URL.revokeObjectURL(url);
   }
 });
+
+// Novo código para o botão de manutenção
+const btnManutencao = document.getElementById("btnManutencao");
+if (btnManutencao) {
+  btnManutencao.addEventListener("click", () => {
+    window.location.href = "manutencao.html";
+  });
+}

@@ -12,25 +12,21 @@
   <main class="container">
     <h1>Registro de KM Rodados</h1>
 
-
     <form id="kmForm">
       <label>
         Data *
         <input type="date" id="data" name="data" required />
       </label>
 
-
       <label>
         Chamado
         <input type="text" id="chamado" name="chamado" placeholder="Opcional" />
       </label>
 
-
       <label>
         Local *
         <input type="text" id="local" name="local" required placeholder="Ex.: São Paulo - Cliente X" />
       </label>
-
 
       <div class="row">
         <label>
@@ -43,23 +39,21 @@
         </label>
       </div>
 
-
       <label>
         Observações
         <textarea id="observacoes" name="observacoes" rows="3" placeholder="Opcional"></textarea>
       </label>
 
-
       <div class="actions">
         <button type="submit">Salvar</button>
         <button type="button" id="downloadCsv">Baixar relatório (CSV)</button>
+        <!-- Botão novo para manutenção -->
+        <button type="button" id="btnManutencao">Ir para Manutenção</button>
       </div>
-
 
       <p id="msg" class="msg"></p>
     </form>
   </main>
-
 
   <script src="script.js"></script>
 </body>

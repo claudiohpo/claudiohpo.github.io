@@ -1,4 +1,4 @@
-// api/report.js
+// api/report.js - Atualizado para incluir kmTotal
 const { MongoClient } = require("mongodb");
 
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -48,6 +48,7 @@ module.exports = async (req, res) => {
         "local",
         "kmSaida",
         "kmChegada",
+        "kmTotal", // Nova coluna
         "observacoes",
         "criadoEm",
       ];
@@ -57,6 +58,7 @@ module.exports = async (req, res) => {
         local: d.local || "",
         kmSaida: d.kmSaida ?? "",
         kmChegada: d.kmChegada ?? "",
+        kmTotal: d.kmTotal ?? (d.kmChegada - d.kmSaida), // Calcular se não existir
         observacoes: d.observacoes || "",
         criadoEm: d.createdAt
           ? new Date(d.createdAt).toISOString()
