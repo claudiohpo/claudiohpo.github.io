@@ -1,4 +1,10 @@
-const BACKEND_URL = "https://claudiohpo-github-io.vercel.app/"; // ex: https://claudio-km.vercel.app
+const BACKEND_URL = ""; // ex: https://claudio-km.vercel.app
+
+const res = await fetch(`${BACKEND_URL}/api/km`, {
+  method: 'POST',
+  headers: {'Content-Type': 'application/json'},
+  body: JSON.stringify(payload)
+});
 
 const form = document.getElementById("kmForm");
 const msg = document.getElementById("msg");
