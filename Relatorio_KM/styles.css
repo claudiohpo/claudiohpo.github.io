@@ -17,6 +17,7 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    align-items: center;
     /* empilha main + footer verticalmente */
     padding: 16px;
 }
@@ -30,7 +31,7 @@ body {
     padding: 18px;
     box-shadow: 0 6px 20px rgba(20, 30, 50, 0.08);
 
-    margin: 16px auto 8px;
+    margin: 16px 0;
     /* centraliza horizontalmente; mantém um espaçamento superior */
     flex: 0 0 auto;
     /* garante altura conforme conteúdo */
@@ -103,11 +104,16 @@ button#downloadCsv {
 /* Rodapé */
 footer {
     margin-top: auto;
+    width: 100%;
     text-align: center;
     padding: 12px;
     color: var(--muted);
     font-size: 14px;
     border-top: 1px solid #e3e6ee;
+
+    display: flex;
+    justify-content: center;
+    
 }
 
 footer a {
