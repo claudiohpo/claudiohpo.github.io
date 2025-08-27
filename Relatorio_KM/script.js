@@ -22,12 +22,17 @@ btnSalvar.addEventListener("click", async (e) => {
     msg.textContent = "Preencha os campos obrigatórios corretamente.";
     return;
   }
-  if (isNaN(kmChegada)) {
-    return;
-  }else if (kmChegada < kmSaida ) {
-    msg.style.color = "red";
-    msg.textContent = "KM chegada não pode ser menor que KM saída.";
-    return;
+
+  // Verifica se o campo foi preenchido (não vazio e não nulo)
+  if (kmChegada !== "" && kmChegada !== null) {
+    const kmChegadaNum = Number(kmChegada);
+
+    // Só valida se for um número
+    if (!isNaN(kmChegadaNum) && kmChegadaNum < kmSaida) {
+      msg.style.color = "red";
+      msg.textContent = "KM chegada não pode ser menor que KM saída.";
+      return;
+    }
   }
 
   const payload = {
