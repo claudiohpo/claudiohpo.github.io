@@ -23,17 +23,20 @@ btnSalvar.addEventListener("click", async (e) => {
     return;
   }
 
-  // Verifica se o campo foi preenchido (não vazio e não nulo)
-  if (kmChegada !== "" && kmChegada !== null) {
-    const kmChegadaNum = Number(kmChegada);
+ const kmChegadaInput = document.getElementById("kmChegada").value;
 
-    // Só valida se for um número
-    if (!isNaN(kmChegadaNum) && kmChegadaNum < kmSaida) {
-      msg.style.color = "red";
-      msg.textContent = "KM chegada não pode ser menor que KM saída.";
-      return;
-    }
-  }
+ // Verifica se foi preenchido
+ if (kmChegadaInput !== "") {
+   const kmChegadaNum = Number(kmChegadaInput);
+
+   // Só valida se for um número válido
+   if (!isNaN(kmChegadaNum) && kmChegadaNum < kmSaida) {
+     msg.style.color = "red";
+     msg.textContent = "KM chegada não pode ser menor que KM saída.";
+     return;
+   }
+ }
+
 
   const payload = {
     data,
