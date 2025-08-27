@@ -15,10 +15,9 @@ body {
     background: var(--bg);
     color: #111;
 
-    /* layout para manter footer no fim da página */
     min-height: 100vh;
     display: flex;
-    flex-direction: column; /* empilha verticalmente main -> footer */
+    flex-direction: column; /* empilha main + footer verticalmente */
     padding: 24px;
 }
 
@@ -31,8 +30,9 @@ body {
     padding: 18px;
     box-shadow: 0 6px 20px rgba(20, 30, 50, 0.08);
 
-    margin: 24px auto;   /* centraliza horizontalmente */
-    flex: 1 0 auto;      /* permite ocupar o espaço restante, empurrando o footer para baixo */
+    margin: 24px auto 0; /* centraliza horizontalmente; mantém um espaçamento superior */
+    /* REMOVIDO: flex: 1 0 auto;  <-- isso fazia a caixa esticar */
+    flex: 0 0 auto; /* garante altura conforme conteúdo (opcional) */
 }
 
 /* restante do seu CSS (sem mudanças, só mantive aqui para referência) */
@@ -102,8 +102,8 @@ button#downloadCsv {
 
 /* Rodapé */
 footer {
+  margin-top: auto;
   text-align: center;
-  margin-top: 20px;
   padding: 15px;
   color: var(--muted);
   font-size: 14px;
