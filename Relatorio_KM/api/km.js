@@ -1,4 +1,4 @@
-// api/km.js - Atualizado para suportar PUT e DELETE
+// api/km.js - Atualizado para suportar PUT, DELETE e busca do último registro
 const { MongoClient, ObjectId } = require("mongodb");
 
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -28,26 +28,34 @@ module.exports = async (req, res) => {
       if (
         !doc.data ||
         !doc.local ||
-        typeof doc.kmSaida !== "number" ||
-        typeof doc.kmChegada !== "number"
+        typeof doc.kmSaida !== "number"
       ) {
         return res
           .status(400)
           .json({
             error:
-              "Campos inválidos. data, local, kmSaida (number) e kmChegada (number) são obrigatórios.",
+              "Campos inválidos. data, local e kmSaida (number) são obrigatórios.",
           });
       }
       
-      // Calcular kmTotal
-      doc.kmTotal = doc.kmChegada - doc.kmSaida;
+      // Se kmChegada não for número, define como null
+      if (typeof doc.kmChegada !== "number") {
+        doc.kmChegada = null;
+      }
+      
+      // Calcular kmTotal apenas se kmChegada for fornecido
+      if (doc.kmChegada !== null) {
+        doc.kmTotal = doc.kmChegada - doc.kmSaida;
+      } else {
+        doc.kmTotal = null;
+      }
       doc.createdAt = new Date();
       const r = await col.insertOne(doc);
       return res.status(200).json({ insertedId: r.insertedId });
     }
 
     if (req.method === "GET") {
-      const { id } = req.query;
+      const { id, ultimo } = req.query;
       
       if (id) {
         // Buscar um registro específico por ID
@@ -59,6 +67,15 @@ module.exports = async (req, res) => {
           return res.status(200).json(doc);
         } catch (err) {
           return res.status(400).json({ error: "ID inválido" });
+        }
+      } else if (ultimo) {
+        // Buscar o último registro baseado na data de criação
+        try {
+          const doc = await col.findOne({}, { sort: { createdAt: -1 } });
+          return res.status(200).json(doc);
+        } catch (err) {
+          console.error(err);
+          return res.status(500).json({ error: "Erro ao buscar último registro" });
         }
       } else {
         // Buscar todos os registros
@@ -85,19 +102,27 @@ module.exports = async (req, res) => {
       if (
         !doc.data ||
         !doc.local ||
-        typeof doc.kmSaida !== "number" ||
-        typeof doc.kmChegada !== "number"
+        typeof doc.kmSaida !== "number"
       ) {
         return res
           .status(400)
           .json({
             error:
-              "Campos inválidos. data, local, kmSaida (number) e kmChegada (number) são obrigatórios.",
+              "Campos inválidos. data, local e kmSaida (number) são obrigatórios.",
           });
       }
       
-      // Calcular kmTotal
-      doc.kmTotal = doc.kmChegada - doc.kmSaida;
+      // Se kmChegada não for número, define como null
+      if (typeof doc.kmChegada !== "number") {
+        doc.kmChegada = null;
+      }
+      
+      // Calcular kmTotal apenas se kmChegada for fornecido
+      if (doc.kmChegada !== null) {
+        doc.kmTotal = doc.kmChegada - doc.kmSaida;
+      } else {
+        doc.kmTotal = null;
+      }
       doc.updatedAt = new Date();
       
       try {

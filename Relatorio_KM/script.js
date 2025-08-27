@@ -6,6 +6,27 @@ const msg = document.getElementById("msg");
 // const downloadBtn = document.getElementById("downloadCsv");
 const btnSalvar = document.getElementById("btnSalvar");
 
+// Função para carregar o último registro e preencher KM Saída
+async function carregarUltimoRegistro() {
+  try {
+    const response = await fetch('/api/km?ultimo=true');
+    if (!response.ok) {
+      throw new Error('Falha ao carregar último registro');
+    }
+    const ultimoRegistro = await response.json();
+    
+    if (ultimoRegistro && ultimoRegistro.kmChegada) {
+      document.getElementById('kmSaida').value = ultimoRegistro.kmChegada;
+    }
+  } catch (error) {
+    console.error('Erro ao carregar último registro:', error);
+    // Não é crítico, então podemos ignorar e deixar o campo vazio
+  }
+}
+
+// Carregar último registro quando a página for carregada
+document.addEventListener('DOMContentLoaded', carregarUltimoRegistro);
+
 btnSalvar.addEventListener("click", async (e) => {
   e.preventDefault();
   msg.textContent = "";
@@ -14,8 +35,7 @@ btnSalvar.addEventListener("click", async (e) => {
   const chamado = document.getElementById("chamado").value.trim();
   const local = document.getElementById("local").value.trim();
   const kmSaida = Number(document.getElementById("kmSaida").value);
-  const kmChegada = Number(document.getElementById("kmChegada").value);
-  const observacoes = document.getElementById("observacoes").value.trim();
+  const kmChegadaInput = document.getElementById("kmChegada").value;
 
   if (!data || !local || isNaN(kmSaida)) {
     msg.style.color = "red";
@@ -23,20 +43,20 @@ btnSalvar.addEventListener("click", async (e) => {
     return;
   }
 
- const kmChegadaInput = document.getElementById("kmChegada").value;
+  // Verifica se foi preenchido
+  if (kmChegadaInput !== "") {
+    const kmChegadaNum = Number(kmChegadaInput);
 
- // Verifica se foi preenchido
- if (kmChegadaInput !== "") {
-   const kmChegadaNum = Number(kmChegadaInput);
+    // Só valida se for um número válido
+    if (!isNaN(kmChegadaNum) && kmChegadaNum < kmSaida) {
+      msg.style.color = "red";
+      msg.textContent = "KM chegada não pode ser menor que KM saída.";
+      return;
+    }
+  }
 
-   // Só valida se for um número válido
-   if (!isNaN(kmChegadaNum) && kmChegadaNum < kmSaida) {
-     msg.style.color = "red";
-     msg.textContent = "KM chegada não pode ser menor que KM saída.";
-     return;
-   }
- }
-
+  const observacoes = document.getElementById("observacoes").value.trim();
+  const kmChegada = kmChegadaInput === "" ? null : Number(kmChegadaInput);
 
   const payload = {
     data,
@@ -63,6 +83,9 @@ btnSalvar.addEventListener("click", async (e) => {
     msg.style.color = "green";
     msg.textContent = "Registro salvo com sucesso.";
     form.reset();
+    
+    // Recarregar o último KM para o próximo registro
+    await carregarUltimoRegistro();
   } catch (err) {
     console.error("Erro ao salvar:", err);
     msg.style.color = "orange";
@@ -73,50 +96,6 @@ btnSalvar.addEventListener("click", async (e) => {
     localStorage.setItem("km_pending", JSON.stringify(pending));
   }
 });
-
-// downloadBtn.addEventListener("click", async () => {
-//   try {
-//     const res = await fetch("/api/report?format=csv");
-//     if (!res.ok) throw new Error("Erro ao baixar CSV");
-//     const csv = await res.text();
-//     const blob = new Blob([csv], { type: "text/csv" });
-//     const url = URL.createObjectURL(blob);
-//     const a = document.createElement("a");
-//     a.href = url;
-//     a.download = "relatorio_km.csv";
-//     a.click();
-//     URL.revokeObjectURL(url);
-//   } catch (e) {
-//     console.warn("Fallback CSV local", e);
-//     const stored = JSON.parse(localStorage.getItem("km_pending") || "[]");
-//     if (stored.length === 0) {
-//       alert("Nenhum dado disponível para relatório local.");
-//       return;
-//     }
-//     const header = [
-//       "data",
-//       "chamado",
-//       "local",
-//       "kmSaida",
-//       "kmChegada",
-//       "observacoes",
-//       "criadoEm",
-//     ];
-//     const rows = stored.map((r) =>
-//       header
-//         .map((h) => `"${(r[h] || "").toString().replace(/"/g, '""')}"`)
-//         .join(",")
-//     );
-//     const csv = [header.join(","), ...rows].join("\n");
-//     const blob = new Blob([csv], { type: "text/csv" });
-//     const url = URL.createObjectURL(blob);
-//     const a = document.createElement("a");
-//     a.href = url;
-//     a.download = "relatorio_km_local.csv";
-//     a.click();
-//     URL.revokeObjectURL(url);
-//   }
-// });
 
 // Novo código para o botão de manutenção
 const btnManutencao = document.getElementById("btnManutencao");
