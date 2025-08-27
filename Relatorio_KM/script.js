@@ -17,12 +17,14 @@ btnSalvar.addEventListener("click", async (e) => {
   const kmChegada = Number(document.getElementById("kmChegada").value);
   const observacoes = document.getElementById("observacoes").value.trim();
 
-  if (!data || !local || isNaN(kmSaida) || isNaN(kmChegada)) {
+  if (!data || !local || isNaN(kmSaida)) {
     msg.style.color = "red";
     msg.textContent = "Preencha os campos obrigatórios corretamente.";
     return;
   }
-  if (kmChegada < kmSaida) {
+  if (isNaN(kmChegada)) {
+    return;
+  }else if (kmChegada < kmSaida ) {
     msg.style.color = "red";
     msg.textContent = "KM chegada não pode ser menor que KM saída.";
     return;
