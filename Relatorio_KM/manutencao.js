@@ -15,9 +15,10 @@ document.addEventListener('DOMContentLoaded', function() {
   
   document.getElementById('btnBaixarRelatorio').addEventListener('click', baixarRelatorioCompleto);
   document.getElementById('btnAplicarFiltros').addEventListener('click', aplicarFiltros);
+  
+  // Novo event listener para o botão de limpar filtros
   document.getElementById('btnLimparFiltros').addEventListener('click', limparFiltros);
-    
-
+  
   // Paginação
   document.getElementById('btnAnterior').addEventListener('click', function() {
     if (paginaAtual > 1) {
@@ -42,6 +43,17 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('btnCancelarEdicao').addEventListener('click', fecharModalEdicao);
   document.getElementById('formEditar').addEventListener('submit', salvarEdicao);
 });
+
+// Função para limpar os filtros
+function limparFiltros() {
+  document.getElementById('filtroDataInicio').value = '';
+  document.getElementById('filtroDataFim').value = '';
+  document.getElementById('filtroLocal').value = '';
+  
+  // Recarregar a tabela sem filtros
+  paginaAtual = 1;
+  exibirRegistros();
+}
 
 async function carregarRegistros() {
   try {
@@ -139,11 +151,6 @@ function aplicarFiltrosInterno(registros) {
     
     return true;
   });
-}
-function limparFiltros() {
-  document.getElementById('filtroDataInicio').value = '';
-  document.getElementById('filtroDataFim').value = '';
-  document.getElementById('filtroLocal').value = '';
 }
 
 function formatarData(data) {
