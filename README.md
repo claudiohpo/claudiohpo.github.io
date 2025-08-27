@@ -22,9 +22,6 @@ Este é meu playground para experimentar formulários, geração de PDF, captura
 ![SignaturePad](https://img.shields.io/badge/SignaturePad-4A90E2?style=flat)
 ![GitHub Pages](https://img.shields.io/badge/GitHub_Pages-181717?style=flat&logo=github&logoColor=white)
 
-> Principais libs detectadas nos arquivos: `jsPDF`, `jspdf-autotable`, `signature_pad`.  
-> Páginas escritas em **HTML/CSS/JS** sem ferramenta de build (arquivos estáticos).
-
 ---
 
 ## 📁 Estrutura resumida (detectada)
@@ -54,14 +51,6 @@ claudiohpo.github.io/
 
 ---
 
-## 📸 Snapshots
-
-Abaixo estão alguns snapshots (imagens retiradas do repositório) — abrir os arquivos em `snapshots/` para visualizá-los.
-
-![Snapshot](snapshots/snapshot1.jpg)
-
-
----
 
 ## ▶️ Como testar localmente
 
@@ -76,17 +65,7 @@ cd claudiohpo.github.io
 
 ---
 
-## ✅ Sugestões rápidas
-- Organizar `assets/` para imagens e logos.
-- Adicionar `.gitignore` para evitar subir `.idea/` e arquivos temporários.
-- Incluir ARIA attributes e melhorar contrastes para aumentar acessibilidade.
-- Definir licença (ex: `MIT`) se desejar abrir o código.
-
----
-
 ## ✉️ Contato
-Perfil: https://github.com/claudiohpo
+Perfil: [Cláudio Henrique](https://github.com/claudiohpo) 
 
 ---
-
-*README gerado automaticamente pelo assistente. Se quiser ajustes (texto, mais badges, mudar snapshots selecionados ou incluir screenshots novas), diga quais mudanças deseja e eu atualizo o arquivo.*
