@@ -265,23 +265,39 @@ async function salvarEdicao(e) {
   }
 }
 
-async function baixarRelatorioCompleto() {
-  try {
-    const response = await fetch('/api/report?format=csv');
-    if (!response.ok) {
-      throw new Error('Erro ao baixar relatório');
-    }
+// async function baixarRelatorioCompleto() {
+//   try {
+//     const response = await fetch('/api/report?format=csv');
+//     if (!response.ok) {
+//       throw new Error('Erro ao baixar relatório');
+//     }
     
-    const csv = await response.text();
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'relatorio_km_completo.csv';
-    a.click();
-    URL.revokeObjectURL(url);
-  } catch (error) {
-    console.error('Erro:', error);
-    alert('Erro ao baixar relatório. Verifique o console para mais detalhes.');
-  }
+//     const csv = await response.text();
+//     const blob = new Blob([csv], { type: 'text/csv' });
+//     const url = URL.createObjectURL(blob);
+//     const a = document.createElement('a');
+//     a.href = url;
+//     a.download = 'relatorio_km_completo.csv';
+//     a.click();
+//     URL.revokeObjectURL(url);
+//   } catch (error) {
+//     console.error('Erro:', error);
+//     alert('Erro ao baixar relatório. Verifique o console para mais detalhes.');
+//   }
+// }
+
+function baixarRelatorioXLSX() {
+  // Exemplo de dados — substitua com os dados reais do seu backend
+  const dados = [
+    { Data: '2025-08-26', Chamado: '123', Local: 'São Paulo - Cliente X', KM_Saida: 1000, KM_Chegada: 1050, Observacoes: 'Tudo certo' },
+    { Data: '2025-08-27', Chamado: '124', Local: 'Mogi - Cliente Y', KM_Saida: 1050, KM_Chegada: 1100, Observacoes: 'Trânsito leve' }
+  ];
+
+  // Cria uma planilha a partir dos dados
+  const worksheet = XLSX.utils.json_to_sheet(dados);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Relatório KM');
+
+  // Gera o arquivo .xlsx
+  XLSX.writeFile(workbook, 'relatorio_km_completo.xlsx');
 }
