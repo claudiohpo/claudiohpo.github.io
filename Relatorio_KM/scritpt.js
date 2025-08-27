@@ -1,5 +1,5 @@
 // CONFIG: coloque aqui a URL do seu backend (sem barra no final)
-const BACKEND_URL = "https://seu-backend.exemplo"; // exemplo: https://meuapp.vercel.app
+const BACKEND_URL = "claudiohpo-github-8dcscm5hl-claudio-henriques-projects-f25502a5.vercel.app"; // exemplo: https://meuapp.vercel.app
 
 const form = document.getElementById('kmForm');
 const msg = document.getElementById('msg');

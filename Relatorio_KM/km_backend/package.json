@@ -1,0 +1,8 @@
+{
+  "name": "km-backend",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "mongodb": "^5.6.0"
+  }
+}
