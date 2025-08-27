@@ -1,31 +1,28 @@
-// script.js — atualizado com botão para manutenção
-const BACKEND_URL = ""; // deixa vazio para usar mesmo domínio (/api/*)
+const BACKEND_URL = ""; // deixar vazio para usar mesmo domínio (/api/*)
 
 const form = document.getElementById("kmForm");
 const msg = document.getElementById("msg");
-// const downloadBtn = document.getElementById("downloadCsv");
 const btnSalvar = document.getElementById("btnSalvar");
 
 // Função para carregar o último registro e preencher KM Saída
 async function carregarUltimoRegistro() {
   try {
-    const response = await fetch('/api/km?ultimo=true');
+    const response = await fetch("/api/km?ultimo=true");
     if (!response.ok) {
-      throw new Error('Falha ao carregar último registro');
+      throw new Error("Falha ao carregar último registro");
     }
     const ultimoRegistro = await response.json();
-    
+
     if (ultimoRegistro && ultimoRegistro.kmChegada) {
-      document.getElementById('kmSaida').value = ultimoRegistro.kmChegada;
+      document.getElementById("kmSaida").value = ultimoRegistro.kmChegada;
     }
   } catch (error) {
-    console.error('Erro ao carregar último registro:', error);
-    // Não é crítico, então podemos ignorar e deixar o campo vazio
+    console.error("Erro ao carregar último registro:", error);
   }
 }
 
-// Carregar último registro quando a página for carregada
-document.addEventListener('DOMContentLoaded', carregarUltimoRegistro);
+// Carregar último registro do kmChegada para o label kmSaida quando a página for carregada
+document.addEventListener("DOMContentLoaded", carregarUltimoRegistro);
 
 btnSalvar.addEventListener("click", async (e) => {
   e.preventDefault();
@@ -43,11 +40,11 @@ btnSalvar.addEventListener("click", async (e) => {
     return;
   }
 
-  // Verifica se foi preenchido
+  // Verifica se kmChegada foi preenchido
   if (kmChegadaInput !== "") {
     const kmChegadaNum = Number(kmChegadaInput);
 
-    // Só valida se for um número válido
+    // Só valida kmChegada se for um número válido
     if (!isNaN(kmChegadaNum) && kmChegadaNum < kmSaida) {
       msg.style.color = "red";
       msg.textContent = "KM chegada não pode ser menor que KM saída.";
@@ -83,7 +80,7 @@ btnSalvar.addEventListener("click", async (e) => {
     msg.style.color = "green";
     msg.textContent = "Registro salvo com sucesso.";
     form.reset();
-    
+
     // Recarregar o último KM para o próximo registro
     await carregarUltimoRegistro();
   } catch (err) {
@@ -97,7 +94,6 @@ btnSalvar.addEventListener("click", async (e) => {
   }
 });
 
-// Novo código para o botão de manutenção
 const btnManutencao = document.getElementById("btnManutencao");
 if (btnManutencao) {
   btnManutencao.addEventListener("click", () => {

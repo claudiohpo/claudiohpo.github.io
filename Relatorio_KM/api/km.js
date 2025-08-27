@@ -1,4 +1,3 @@
-// api/km.js - Atualizado para suportar PUT, DELETE e ordenação decrescente
 const { MongoClient, ObjectId } = require("mongodb");
 
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -25,24 +24,18 @@ module.exports = async (req, res) => {
     if (req.method === "POST") {
       const doc = req.body;
       // validação básica
-      if (
-        !doc.data ||
-        !doc.local ||
-        typeof doc.kmSaida !== "number"
-      ) {
-        return res
-          .status(400)
-          .json({
-            error:
-              "Campos inválidos. data, local e kmSaida (number) são obrigatórios.",
-          });
+      if (!doc.data || !doc.local || typeof doc.kmSaida !== "number") {
+        return res.status(400).json({
+          error:
+            "Campos inválidos. data, local e kmSaida (number) são obrigatórios.",
+        });
       }
-      
+
       // Se kmChegada não for número, define como null
       if (typeof doc.kmChegada !== "number") {
         doc.kmChegada = null;
       }
-      
+
       // Calcular kmTotal apenas se kmChegada for fornecido
       if (doc.kmChegada !== null) {
         doc.kmTotal = doc.kmChegada - doc.kmSaida;
@@ -56,7 +49,7 @@ module.exports = async (req, res) => {
 
     if (req.method === "GET") {
       const { id, ultimo } = req.query;
-      
+
       if (id) {
         // Buscar um registro específico por ID
         try {
@@ -75,7 +68,9 @@ module.exports = async (req, res) => {
           return res.status(200).json(doc);
         } catch (err) {
           console.error(err);
-          return res.status(500).json({ error: "Erro ao buscar último registro" });
+          return res
+            .status(500)
+            .json({ error: "Erro ao buscar último registro" });
         }
       } else {
         // Buscar todos os registros com ordenação por data decrescente e createdAt decrescente
@@ -86,12 +81,13 @@ module.exports = async (req, res) => {
           if (from) filter.data.$gte = from;
           if (to) filter.data.$lte = to;
         }
-        
+
         // Ordenar por data decrescente e createdAt decrescente
-        const docs = await col.find(filter)
+        const docs = await col
+          .find(filter)
           .sort({ data: -1, createdAt: -1 })
           .toArray();
-          
+
         return res.status(200).json(docs);
       }
     }
@@ -101,27 +97,21 @@ module.exports = async (req, res) => {
       if (!id) {
         return res.status(400).json({ error: "ID não fornecido" });
       }
-      
+
       const doc = req.body;
       // validação básica
-      if (
-        !doc.data ||
-        !doc.local ||
-        typeof doc.kmSaida !== "number"
-      ) {
-        return res
-          .status(400)
-          .json({
-            error:
-              "Campos inválidos. data, local e kmSaida (number) são obrigatórios.",
-          });
+      if (!doc.data || !doc.local || typeof doc.kmSaida !== "number") {
+        return res.status(400).json({
+          error:
+            "Campos inválidos. data, local e kmSaida (number) são obrigatórios.",
+        });
       }
-      
+
       // Se kmChegada não for número, define como null
       if (typeof doc.kmChegada !== "number") {
         doc.kmChegada = null;
       }
-      
+
       // Calcular kmTotal apenas se kmChegada for fornecido
       if (doc.kmChegada !== null) {
         doc.kmTotal = doc.kmChegada - doc.kmSaida;
@@ -129,18 +119,20 @@ module.exports = async (req, res) => {
         doc.kmTotal = null;
       }
       doc.updatedAt = new Date();
-      
+
       try {
         const result = await col.updateOne(
           { _id: new ObjectId(id) },
           { $set: doc }
         );
-        
+
         if (result.matchedCount === 0) {
           return res.status(404).json({ error: "Registro não encontrado" });
         }
-        
-        return res.status(200).json({ message: "Registro atualizado com sucesso" });
+
+        return res
+          .status(200)
+          .json({ message: "Registro atualizado com sucesso" });
       } catch (err) {
         return res.status(400).json({ error: "ID inválido" });
       }
@@ -151,15 +143,17 @@ module.exports = async (req, res) => {
       if (!id) {
         return res.status(400).json({ error: "ID não fornecido" });
       }
-      
+
       try {
         const result = await col.deleteOne({ _id: new ObjectId(id) });
-        
+
         if (result.deletedCount === 0) {
           return res.status(404).json({ error: "Registro não encontrado" });
         }
-        
-        return res.status(200).json({ message: "Registro excluído com sucesso" });
+
+        return res
+          .status(200)
+          .json({ message: "Registro excluído com sucesso" });
       } catch (err) {
         return res.status(400).json({ error: "ID inválido" });
       }
