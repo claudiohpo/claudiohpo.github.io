@@ -1,3 +1,4 @@
+
 // api/report.js
 const { MongoClient } = require('mongodb');
 
@@ -29,10 +30,8 @@ function toCsv(rows, headers){
 
 module.exports = async (req, res) => {
   try {
-    if (req.method !== 'GET') {
-      res.setHeader('Allow', 'GET');
-      return res.status(405).end('Method Not Allowed');
-    }
+    if (req.method !== 'GET') return res.status(405).end('Method Not Allowed');
+
     const col = await getCollection();
     const { from, to, format } = req.query;
     const filter = {};
