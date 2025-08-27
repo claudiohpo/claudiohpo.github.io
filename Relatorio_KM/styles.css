@@ -93,3 +93,31 @@ button#downloadCsv {
         flex-direction: column
     }
 }
+
+/* Rodapé */
+footer {
+  text-align: center;
+  margin-top: 20px;
+  padding: 15px;
+  color: var(--muted);
+  font-size: 14px;
+  border-top: 1px solid #e3e6ee;
+}
+
+footer a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+footer a:hover {
+  text-decoration: underline;
+}
+
+/* Ajustes de responsividade para o rodapé */
+@media (max-width: 520px) {
+  footer {
+    font-size: 12px;
+    padding: 10px;
+  }
+}
