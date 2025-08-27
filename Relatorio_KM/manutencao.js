@@ -267,21 +267,38 @@ async function salvarEdicao(e) {
 
 async function baixarRelatorioCompleto() {
   try {
-    const response = await fetch('/api/report?format=csv');
-    if (!response.ok) {
-      throw new Error('Erro ao baixar relatório');
+    // Pode reaproveitar os registros já carregados
+    let dados = aplicarFiltrosInterno(registros).map(r => ({
+      Data: formatarData(r.data),
+      Chamado: r.chamado || '',
+      Local: r.local,
+      "KM Saída": r.kmSaida,
+      "KM Chegada": r.kmChegada,
+      "KM Total": r.kmTotal,
+      Observações: r.observacoes || ''
+    }));
+
+    if (dados.length === 0) {
+      alert("Nenhum registro disponível para exportar.");
+      return;
     }
-    
-    const csv = await response.text();
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'relatorio_km_completo.csv';
-    a.click();
-    URL.revokeObjectURL(url);
+
+    // Criar worksheet e workbook
+    const worksheet = XLSX.utils.json_to_sheet(dados);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Relatório KM");
+
+    // Ajustar largura das colunas automaticamente
+    const colWidths = Object.keys(dados[0]).map(key => ({
+      wch: Math.max(key.length, ...dados.map(r => (r[key] ? r[key].toString().length : 0))) + 2
+    }));
+    worksheet['!cols'] = colWidths;
+
+    // Baixar o arquivo .xlsx
+    XLSX.writeFile(workbook, "relatorio_km_completo.xlsx");
+
   } catch (error) {
-    console.error('Erro:', error);
-    alert('Erro ao baixar relatório. Verifique o console para mais detalhes.');
+    console.error("Erro:", error);
+    alert("Erro ao gerar relatório em XLSX.");
   }
 }
