@@ -4,8 +4,9 @@ const BACKEND_URL = ""; // deixa vazio para usar mesmo domínio (/api/*)
 const form = document.getElementById("kmForm");
 const msg = document.getElementById("msg");
 const downloadBtn = document.getElementById("downloadCsv");
+const btnSalvar = document.getElementById("btnSalvar");
 
-form.addEventListener("btnSalvar", async (e) => {
+btnSalvar.addEventListener("click", async (e) => {
   e.preventDefault();
   msg.textContent = "";
 
