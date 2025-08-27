@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
     window.location.href = 'index.html';
   });
   
-  document.getElementById('btnBaixarRelatorio').addEventListener('click', baixarRelatorioCompleto);
+  document.getElementById('btnBaixarRelatorio').addEventListener('click', baixarRelatorioXLSX);
   document.getElementById('btnAplicarFiltros').addEventListener('click', aplicarFiltros);
   
   // Novo event listener para o botão de limpar filtros
@@ -287,17 +287,20 @@ async function salvarEdicao(e) {
 // }
 
 function baixarRelatorioXLSX() {
-  // Exemplo de dados — substitua com os dados reais do seu backend
-  const dados = [
-    { Data: '2025-08-26', Chamado: '123', Local: 'São Paulo - Cliente X', KM_Saida: 1000, KM_Chegada: 1050, Observacoes: 'Tudo certo' },
-    { Data: '2025-08-27', Chamado: '124', Local: 'Mogi - Cliente Y', KM_Saida: 1050, KM_Chegada: 1100, Observacoes: 'Trânsito leve' }
-  ];
+  // usa os registros já carregados da API
+  const dados = registros.map(r => ({
+    Data: r.data,
+    Chamado: r.chamado,
+    Local: r.local,
+    KM_Saida: r.kmSaida,
+    KM_Chegada: r.kmChegada,
+    KM_Total: r.kmTotal,
+    Observacoes: r.observacoes
+  }));
 
-  // Cria uma planilha a partir dos dados
   const worksheet = XLSX.utils.json_to_sheet(dados);
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Relatório KM');
 
-  // Gera o arquivo .xlsx
   XLSX.writeFile(workbook, 'relatorio_km_completo.xlsx');
 }
