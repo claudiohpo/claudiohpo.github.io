@@ -14,11 +14,10 @@ body {
     margin: 0;
     background: var(--bg);
     color: #111;
-
     min-height: 100vh;
     display: flex;
     flex-direction: column; /* empilha main + footer verticalmente */
-    padding: 24px;
+    padding: 16px;
 }
 
 /* Container principal */
@@ -30,7 +29,7 @@ body {
     padding: 18px;
     box-shadow: 0 6px 20px rgba(20, 30, 50, 0.08);
 
-    margin: 24px auto 0; /* centraliza horizontalmente; mantém um espaçamento superior */
+    margin: 16px auto 8px; /* centraliza horizontalmente; mantém um espaçamento superior */
     /* REMOVIDO: flex: 1 0 auto;  <-- isso fazia a caixa esticar */
     flex: 0 0 auto; /* garante altura conforme conteúdo (opcional) */
 }
@@ -102,9 +101,9 @@ button#downloadCsv {
 
 /* Rodapé */
 footer {
-  margin-top: auto;
+  margin-top: 8px;
   text-align: center;
-  padding: 15px;
+  padding: 12px 10px;
   color: var(--muted);
   font-size: 14px;
   border-top: 1px solid #e3e6ee;
@@ -120,10 +119,17 @@ footer a:hover {
   text-decoration: underline;
 }
 
-/* Ajustes de responsividade para o rodapé */
+/* mobile: reduzir ainda mais */
 @media (max-width: 520px) {
+  body {
+    padding: 12px;
+  }
+  .container {
+    margin: 12px auto 6px;
+  }
   footer {
-    font-size: 12px;
+    margin-top: 6px;
     padding: 10px;
+    font-size: 12px;
   }
 }
