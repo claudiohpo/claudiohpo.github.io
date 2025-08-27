@@ -13,7 +13,8 @@ document.addEventListener('DOMContentLoaded', function() {
     window.location.href = 'index.html';
   });
   
-  document.getElementById('btnBaixarRelatorio').addEventListener('click', baixarRelatorioCompleto);
+  document.getElementById('btnBaixarRelatorioCSV').addEventListener('click', baixarRelatorioCompletoCSV);
+  document.getElementById('btnBaixarRelatorioXLS').addEventListener('click', baixarRelatorioCompletoXLS);
   document.getElementById('btnAplicarFiltros').addEventListener('click', aplicarFiltros);
   
   // Novo event listener para o botão de limpar filtros
@@ -265,7 +266,28 @@ async function salvarEdicao(e) {
   }
 }
 
-async function baixarRelatorioCompleto() {
+async function baixarRelatorioCompletoCSV() {
+  try {
+    const response = await fetch('/api/report?format=csv');
+    if (!response.ok) {
+      throw new Error('Erro ao baixar relatório');
+    }
+    
+    const csv = await response.text();
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'relatorio_km_completo.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Erro:', error);
+    alert('Erro ao baixar relatório. Verifique o console para mais detalhes.');
+  }
+}
+
+async function baixarRelatorioCompletoXLS() {
   try {
     // Pode reaproveitar os registros já carregados
     let dados = aplicarFiltrosInterno(registros).map(r => ({
