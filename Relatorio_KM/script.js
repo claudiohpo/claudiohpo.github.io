@@ -5,7 +5,7 @@ const form = document.getElementById("kmForm");
 const msg = document.getElementById("msg");
 const downloadBtn = document.getElementById("downloadCsv");
 
-form.addEventListener("submit", async (e) => {
+form.addEventListener("btnSalvar", async (e) => {
   e.preventDefault();
   msg.textContent = "";
 
