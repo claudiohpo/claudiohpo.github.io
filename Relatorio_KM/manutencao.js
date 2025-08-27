@@ -70,6 +70,17 @@ async function carregarRegistros() {
       registro.kmTotal = (registro.kmChegada - registro.kmSaida) || 0;
     });
     
+    // Ordenar registros por data (decrescente) e por createdAt (decrescente) para desempate
+    registros.sort((a, b) => {
+      // Primeiro compara pelas datas
+      const dateComparison = new Date(b.data) - new Date(a.data);
+      if (dateComparison !== 0) {
+        return dateComparison;
+      }
+      // Se as datas forem iguais, ordena por createdAt (mais recente primeiro)
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    });
+    
     exibirRegistros();
   } catch (error) {
     console.error('Erro:', error);

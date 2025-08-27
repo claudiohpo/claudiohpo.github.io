@@ -1,4 +1,4 @@
-// api/km.js - Atualizado para suportar PUT, DELETE e busca do último registro
+// api/km.js - Atualizado para suportar PUT, DELETE e ordenação decrescente
 const { MongoClient, ObjectId } = require("mongodb");
 
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -78,7 +78,7 @@ module.exports = async (req, res) => {
           return res.status(500).json({ error: "Erro ao buscar último registro" });
         }
       } else {
-        // Buscar todos os registros
+        // Buscar todos os registros com ordenação por data decrescente e createdAt decrescente
         const { from, to } = req.query;
         const filter = {};
         if (from || to) {
@@ -86,7 +86,12 @@ module.exports = async (req, res) => {
           if (from) filter.data.$gte = from;
           if (to) filter.data.$lte = to;
         }
-        const docs = await col.find(filter).sort({ data: 1 }).toArray();
+        
+        // Ordenar por data decrescente e createdAt decrescente
+        const docs = await col.find(filter)
+          .sort({ data: -1, createdAt: -1 })
+          .toArray();
+          
         return res.status(200).json(docs);
       }
     }
