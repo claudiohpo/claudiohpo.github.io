@@ -143,7 +143,7 @@ Contribuições são sempre bem-vindas! Sinta-se à vontade para reportar bugs o
 
 Em caso de dúvidas ou problemas, abra uma issue no repositório ou entre em contato.
 
-## 👨‍💻 Autore
+## 👨‍💻 Autor
 
 - [Cláudio Henrique](https://github.com/claudiohpo)  
 
