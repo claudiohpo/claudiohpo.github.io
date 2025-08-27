@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
     window.location.href = 'index.html';
   });
   
-  document.getElementById('btnBaixarRelatorio').addEventListener('click', baixarRelatorioXLSX);
+  document.getElementById('btnBaixarRelatorio').addEventListener('click', baixarRelatorioCompleto);
   document.getElementById('btnAplicarFiltros').addEventListener('click', aplicarFiltros);
   
   // Novo event listener para o botão de limpar filtros
@@ -265,42 +265,23 @@ async function salvarEdicao(e) {
   }
 }
 
-// async function baixarRelatorioCompleto() {
-//   try {
-//     const response = await fetch('/api/report?format=csv');
-//     if (!response.ok) {
-//       throw new Error('Erro ao baixar relatório');
-//     }
+async function baixarRelatorioCompleto() {
+  try {
+    const response = await fetch('/api/report?format=csv');
+    if (!response.ok) {
+      throw new Error('Erro ao baixar relatório');
+    }
     
-//     const csv = await response.text();
-//     const blob = new Blob([csv], { type: 'text/csv' });
-//     const url = URL.createObjectURL(blob);
-//     const a = document.createElement('a');
-//     a.href = url;
-//     a.download = 'relatorio_km_completo.csv';
-//     a.click();
-//     URL.revokeObjectURL(url);
-//   } catch (error) {
-//     console.error('Erro:', error);
-//     alert('Erro ao baixar relatório. Verifique o console para mais detalhes.');
-//   }
-// }
-
-function baixarRelatorioXLSX() {
-  // usa os registros já carregados da API
-  const dados = registros.map(r => ({
-    Data: r.data,
-    Chamado: r.chamado,
-    Local: r.local,
-    KM_Saida: r.kmSaida,
-    KM_Chegada: r.kmChegada,
-    KM_Total: r.kmTotal,
-    Observacoes: r.observacoes
-  }));
-
-  const worksheet = XLSX.utils.json_to_sheet(dados);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Relatório KM');
-
-  XLSX.writeFile(workbook, 'relatorio_km_completo.xlsx');
+    const csv = await response.text();
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'relatorio_km_completo.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Erro:', error);
+    alert('Erro ao baixar relatório. Verifique o console para mais detalhes.');
+  }
 }
