@@ -10,134 +10,13 @@
   const btnGeneratePdf = $("#btnGeneratePdf");
 
   const codigoInput = $("#codigoPeca");
-  const serialInput = $("#serialPeca");
+  const serialInput = $("#serialProxxi");
   const notaInput = $("#notaFiscal");
   const inputCompleto = $("#inputCompleto");
   const serialTableBody = $("#serialTable tbody");
 
   const canvas = $("#signatureCanvas");
   const ctx = canvas.getContext("2d");
-
-  // Variáveis para controle da câmera
-  let cameraActive = false;
-  let currentTarget = null;
-  let cameraPreview = null;
-  let cameraOverlay = null;
-
-  // Inicializar elementos da câmera
-  function initCameraElements() {
-    // Criar overlay
-    cameraOverlay = document.createElement("div");
-    cameraOverlay.className = "camera-overlay";
-    document.body.appendChild(cameraOverlay);
-
-    // Criar preview da câmera
-    cameraPreview = document.createElement("div");
-    cameraPreview.className = "camera-preview";
-    cameraPreview.innerHTML = `
-      <video id="cameraVideo" autoplay playsinline></video>
-      <button type="button" class="close-camera">X</button>
-    `;
-    document.body.appendChild(cameraPreview);
-
-    // Event listener para fechar a câmera
-    cameraPreview
-      .querySelector(".close-camera")
-      .addEventListener("click", stopCamera);
-    cameraOverlay.addEventListener("click", stopCamera);
-  }
-
-  // Inicializar a câmera
-  function initCamera() {
-    initCameraElements();
-
-    // Adicionar event listeners para os botões de câmera
-    document.querySelectorAll(".btn-camera").forEach((button) => {
-      button.addEventListener("click", function () {
-        const target = this.getAttribute("data-target");
-        startCamera(target);
-      });
-    });
-  }
-
-  // Função para iniciar a câmera
-  function startCamera(targetId) {
-    if (cameraActive) {
-      stopCamera();
-      return;
-    }
-
-    currentTarget = targetId;
-    cameraActive = true;
-    cameraPreview.style.display = "block";
-    cameraOverlay.style.display = "block";
-
-    Quagga.init(
-      {
-        inputStream: {
-          name: "Live",
-          type: "LiveStream",
-          target: cameraPreview.querySelector("video"),
-          constraints: {
-            width: 640,
-            height: 480,
-            facingMode: "environment",
-          },
-        },
-        decoder: {
-          readers: [
-            "code_128_reader",
-            "ean_reader",
-            "ean_8_reader",
-            "code_39_reader",
-            "upc_reader",
-          ],
-        },
-      },
-      function (err) {
-        if (err) {
-          console.error("Erro ao inicializar Quagga:", err);
-          alert("Não foi possível acessar a câmera.");
-          stopCamera();
-          return;
-        }
-        Quagga.start();
-      }
-    );
-
-    // Modifique a função onDetected no Quagga para lidar com textarea
-    Quagga.onDetected(function (result) {
-      const code = result.codeResult.code;
-      if (code) {
-        const targetElement = document.getElementById(targetId);
-
-        if (targetId === "inputCompleto") {
-          // Para textarea, adicionamos o código ao final com uma vírgula
-          if (targetElement.value) {
-            targetElement.value += ", " + code;
-          } else {
-            targetElement.value = code;
-          }
-        } else {
-          // Para inputs, substituímos o valor
-          targetElement.value = code;
-        }
-
-        stopCamera();
-      }
-    });
-  }
-
-  // Função para parar a câmera
-  function stopCamera() {
-    if (Quagga && typeof Quagga.stop === "function") {
-      Quagga.stop();
-    }
-    if (cameraPreview) cameraPreview.style.display = "none";
-    if (cameraOverlay) cameraOverlay.style.display = "none";
-    cameraActive = false;
-    currentTarget = null;
-  }
 
   // Ajusta canvas para alta densidade de pixels (melhor qualidade na tela)
   function fixCanvasDPI() {
@@ -362,7 +241,7 @@
     const tds = tr.querySelectorAll("td");
     if (tds.length >= 3) {
       $("#codigoPeca").value = tds[0].textContent;
-      $("#serialPeca").value = tds[1].textContent;
+      $("#serialProxxi").value = tds[1].textContent;
       $("#notaFiscal").value = tds[2].textContent;
       tr.remove();
     }
@@ -393,17 +272,11 @@
   }
 
   // util: otimiza um dataURL (img) para JPEG com largura máxima
-  function optimizeDataUrl(
-    dataUrl,
-    maxWidthPx,
-    mime = "image/jpeg",
-    quality = 0.8
-  ) {
+  function optimizeDataUrl(dataUrl, maxWidthPx, mime = "image/jpeg", quality = 0.8) {
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => {
-        const aspect =
-          (img.naturalWidth || img.width) / (img.naturalHeight || img.height);
+        const aspect = (img.naturalWidth || img.width) / (img.naturalHeight || img.height);
         const targetW = Math.min(maxWidthPx, img.naturalWidth || img.width);
         const targetH = Math.round(targetW / aspect) || 1;
         const c = document.createElement("canvas");
@@ -427,12 +300,7 @@
   }
 
   // util: otimiza um canvas existente (assinatura) para JPEG com largura máxima
-  function optimizeCanvasToDataUrl(
-    srcCanvas,
-    maxWidthPx,
-    mime = "image/jpeg",
-    quality = 0.9
-  ) {
+  function optimizeCanvasToDataUrl(srcCanvas, maxWidthPx, mime = "image/jpeg", quality = 0.9) {
     const sw = srcCanvas.width;
     const sh = srcCanvas.height;
     const aspect = sw / sh || 1;
@@ -467,29 +335,15 @@
         i.onerror = reject;
         i.src = dataUrl;
       });
-      PRELOADED_LOGO_ASPECT =
-        (img.naturalWidth || img.width) / (img.naturalHeight || img.height);
-      console.info(
-        "[logo] carregada (original) aspect:",
-        PRELOADED_LOGO_ASPECT
-      );
+      PRELOADED_LOGO_ASPECT = (img.naturalWidth || img.width) / (img.naturalHeight || img.height);
+      console.info("[logo] carregada (original) aspect:", PRELOADED_LOGO_ASPECT);
 
       // agora otimiza: reduz largura para algo razoável (ex: 600px) e gera JPEG com qualidade
       try {
         const maxWidthPx = 600; // ajuste aqui se quiser mais/menos pixels
-        const optimized = await optimizeDataUrl(
-          PRELOADED_LOGO_DATAURL,
-          maxWidthPx,
-          "image/jpeg",
-          0.8
-        );
+        const optimized = await optimizeDataUrl(PRELOADED_LOGO_DATAURL, maxWidthPx, "image/jpeg", 0.8);
         PRELOADED_LOGO_OPTIMIZED = optimized.dataUrl;
-        console.info(
-          "[logo] otimizada ->",
-          optimized.width + "x" + optimized.height,
-          "chars:",
-          PRELOADED_LOGO_OPTIMIZED.length
-        );
+        console.info("[logo] otimizada ->", optimized.width + "x" + optimized.height, "chars:", PRELOADED_LOGO_OPTIMIZED.length);
       } catch (optErr) {
         console.warn("[logo] otimização falhou, usando original:", optErr);
         PRELOADED_LOGO_OPTIMIZED = PRELOADED_LOGO_DATAURL;
@@ -512,9 +366,7 @@
             const cctx = c.getContext("2d");
             cctx.drawImage(img, 0, 0);
             PRELOADED_LOGO_DATAURL = c.toDataURL("image/png");
-            PRELOADED_LOGO_ASPECT =
-              (img.naturalWidth || img.width) /
-              (img.naturalHeight || img.height);
+            PRELOADED_LOGO_ASPECT = (img.naturalWidth || img.width) / (img.naturalHeight || img.height);
             resolve();
           } catch (errCanvas) {
             reject(errCanvas);
@@ -527,17 +379,9 @@
       // otimiza
       try {
         const maxWidthPx = 600;
-        const optimized = await optimizeDataUrl(
-          PRELOADED_LOGO_DATAURL,
-          maxWidthPx,
-          "image/jpeg",
-          0.8
-        );
+        const optimized = await optimizeDataUrl(PRELOADED_LOGO_DATAURL, maxWidthPx, "image/jpeg", 0.8);
         PRELOADED_LOGO_OPTIMIZED = optimized.dataUrl;
-        console.info(
-          "[logo] fallback otimizada ->",
-          optimized.width + "x" + optimized.height
-        );
+        console.info("[logo] fallback otimizada ->", optimized.width + "x" + optimized.height);
       } catch (optErr) {
         PRELOADED_LOGO_OPTIMIZED = PRELOADED_LOGO_DATAURL;
       }
@@ -547,9 +391,7 @@
       console.warn("[logo] fallback <img> falhou:", err2);
     }
 
-    console.warn(
-      "[logo] não foi possível carregar o logo — PDF será gerado sem logo."
-    );
+    console.warn("[logo] não foi possível carregar o logo — PDF será gerado sem logo.");
   }
 
   preloadLogo().catch((e) => console.error("[logo] preload erro:", e));
@@ -612,19 +454,11 @@
       if (!logoDataUrl && PRELOADED_LOGO_DATAURL) {
         // tenta otimizar a original (segurança)
         try {
-          const opt = await optimizeDataUrl(
-            PRELOADED_LOGO_DATAURL,
-            600,
-            "image/jpeg",
-            0.8
-          );
+          const opt = await optimizeDataUrl(PRELOADED_LOGO_DATAURL, 600, "image/jpeg", 0.8);
           logoDataUrl = opt.dataUrl;
           PRELOADED_LOGO_OPTIMIZED = logoDataUrl;
         } catch (e) {
-          console.warn(
-            "Erro ao otimizar PRELOADED_LOGO_DATAURL no momento do PDF:",
-            e
-          );
+          console.warn("Erro ao otimizar PRELOADED_LOGO_DATAURL no momento do PDF:", e);
           logoDataUrl = PRELOADED_LOGO_DATAURL;
         }
       }
@@ -713,9 +547,7 @@
 
         doc.setFontSize(20);
         doc.setFont(undefined, "bold");
-        doc.text("Formulário de Entrega de Peças", 105, 30, {
-          align: "center",
-        });
+        doc.text("Formulário de Entrega de Peças", 105, 30, { align: "center" });
 
         doc.setFontSize(12);
         doc.setFont(undefined, "bold");
@@ -778,24 +610,12 @@
       try {
         // usa otimização para evitar embutir milhões de pixels
         // escolhe largura em px para assinatura (ex: 600px) — diminuirá peso drasticamente
-        const assinaturaOptimized = optimizeCanvasToDataUrl(
-          canvas,
-          600,
-          "image/jpeg",
-          0.9
-        );
+        const assinaturaOptimized = optimizeCanvasToDataUrl(canvas, 600, "image/jpeg", 0.9);
         const fmtSig = getImageFormatFromDataUrl(assinaturaOptimized);
         // define tamanho em mm (aprox)
         const sigWidthMm = 60; // ajuste conforme prefere (em mm)
         const sigHeightMm = 30; // ajuste conforme prefere (em mm)
-        doc.addImage(
-          assinaturaOptimized,
-          fmtSig,
-          15,
-          finalY,
-          sigWidthMm,
-          sigHeightMm
-        );
+        doc.addImage(assinaturaOptimized, fmtSig, 15, finalY, sigWidthMm, sigHeightMm);
         doc.line(15, finalY + 35, 100, finalY + 35);
         doc.text(formDataObject.nomeRecebedor || "", 20, finalY + 39);
       } catch (e) {
@@ -803,9 +623,7 @@
       }
 
       // salvar
-      const fileName = `form_entrega_pecas_${
-        dataFormatadaPDF || "sem_data"
-      }.pdf`;
+      const fileName = `form_entrega_pecas_${dataFormatadaPDF || "sem_data"}.pdf`;
       doc.save(fileName);
 
       // dica de sucesso
@@ -816,8 +634,92 @@
     }
   });
 
-  // Inicializar a câmera quando o documento estiver pronto
-  document.addEventListener("DOMContentLoaded", function () {
-    initCamera();
-  });
+  // Se quiser, pode adicionar funções que mostram a câmera e usam Quagga.
+  window.iniciarLeituraCodigo = function (idInput) {
+    console.warn("iniciarLeituraCodigo(): implemente Quagga ou biblioteca de leitura de código se desejar.");
+  };
 })();
+
+
+
+// ... código existente ...
+
+// Variáveis para controle da câmera
+let cameraActive = false;
+let currentTarget = null;
+
+// Elementos para a câmera
+const cameraPreview = document.createElement('div');
+cameraPreview.className = 'camera-preview';
+cameraPreview.innerHTML = `
+    <video id="cameraVideo" autoplay playsinline></video>
+    <button type="button" class="close-camera">X</button>
+`;
+document.body.appendChild(cameraPreview);
+
+// Função para iniciar a câmera
+function startCamera(targetId) {
+    if (cameraActive) {
+        stopCamera();
+        return;
+    }
+
+    currentTarget = targetId;
+    cameraActive = true;
+    cameraPreview.style.display = 'block';
+
+    Quagga.init({
+        inputStream: {
+            name: "Live",
+            type: "LiveStream",
+            target: cameraPreview.querySelector('video'),
+            constraints: {
+                width: 640,
+                height: 480,
+                facingMode: "environment" // ou "user" para frontal
+            }
+        },
+        decoder: {
+            readers: ["code_128_reader", "ean_reader", "ean_8_reader", "code_39_reader", "upc_reader"]
+        }
+    }, function(err) {
+        if (err) {
+            console.error("Erro ao inicializar Quagga:", err);
+            alert("Não foi possível acessar a câmera.");
+            stopCamera();
+            return;
+        }
+        Quagga.start();
+    });
+
+    Quagga.onDetected(function(result) {
+        const code = result.codeResult.code;
+        if (code) {
+            document.getElementById(targetId).value = code;
+            stopCamera();
+        }
+    });
+}
+
+// Função para parar a câmera
+function stopCamera() {
+    Quagga.stop();
+    cameraPreview.style.display = 'none';
+    cameraActive = false;
+    currentTarget = null;
+}
+
+// Evento para fechar a câmera
+cameraPreview.querySelector('.close-camera').addEventListener('click', stopCamera);
+
+// Adicionar event listeners para os botões de câmera
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.btn-camera').forEach(button => {
+        button.addEventListener('click', function() {
+            const target = this.getAttribute('data-target');
+            startCamera(target);
+        });
+    });
+});
+
+// ... resto do código ...
