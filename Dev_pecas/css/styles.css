@@ -1,0 +1,132 @@
+/* Reset básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    padding: 10px;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+}
+
+form {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input[type="text"],
+input[type="date"],
+textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+}
+
+textarea {
+    resize: vertical;
+}
+
+button {
+    display: inline-block;
+    padding: 10px 14px;
+    margin: 6px 6px 6px 0;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 1em;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+#serialTable {
+    width: 100%;
+    margin-bottom: 10px;
+    border-collapse: collapse;
+}
+
+#serialTable, #serialTable th, #serialTable td {
+    border: 1px solid #ccc;
+}
+
+#serialTable th, #serialTable td {
+    padding: 8px;
+    text-align: left;
+}
+
+.camera-preview {
+    width: 100%;
+    height: auto;
+    margin-top: 6px;
+}
+
+.row {
+    margin-bottom: 10px;
+}
+
+.signature-wrap {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+#signatureCanvas {
+    display: block;
+    width: 100%;
+    height: 150px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    touch-action: none; /* evita scroll ao desenhar em touch */
+}
+
+.sig-buttons {
+    margin-top: 6px;
+}
+
+.actions {
+    margin-top: 10px;
+}
+
+footer {
+    text-align: center;
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #f0f0f0;
+    border-top: 1px solid #ccc;
+    font-size: 0.8em;
+}
+
+/* Responsivo */
+@media (max-width: 375px) {
+    h1 { font-size: 1.2em; }
+    form { padding: 15px; }
+    input[type="text"], input[type="date"] { padding: 8px; }
+    button { padding: 8px; font-size: 0.9em; }
+    #signatureCanvas { height: 100px; }
+}
+
+@media screen and (orientation: landscape) {
+    #signatureCanvas { width: 50%; height: auto; }
+}
