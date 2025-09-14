@@ -74,7 +74,6 @@ Este projeto é um sistema em **HTML, CSS e JavaScript** para gerenciamento da e
 
 ## 📌 Personalização
 
-- Substituir o logo da empresa → editar variável `proxxi_logo_base64` dentro do `script`.  
 - Ajustar limite de linhas por página no PDF → alterar constante `maxRowsPerPage` em `gerarPDF()`.  
 - Expandir tipos de código de barras aceitos → configurar `readers` no QuaggaJS.  
 

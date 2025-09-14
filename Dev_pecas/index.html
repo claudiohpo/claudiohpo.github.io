@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-<!-- Última alteração: 14/09/2025 -->
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,8 +10,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
-    <!-- se usar Quagga.js, adicione o script aqui (não estava no original) -->
-    <!-- <script src="URL_DO_QUAGGA.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
 
     <!-- CSS -->
     <link rel="stylesheet" href="css/styles.css" />
@@ -42,26 +41,43 @@
             <tbody></tbody>
         </table>
 
-        <div class="row">
-            <input type="text" id="codigoPeca" placeholder="Código da Peça" autocapitalize="characters" />
+        <div class="row input-with-camera">
+            <div class="input-container">
+                <input type="text" id="codigoPeca" placeholder="Código da Peça" autocapitalize="characters" />
+                <button type="button" class="btn-camera" data-target="codigoPeca">📷</button>
+            </div>
             <div id="camera-preview-codigoPeca" class="camera-preview"></div>
         </div>
 
-        <div class="row">
-            <input type="text" id="serialProxxi" placeholder="Número de Série" autocapitalize="characters" />
-            <div id="camera-preview-serialProxxi" class="camera-preview"></div>
+        <div class="row input-with-camera">
+            <div class="input-container">
+                <input type="text" id="serialPeca" placeholder="Número de Série" autocapitalize="characters" />
+                <button type="button" class="btn-camera" data-target="serialPeca">📷</button>
+            </div>
+            <div id="camera-preview-serialPeca" class="camera-preview"></div>
         </div>
 
-        <div class="row">
-            <input type="text" id="notaFiscal" placeholder="Nota Fiscal" autocapitalize="characters" />
+        <div class="row input-with-camera">
+            <div class="input-container">
+                <input type="text" id="notaFiscal" placeholder="Nota Fiscal" autocapitalize="characters" />
+                <button type="button" class="btn-camera" data-target="notaFiscal">📷</button>
+            </div>
             <div id="camera-preview-notaFiscal" class="camera-preview"></div>
         </div>
 
         <button type="button" id="btnAdd">Adicionar</button>
 
         <div>
-            <label for="inputCompleto"><strong>Preencha os códigos separados por vírgula, espaço ou ponto: </strong></label>
-            <textarea id="inputCompleto" placeholder="Código da Peça, Serial, Nota Fiscal" autocapitalize="characters" rows="4"></textarea>
+            <label for="inputCompleto"><strong>Preencha os códigos separados por vírgula, espaço ou ponto:
+                </strong></label>
+            <div class="input-with-camera">
+                <div class="input-container">
+                    <textarea id="inputCompleto" placeholder="Código da Peça, Serial, Nota Fiscal"
+                        autocapitalize="characters" rows="4"></textarea>
+                    <button type="button" class="btn-camera" data-target="inputCompleto">📷</button>
+                </div>
+                <div id="camera-preview-inputCompleto" class="camera-preview"></div>
+            </div>
             <button type="button" id="btnAddFull">Adicionar (vários)</button>
         </div>
 
@@ -85,4 +101,5 @@
     <!-- script principal -->
     <script src="js/main.js" defer></script>
 </body>
+
 </html>

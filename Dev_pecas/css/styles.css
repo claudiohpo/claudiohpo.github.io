@@ -118,6 +118,80 @@ footer {
     font-size: 0.8em;
 }
 
+/* Novos estilos para inputs com câmera */
+.input-with-camera {
+    position: relative;
+}
+
+.input-container {
+    display: flex;
+    align-items: center;
+}
+
+.input-container input[type="text"] {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.btn-camera {
+    padding: 10px 12px;
+    margin-left: 5px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    height: 40px; /* mesma altura do input */
+}
+
+.btn-camera:hover {
+    background-color: #218838;
+}
+
+/* Preview da câmera */
+.camera-preview {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    max-width: 500px;
+    background: #000;
+    z-index: 1000;
+    display: none;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.camera-preview video {
+    width: 100%;
+    display: block;
+}
+
+.camera-preview .close-camera {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: red;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+/* Overlay escuro quando a câmera está aberta */
+.camera-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 999;
+    display: none;
+}
+
 /* Responsivo */
 @media (max-width: 375px) {
     h1 { font-size: 1.2em; }
@@ -125,8 +199,13 @@ footer {
     input[type="text"], input[type="date"] { padding: 8px; }
     button { padding: 8px; font-size: 0.9em; }
     #signatureCanvas { height: 100px; }
+    .btn-camera { 
+        padding: 8px 10px;
+        height: 36px; /* mesma altura do input em mobile */
+    }
 }
 
 @media screen and (orientation: landscape) {
     #signatureCanvas { width: 50%; height: auto; }
 }
+
