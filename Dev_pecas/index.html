@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <!-- Última alteração: 14/09/2025 -->
-
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -46,30 +45,24 @@
 
         <div class="row">
             <input type="text" id="codigoPeca" placeholder="Código da Peça" autocapitalize="characters" />
-            <button type="button" class="btn-camera" data-target="codigoPeca">📷</button>
             <div id="camera-preview-codigoPeca" class="camera-preview"></div>
         </div>
 
-
         <div class="row">
             <input type="text" id="serialProxxi" placeholder="Número de Série" autocapitalize="characters" />
-            <button type="button" class="btn-camera" data-target="serialProxxi">📷</button>
             <div id="camera-preview-serialProxxi" class="camera-preview"></div>
         </div>
 
         <div class="row">
             <input type="text" id="notaFiscal" placeholder="Nota Fiscal" autocapitalize="characters" />
-            <button type="button" class="btn-camera" data-target="notaFiscal">📷</button>
             <div id="camera-preview-notaFiscal" class="camera-preview"></div>
         </div>
 
         <button type="button" id="btnAdd">Adicionar</button>
 
         <div>
-            <label for="inputCompleto"><strong>Preencha os códigos separados por vírgula, espaço ou ponto:
-                </strong></label>
-            <textarea id="inputCompleto" placeholder="Código da Peça, Serial, Nota Fiscal" autocapitalize="characters"
-                rows="4"></textarea>
+            <label for="inputCompleto"><strong>Preencha os códigos separados por vírgula, espaço ou ponto: </strong></label>
+            <textarea id="inputCompleto" placeholder="Código da Peça, Serial, Nota Fiscal" autocapitalize="characters" rows="4"></textarea>
             <button type="button" id="btnAddFull">Adicionar (vários)</button>
         </div>
 
@@ -93,5 +86,4 @@
     <!-- script principal -->
     <script src="js/main.js" defer></script>
 </body>
-
 </html>
