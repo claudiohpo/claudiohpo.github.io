@@ -1,5 +1,5 @@
 // js/main.js
-// Versão melhorada: carrega logo com fetch->blob->dataURL (mais confiável), fallback via Image+canvas.
+// Versão otimizada: carrega logo, preserva proporção e gera versões otimizadas (JPEG) antes de embutir no PDF.
 // Coloque este arquivo em: js/main.js
 
 (function () {
@@ -22,14 +22,14 @@
   const canvas = $("#signatureCanvas");
   const ctx = canvas.getContext("2d");
 
-  // Ajusta canvas para alta densidade de pixels (melhor qualidade na exportação)
+  // Ajusta canvas para alta densidade de pixels (melhor qualidade na tela)
   function fixCanvasDPI() {
     // canvas client size (CSS px)
     const w = canvas.clientWidth || 600;
     const h = canvas.clientHeight || 300;
     const ratio = window.devicePixelRatio || 1;
 
-    // redimensiona canvas de verdade para guardar mais pixels
+    // redimensiona canvas real (pixels)
     canvas.width = Math.round(w * ratio);
     canvas.height = Math.round(h * ratio);
 
@@ -37,7 +37,7 @@
     canvas.style.width = w + "px";
     canvas.style.height = h + "px";
 
-    // reset transform e aplicar escala para desenhar em CSS coordinate system
+    // reset transform e aplicar escala para desenhar em CSS coordenadas
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.scale(ratio, ratio);
 
@@ -258,10 +258,69 @@
   btnAdd.addEventListener("click", addRow);
   btnAddFull.addEventListener("click", addRowFull);
 
-  // ----------------- PRELOAD LOGO (com aspect ratio) -----------------
-  const logoPath = "assets/images/logosmall2.png"; // caminho relativo ao index.html
-  let PRELOADED_LOGO_DATAURL = null;
+  // ----------------- PRELOAD LOGO (com aspect ratio e otimização) -----------------
+  // Ajuste o caminho se necessário (relativo ao index.html)
+  const logoPath = "assets/images/logosmall2.png";
+  let PRELOADED_LOGO_DATAURL = null; // original dataURL do arquivo
   let PRELOADED_LOGO_ASPECT = null; // largura / altura
+  let PRELOADED_LOGO_OPTIMIZED = null; // dataURL otimizada (JPEG) pronta para o PDF
+
+  // util: converte blob -> dataURL
+  function blobToDataURL(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  // util: otimiza um dataURL (img) para JPEG com largura máxima
+  function optimizeDataUrl(dataUrl, maxWidthPx, mime = "image/jpeg", quality = 0.8) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const aspect = (img.naturalWidth || img.width) / (img.naturalHeight || img.height);
+        const targetW = Math.min(maxWidthPx, img.naturalWidth || img.width);
+        const targetH = Math.round(targetW / aspect) || 1;
+        const c = document.createElement("canvas");
+        c.width = targetW;
+        c.height = targetH;
+        const cctx = c.getContext("2d");
+        // fundo branco pra evitar problemas com JPEG
+        cctx.fillStyle = "#ffffff";
+        cctx.fillRect(0, 0, c.width, c.height);
+        cctx.drawImage(img, 0, 0, c.width, c.height);
+        try {
+          const out = c.toDataURL(mime, quality);
+          resolve({ dataUrl: out, width: targetW, height: targetH, aspect });
+        } catch (err) {
+          reject(err);
+        }
+      };
+      img.onerror = (e) => reject(e);
+      img.src = dataUrl;
+    });
+  }
+
+  // util: otimiza um canvas existente (assinatura) para JPEG com largura máxima
+  function optimizeCanvasToDataUrl(srcCanvas, maxWidthPx, mime = "image/jpeg", quality = 0.9) {
+    const sw = srcCanvas.width;
+    const sh = srcCanvas.height;
+    const aspect = sw / sh || 1;
+    const targetW = Math.min(maxWidthPx, sw);
+    const targetH = Math.round(targetW / aspect) || 1;
+    const c = document.createElement("canvas");
+    c.width = targetW;
+    c.height = targetH;
+    const cctx = c.getContext("2d");
+    // white background for JPEG
+    cctx.fillStyle = "#ffffff";
+    cctx.fillRect(0, 0, c.width, c.height);
+    // draw original canvas scaled down
+    cctx.drawImage(srcCanvas, 0, 0, c.width, c.height);
+    return c.toDataURL(mime, quality);
+  }
 
   async function preloadLogo() {
     console.info("[logo] preload start ->", logoPath);
@@ -269,51 +328,32 @@
       const res = await fetch(logoPath, { cache: "no-cache" });
       if (!res.ok) throw new Error("HTTP " + res.status);
       const blob = await res.blob();
+      // converte para dataURL
+      const dataUrl = await blobToDataURL(blob);
+      PRELOADED_LOGO_DATAURL = dataUrl;
 
-      // tenta createImageBitmap (mais confiável)
+      // pega dimensões via Image
+      const img = await new Promise((resolve, reject) => {
+        const i = new Image();
+        i.onload = () => resolve(i);
+        i.onerror = reject;
+        i.src = dataUrl;
+      });
+      PRELOADED_LOGO_ASPECT = (img.naturalWidth || img.width) / (img.naturalHeight || img.height);
+      console.info("[logo] carregada (original) aspect:", PRELOADED_LOGO_ASPECT);
+
+      // agora otimiza: reduz largura para algo razoável (ex: 600px) e gera JPEG com qualidade
       try {
-        const bitmap = await createImageBitmap(blob);
-        // obtém dataURL desenhando o bitmap em canvas
-        const c = document.createElement("canvas");
-        c.width = bitmap.width;
-        c.height = bitmap.height;
-        const cctx = c.getContext("2d");
-        cctx.drawImage(bitmap, 0, 0);
-        PRELOADED_LOGO_DATAURL = c.toDataURL("image/png");
-        PRELOADED_LOGO_ASPECT = bitmap.width / bitmap.height;
-        console.info(
-          "[logo] carregada via createImageBitmap, aspect:",
-          PRELOADED_LOGO_ASPECT
-        );
-        return;
-      } catch (bmErr) {
-        console.warn(
-          "[logo] createImageBitmap falhou, fallback para FileReader:",
-          bmErr
-        );
-        // converte blob pra dataURL (FileReader)
-        const reader = new FileReader();
-        const dataUrl = await new Promise((resolve, reject) => {
-          reader.onloadend = () => resolve(reader.result);
-          reader.onerror = reject;
-          reader.readAsDataURL(blob);
-        });
-        PRELOADED_LOGO_DATAURL = dataUrl;
-        // para pegar aspect, precisamos criar uma Image e ler naturalWidth/Height
-        const img = await new Promise((resolve, reject) => {
-          const i = new Image();
-          i.onload = () => resolve(i);
-          i.onerror = reject;
-          i.src = dataUrl;
-        });
-        PRELOADED_LOGO_ASPECT =
-          (img.naturalWidth || img.width) / (img.naturalHeight || img.height);
-        console.info(
-          "[logo] carregada via FileReader fallback, aspect:",
-          PRELOADED_LOGO_ASPECT
-        );
-        return;
+        const maxWidthPx = 600; // ajuste aqui se quiser mais/menos pixels
+        const optimized = await optimizeDataUrl(PRELOADED_LOGO_DATAURL, maxWidthPx, "image/jpeg", 0.8);
+        PRELOADED_LOGO_OPTIMIZED = optimized.dataUrl;
+        console.info("[logo] otimizada ->", optimized.width + "x" + optimized.height, "chars:", PRELOADED_LOGO_OPTIMIZED.length);
+      } catch (optErr) {
+        console.warn("[logo] otimização falhou, usando original:", optErr);
+        PRELOADED_LOGO_OPTIMIZED = PRELOADED_LOGO_DATAURL;
       }
+
+      return;
     } catch (err) {
       console.warn("[logo] fetch falhou:", err);
     }
@@ -330,13 +370,7 @@
             const cctx = c.getContext("2d");
             cctx.drawImage(img, 0, 0);
             PRELOADED_LOGO_DATAURL = c.toDataURL("image/png");
-            PRELOADED_LOGO_ASPECT =
-              (img.naturalWidth || img.width) /
-              (img.naturalHeight || img.height);
-            console.info(
-              "[logo] carregada via <img> fallback, aspect:",
-              PRELOADED_LOGO_ASPECT
-            );
+            PRELOADED_LOGO_ASPECT = (img.naturalWidth || img.width) / (img.naturalHeight || img.height);
             resolve();
           } catch (errCanvas) {
             reject(errCanvas);
@@ -345,96 +379,70 @@
         img.onerror = (e) => reject(new Error("Imagem fallback erro: " + e));
         img.src = logoPath + "?cb=" + Date.now();
       });
+
+      // otimiza
+      try {
+        const maxWidthPx = 600;
+        const optimized = await optimizeDataUrl(PRELOADED_LOGO_DATAURL, maxWidthPx, "image/jpeg", 0.8);
+        PRELOADED_LOGO_OPTIMIZED = optimized.dataUrl;
+        console.info("[logo] fallback otimizada ->", optimized.width + "x" + optimized.height);
+      } catch (optErr) {
+        PRELOADED_LOGO_OPTIMIZED = PRELOADED_LOGO_DATAURL;
+      }
+
       return;
     } catch (err2) {
       console.warn("[logo] fallback <img> falhou:", err2);
     }
 
-    console.warn(
-      "[logo] não foi possível carregar o logo — PDF será gerado sem logo."
-    );
+    console.warn("[logo] não foi possível carregar o logo — PDF será gerado sem logo.");
   }
 
   preloadLogo().catch((e) => console.error("[logo] preload erro:", e));
 
-  // Converte Blob -> dataURL
-  function blobToDataURL(blob) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-  }
-
-  // Tenta obter dataURL via fetch (preferível quando servido por HTTP(S))
-  async function fetchImageAsDataURL(url) {
+  // Função que tenta múltiplas estratégias (mantida por compatibilidade)
+  async function getLogoDataURL(url) {
+    // tenta usar já otimizado se disponível
+    if (PRELOADED_LOGO_OPTIMIZED) return PRELOADED_LOGO_OPTIMIZED;
+    // senão tenta carregar agora (sincrono)
     try {
       const res = await fetch(url, { cache: "no-cache" });
-      if (!res.ok) throw new Error("fetch error: " + res.status);
+      if (!res.ok) throw new Error("HTTP " + res.status);
       const blob = await res.blob();
       const dataUrl = await blobToDataURL(blob);
-      return dataUrl;
+      // otimiza
+      const maxWidthPx = 600;
+      const opt = await optimizeDataUrl(dataUrl, maxWidthPx, "image/jpeg", 0.8);
+      return opt.dataUrl;
     } catch (err) {
-      // rethrow para o fallback tratar
-      throw err;
+      console.warn("getLogoDataURL fetch falhou:", err);
     }
-  }
 
-  // Fallback: cria Image e desenha em canvas (pode taintar se CORS bloquear)
-  function imageToDataUrlFallback(url) {
-    return new Promise((resolve, reject) => {
+    // fallback image->canvas
+    try {
       const img = new Image();
-      // não setar crossOrigin aqui se servidor não permitir; primeiro tenta sem
-      img.onload = () => {
-        const c = document.createElement("canvas");
-        c.width = img.naturalWidth;
-        c.height = img.naturalHeight;
-        const cctx = c.getContext("2d");
-        try {
-          cctx.drawImage(img, 0, 0);
-          const dataURL = c.toDataURL("image/png");
-          resolve(dataURL);
-        } catch (err) {
-          reject(err);
-        }
-      };
-      img.onerror = (e) => reject(new Error("image fallback error: " + e));
       img.src = url;
-    });
-  }
-
-  // Função principal que tenta múltiplas estratégias e retorna dataURL ou null
-  async function getLogoDataURL(url) {
-    // 1) Tenta fetch -> blob -> dataURL
-    try {
-      const dataUrl = await fetchImageAsDataURL(url);
-      console.info("Logo carregada via fetch:", url);
-      return dataUrl;
-    } catch (err) {
-      console.warn("fetch falhou para logo:", url, err);
+      await new Promise((res, rej) => {
+        img.onload = res;
+        img.onerror = rej;
+      });
+      const c = document.createElement("canvas");
+      c.width = img.naturalWidth || img.width;
+      c.height = img.naturalHeight || img.height;
+      c.getContext("2d").drawImage(img, 0, 0);
+      const dataUrl = c.toDataURL("image/png");
+      const opt = await optimizeDataUrl(dataUrl, 600, "image/jpeg", 0.8);
+      return opt.dataUrl;
+    } catch (err2) {
+      console.warn("getLogoDataURL fallback image falhou:", err2);
     }
 
-    // 2) Tenta fallback por Image + canvas (pode taintar em ambientes com CORS)
-    try {
-      const dataUrl = await imageToDataUrlFallback(url);
-      console.info("Logo carregada via Image fallback:", url);
-      return dataUrl;
-    } catch (err) {
-      console.warn("fallback por Image falhou para logo:", url, err);
-    }
-
-    // 3) Sem logo
-    console.warn(
-      "Não foi possível carregar o logo. O PDF será gerado sem logo."
-    );
     return null;
   }
 
   // Extrai MIME (ex: 'PNG' ou 'JPEG') a partir de dataURL
   function getImageFormatFromDataUrl(dataUrl) {
     if (!dataUrl || typeof dataUrl !== "string") return "PNG";
-    // data:image/png;base64,...
     const m = dataUrl.match(/^data:image\/(png|jpeg|jpg);/i);
     if (!m) return "PNG";
     const mime = m[1].toLowerCase();
@@ -445,13 +453,27 @@
   // ---------- GERA PDF ----------
   btnGeneratePdf.addEventListener("click", async function gerarPDF() {
     try {
-      // Tenta obter logoDataUrl (pode falhar por CORS/file://)
-      let logoDataUrl = null;
-      try {
-        logoDataUrl = await getLogoDataURL(logoPath);
-      } catch (err) {
-        console.warn("Erro ao obter logoDataUrl:", err);
-        logoDataUrl = null;
+      // usa a versão otimizada pronta (se houver), senão tenta carregar/otimizar agora
+      let logoDataUrl = PRELOADED_LOGO_OPTIMIZED || null;
+      if (!logoDataUrl && PRELOADED_LOGO_DATAURL) {
+        // tenta otimizar a original (segurança)
+        try {
+          const opt = await optimizeDataUrl(PRELOADED_LOGO_DATAURL, 600, "image/jpeg", 0.8);
+          logoDataUrl = opt.dataUrl;
+          PRELOADED_LOGO_OPTIMIZED = logoDataUrl;
+        } catch (e) {
+          console.warn("Erro ao otimizar PRELOADED_LOGO_DATAURL no momento do PDF:", e);
+          logoDataUrl = PRELOADED_LOGO_DATAURL;
+        }
+      }
+      if (!logoDataUrl) {
+        // última tentativa síncrona
+        try {
+          logoDataUrl = await getLogoDataURL(logoPath);
+        } catch (e) {
+          console.warn("Tentativa final de carregar logo falhou:", e);
+          logoDataUrl = null;
+        }
       }
 
       // usa jsPDF
@@ -506,34 +528,22 @@
         ).padStart(2, "0")}-${now.getFullYear()}`;
       }
 
-      // função para adicionar cabeçalho e rodapé
+      // função para adicionar cabeçalho e rodapé (usa PRELOADED_LOGO_OPTIMIZED se disponível)
       function addHeaderAndFooter(pageNumber) {
         // Define largura máxima do logo no PDF (em mm).
-        // Ajuste conforme desejar. Ex.: 40 mm é razoável, com sua aspect ~5.51 o height ficará ~7.26 mm.
-        const logoMaxWidthMm = 40; // largura máxima permitida (mm)
-        let logoWidth = 0;
-        let logoHeight = 0;
-
-        if (PRELOADED_LOGO_DATAURL && PRELOADED_LOGO_ASPECT) {
-          // PRELOADED_LOGO_ASPECT = naturalWidth / naturalHeight
-          logoWidth = logoMaxWidthMm;
-          logoHeight = logoWidth / PRELOADED_LOGO_ASPECT;
-          // se preferir limitar por altura, pode fazer:
-          // const logoMaxHeightMm = 12;
-          // logoHeight = Math.min(logoWidth / PRELOADED_LOGO_ASPECT, logoMaxHeightMm);
+        const logoMaxWidthMm = 40; // largura máxima em mm
+        if (logoDataUrl) {
           try {
-            const fmt = getImageFormatFromDataUrl(PRELOADED_LOGO_DATAURL); // 'PNG' ou 'JPEG'
+            const fmt = getImageFormatFromDataUrl(logoDataUrl); // 'JPEG' ou 'PNG'
+            // converter mm->posição correta: jsPDF usa mm, passamos width/height em mm
+            // preservando proporção: calculamos height a partir da proporção original PRELOADED_LOGO_ASPECT
+            let logoWidth = logoMaxWidthMm;
+            let logoHeight = logoWidth / (PRELOADED_LOGO_ASPECT || 1);
             // posicione no canto superior direito (x, y)
-            const x = 210 - 15 - logoWidth; // exemplo para A4 (210mm) com margin 15mm
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const x = pageWidth - 15 - logoWidth; // margem 15mm
             const y = 8;
-            doc.addImage(
-              PRELOADED_LOGO_DATAURL,
-              fmt,
-              x,
-              y,
-              logoWidth,
-              logoHeight
-            );
+            doc.addImage(logoDataUrl, fmt, x, y, logoWidth, logoHeight);
           } catch (e) {
             console.warn("Erro ao adicionar logo no PDF:", e);
           }
@@ -541,9 +551,7 @@
 
         doc.setFontSize(20);
         doc.setFont(undefined, "bold");
-        doc.text("Formulário de Entrega de Peças", 105, 30, {
-          align: "center",
-        });
+        doc.text("Formulário de Entrega de Peças", 105, 30, { align: "center" });
 
         doc.setFontSize(12);
         doc.setFont(undefined, "bold");
@@ -573,7 +581,7 @@
 
       // se não houver linhas, ainda queremos um cabeçalho
       if (tableData.length === 0) {
-        addHeaderAndFooter(currentPage, logoDataUrl);
+        addHeaderAndFooter(currentPage);
       }
 
       for (let i = 0; i < tableData.length; i += maxRowsPerPage) {
@@ -581,7 +589,7 @@
           doc.addPage();
           currentPage++;
         }
-        addHeaderAndFooter(currentPage, logoDataUrl);
+        addHeaderAndFooter(currentPage);
         doc.autoTable({
           head: [tableColumnNames],
           body: tableData.slice(i, i + maxRowsPerPage),
@@ -602,13 +610,16 @@
         finalY = 80;
       }
 
-      // assinatura: pega dataURL do canvas (assinatura)
+      // assinatura: pega dataURL do canvas (assinatura) e otimiza (reduz resolução e comprime)
       try {
-        // usa canvas "real" (que já está em alta resolução)
-        const assinaturaDataUrl = canvas.toDataURL("image/png");
-        const fmtSig = getImageFormatFromDataUrl(assinaturaDataUrl);
-        // tamanho adequado em mm (aprox)
-        doc.addImage(assinaturaDataUrl, fmtSig, 15, finalY, 60, 30);
+        // usa otimização para evitar embutir milhões de pixels
+        // escolhe largura em px para assinatura (ex: 600px) — diminuirá peso drasticamente
+        const assinaturaOptimized = optimizeCanvasToDataUrl(canvas, 600, "image/jpeg", 0.9);
+        const fmtSig = getImageFormatFromDataUrl(assinaturaOptimized);
+        // define tamanho em mm (aprox)
+        const sigWidthMm = 60; // ajuste conforme prefere (em mm)
+        const sigHeightMm = 30; // ajuste conforme prefere (em mm)
+        doc.addImage(assinaturaOptimized, fmtSig, 15, finalY, sigWidthMm, sigHeightMm);
         doc.line(15, finalY + 35, 100, finalY + 35);
         doc.text(formDataObject.nomeRecebedor || "", 20, finalY + 39);
       } catch (e) {
@@ -616,9 +627,7 @@
       }
 
       // salvar
-      const fileName = `form_entrega_pecas_${
-        dataFormatadaPDF || "sem_data"
-      }.pdf`;
+      const fileName = `form_entrega_pecas_${dataFormatadaPDF || "sem_data"}.pdf`;
       doc.save(fileName);
 
       // dica de sucesso
@@ -631,8 +640,6 @@
 
   // Se quiser, pode adicionar funções que mostram a câmera e usam Quagga.
   window.iniciarLeituraCodigo = function (idInput) {
-    console.warn(
-      "iniciarLeituraCodigo(): implemente Quagga ou biblioteca de leitura de código se desejar."
-    );
+    console.warn("iniciarLeituraCodigo(): implemente Quagga ou biblioteca de leitura de código se desejar.");
   };
 })();
