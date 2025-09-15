@@ -155,8 +155,6 @@ td[data-label="Ações"] button {
   align-items: center;
 }
 
-
-
 .sig-buttons button {
   width: auto;
 }
@@ -180,7 +178,7 @@ footer {
   color: #555;
 }
 
-/* ===== RESPONSIVIDADE (AJUSTADO: mantém linhas horizontais e adiciona scroll horizontal) ===== */
+/* ===== RESPONSIVIDADE ===== */
 @media (max-width: 768px) {
   body {
     padding: 0.5rem;
@@ -190,67 +188,56 @@ footer {
     font-size: 1.5rem;
   }
 
-  /* mantém a tabela como tabela, mas permite scroll horizontal quando necessário */
-  #serialTable {
+  table, thead, tbody, th, td, tr {
+    display: block;
     width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed; /* tenta distribuir colunas com largura fixa */
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    display: table; /* garante comportamento tabular */
   }
 
-  /* garante que o cabeçalho continue visível como tabela */
-  #serialTable thead {
-    display: table-header-group;
+  thead {
+    display: none;
   }
 
-  /* linhas e células continuam em modo tabela (não empilhadas) */
-  #serialTable tr {
-    display: table-row;
-  }
-
-  #serialTable th,
-  #serialTable td {
-    display: table-cell;
+  tr {
+    margin-bottom: 1rem;
+    background: #fff;
+    border-radius: 8px;
     padding: 0.5rem;
-    font-size: 0.95rem;
-    vertical-align: middle;
-    text-align: left; /* alinha à esquerda para leitura em mobile */
-    white-space: nowrap; /* evita quebra indesejada, ativa overflow/ellipsis */
-    overflow: hidden;
-    text-overflow: ellipsis;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
   }
 
-  /* se quiser que uma coluna (ex.: código) quebre antes, remova nowrap ou use word-break */
-  #serialTable td.breakable {
-    white-space: normal;
-    word-break: break-word;
+  td {
+    text-align: right;
+    padding-left: 50%;
+    position: relative;
   }
 
-  /* Ações: mantém botões empilhados, mas não quebra a linha */
+  td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 0;
+    width: 50%;
+    padding-left: 0.5rem;
+    font-weight: bold;
+    text-align: left;
+  }
+
   td[data-label="Ações"] {
-    display: flex;
     flex-direction: column;
-    gap: 0.35rem;
-    justify-content: center;
-    align-items: flex-end; /* botão à direita da célula */
-    min-width: 90px; /* evita que a coluna suma em telas estreitas */
+    align-items: stretch;
   }
 
   td[data-label="Ações"] button {
-    width: 92%;
-    padding: 0.45rem;
-    font-size: 0.85rem;
+    width: 100%;
   }
+}
 
-  /* reduz padding da assinatura para caber melhor em telas pequenas */
+/* quando tela pequena, botões ficam empilhados e ocupam largura completa */
+@media (max-width: 540px) {
   .signature-wrap {
-    min-height: 300px;
+    min-height: 300px; /* mantém bom espaço em celulares */
     padding: 0.5rem;
   }
 
-  /* botões de assinatura empilhados no mobile (mantém a área do canvas) */
   .sig-buttons {
     flex-direction: column;
     align-items: stretch;
