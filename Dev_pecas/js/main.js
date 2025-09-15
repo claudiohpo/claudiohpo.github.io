@@ -22,7 +22,9 @@
 
   const canvas = $("#signatureCanvas");
   if (!canvas) {
-    console.error("Canvas de assinatura não encontrado (id='signatureCanvas').");
+    console.error(
+      "Canvas de assinatura não encontrado (id='signatureCanvas')."
+    );
     return;
   }
   const ctx = canvas.getContext("2d");
@@ -71,7 +73,10 @@
           ctx.drawImage(img, 0, 0, canvas.clientWidth, canvas.clientHeight);
         } catch (e) {
           // draw may fail if dataURL tainted by CORS
-          console.warn("Não foi possível restaurar desenho do canvas (CORS?)", e);
+          console.warn(
+            "Não foi possível restaurar desenho do canvas (CORS?)",
+            e
+          );
         }
       };
       img.src = prevData;
@@ -139,26 +144,36 @@
   });
 
   // Touch events (passive false para permitir preventDefault)
-  canvas.addEventListener("touchstart", (e) => {
-    drawing = true;
-    const p = getPos(e);
-    ctx.beginPath();
-    ctx.moveTo(p.x, p.y);
-    e.preventDefault();
-  }, { passive: false });
+  canvas.addEventListener(
+    "touchstart",
+    (e) => {
+      drawing = true;
+      const p = getPos(e);
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+      e.preventDefault();
+    },
+    { passive: false }
+  );
 
-  canvas.addEventListener("touchmove", (e) => {
-    if (!drawing) return;
-    const p = getPos(e);
-    ctx.lineTo(p.x, p.y);
-    ctx.stroke();
-    e.preventDefault();
-  }, { passive: false });
+  canvas.addEventListener(
+    "touchmove",
+    (e) => {
+      if (!drawing) return;
+      const p = getPos(e);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+      e.preventDefault();
+    },
+    { passive: false }
+  );
 
   ["touchend", "touchcancel"].forEach((ev) =>
     canvas.addEventListener(ev, () => {
       drawing = false;
-      try { ctx.closePath(); } catch (e) {}
+      try {
+        ctx.closePath();
+      } catch (e) {}
     })
   );
 
@@ -206,8 +221,12 @@
     tdNota.setAttribute("data-label", HEADER_NOTA);
     tdActions.setAttribute("data-label", HEADER_ACOES);
 
-    const btnEdit = makeActionButton("Editar", "edit-btn", () => editarLinha(tr));
-    const btnDelete = makeActionButton("Excluir", "delete-btn", () => excluirLinha(tr));
+    const btnEdit = makeActionButton("Editar", "edit-btn", () =>
+      editarLinha(tr)
+    );
+    const btnDelete = makeActionButton("Excluir", "delete-btn", () =>
+      excluirLinha(tr)
+    );
 
     tdActions.appendChild(btnEdit);
     tdActions.appendChild(btnDelete);
@@ -233,7 +252,9 @@
       .filter(Boolean);
 
     if (valores.length % 3 !== 0) {
-      alert("Por favor, insira valores em múltiplos de 3: Código, Serial, Nota Fiscal.");
+      alert(
+        "Por favor, insira valores em múltiplos de 3: Código, Serial, Nota Fiscal."
+      );
       return;
     }
 
@@ -253,8 +274,12 @@
       tdNota.setAttribute("data-label", HEADER_NOTA);
       tdActions.setAttribute("data-label", HEADER_ACOES);
 
-      const btnEdit = makeActionButton("Editar", "edit-btn", () => editarLinha(tr));
-      const btnDelete = makeActionButton("Excluir", "delete-btn", () => excluirLinha(tr));
+      const btnEdit = makeActionButton("Editar", "edit-btn", () =>
+        editarLinha(tr)
+      );
+      const btnDelete = makeActionButton("Excluir", "delete-btn", () =>
+        excluirLinha(tr)
+      );
 
       tdActions.appendChild(btnEdit);
       tdActions.appendChild(btnDelete);
@@ -280,7 +305,9 @@
     }
   }
 
-  function excluirLinha(tr) { tr.remove(); }
+  function excluirLinha(tr) {
+    tr.remove();
+  }
 
   btnAdd.addEventListener("click", addRow);
   btnAddFull.addEventListener("click", addRowFull);
@@ -300,11 +327,17 @@
     });
   }
 
-  async function optimizeDataUrl(dataUrl, maxWidthPx, mime = "image/jpeg", quality = 0.8) {
+  async function optimizeDataUrl(
+    dataUrl,
+    maxWidthPx,
+    mime = "image/jpeg",
+    quality = 0.8
+  ) {
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => {
-        const aspect = (img.naturalWidth || img.width) / (img.naturalHeight || img.height);
+        const aspect =
+          (img.naturalWidth || img.width) / (img.naturalHeight || img.height);
         const targetW = Math.min(maxWidthPx, img.naturalWidth || img.width);
         const targetH = Math.round(targetW / aspect) || 1;
         const c = document.createElement("canvas");
@@ -326,7 +359,12 @@
     });
   }
 
-  function optimizeCanvasToDataUrl(srcCanvas, maxWidthPx, mime = "image/jpeg", quality = 0.9) {
+  function optimizeCanvasToDataUrl(
+    srcCanvas,
+    maxWidthPx,
+    mime = "image/jpeg",
+    quality = 0.9
+  ) {
     const sw = srcCanvas.width;
     const sh = srcCanvas.height;
     const aspect = sw / sh || 1;
@@ -356,11 +394,17 @@
         i.onerror = reject;
         i.src = dataUrl;
       });
-      PRELOADED_LOGO_ASPECT = (img.naturalWidth || img.width) / (img.naturalHeight || img.height);
+      PRELOADED_LOGO_ASPECT =
+        (img.naturalWidth || img.width) / (img.naturalHeight || img.height);
 
       try {
         const maxWidthPx = 600;
-        const optimized = await optimizeDataUrl(PRELOADED_LOGO_DATAURL, maxWidthPx, "image/jpeg", 0.8);
+        const optimized = await optimizeDataUrl(
+          PRELOADED_LOGO_DATAURL,
+          maxWidthPx,
+          "image/jpeg",
+          0.8
+        );
         PRELOADED_LOGO_OPTIMIZED = optimized.dataUrl;
       } catch (optErr) {
         PRELOADED_LOGO_OPTIMIZED = PRELOADED_LOGO_DATAURL;
@@ -375,10 +419,16 @@
 
   btnGeneratePdf.addEventListener("click", async function gerarPDF() {
     try {
-      let logoDataUrl = PRELOADED_LOGO_OPTIMIZED || PRELOADED_LOGO_DATAURL || null;
+      let logoDataUrl =
+        PRELOADED_LOGO_OPTIMIZED || PRELOADED_LOGO_DATAURL || null;
       if (!logoDataUrl && PRELOADED_LOGO_DATAURL) {
         try {
-          const opt = await optimizeDataUrl(PRELOADED_LOGO_DATAURL, 600, "image/jpeg", 0.8);
+          const opt = await optimizeDataUrl(
+            PRELOADED_LOGO_DATAURL,
+            600,
+            "image/jpeg",
+            0.8
+          );
           logoDataUrl = opt.dataUrl;
           PRELOADED_LOGO_OPTIMIZED = logoDataUrl;
         } catch (e) {
@@ -386,7 +436,11 @@
         }
       }
       if (!logoDataUrl) {
-        try { logoDataUrl = await getLogoDataURL(logoPath); } catch (e) { logoDataUrl = null; }
+        try {
+          logoDataUrl = await getLogoDataURL(logoPath);
+        } catch (e) {
+          logoDataUrl = null;
+        }
       }
 
       const { jsPDF } = window.jspdf;
@@ -420,13 +474,23 @@
         if (parts.length === 3) {
           dataFormatadaPDF = `${parts[2]}-${parts[1]}-${parts[0]}`;
           const dt = new Date(parts[0], parts[1] - 1, parts[2]);
-          dataFormatada = dt.toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" });
+          dataFormatada = dt.toLocaleDateString("pt-BR", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          });
         }
       }
       if (!dataFormatada) {
         const now = new Date();
-        dataFormatada = now.toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" });
-        dataFormatadaPDF = `${String(now.getDate()).padStart(2, "0")}-${String(now.getMonth() + 1).padStart(2, "0")}-${now.getFullYear()}`;
+        dataFormatada = now.toLocaleDateString("pt-BR", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        });
+        dataFormatadaPDF = `${String(now.getDate()).padStart(2, "0")}-${String(
+          now.getMonth() + 1
+        ).padStart(2, "0")}-${now.getFullYear()}`;
       }
 
       function addHeaderAndFooter(pageNumber) {
@@ -447,7 +511,9 @@
 
         doc.setFontSize(20);
         doc.setFont(undefined, "bold");
-        doc.text("Formulário de Entrega de Peças", 105, 30, { align: "center" });
+        doc.text("Formulário de Entrega de Peças", 105, 30, {
+          align: "center",
+        });
 
         doc.setFontSize(12);
         doc.setFont(undefined, "bold");
@@ -490,26 +556,49 @@
       }
 
       let finalY = 0;
-      if (doc.autoTable && doc.autoTable.previous && typeof doc.autoTable.previous.finalY === "number") {
+      if (
+        doc.autoTable &&
+        doc.autoTable.previous &&
+        typeof doc.autoTable.previous.finalY === "number"
+      ) {
         finalY = doc.autoTable.previous.finalY + 10;
       } else {
         finalY = 80;
       }
 
-      // assinatura: otimizar canvas antes de embutir
+      // assinatura: exporta o canvas em tamanho real
       try {
-        const assinaturaOptimized = optimizeCanvasToDataUrl(canvas, 600, "image/jpeg", 0.9);
-        const fmtSig = getImageFormatFromDataUrl(assinaturaOptimized);
+        // usa o próprio canvas.toDataURL com fundo branco
+        const exportCanvas = document.createElement("canvas");
+        exportCanvas.width = canvas.width;
+        exportCanvas.height = canvas.height;
+        const exportCtx = exportCanvas.getContext("2d");
+        exportCtx.fillStyle = "#ffffff";
+        exportCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+        exportCtx.drawImage(canvas, 0, 0);
+
+        const assinaturaDataUrl = exportCanvas.toDataURL("image/png");
+
         const sigWidthMm = 60;
         const sigHeightMm = 30;
-        doc.addImage(assinaturaOptimized, fmtSig, 15, finalY, sigWidthMm, sigHeightMm);
+        doc.addImage(
+          assinaturaDataUrl,
+          "PNG",
+          15,
+          finalY,
+          sigWidthMm,
+          sigHeightMm
+        );
+
         doc.line(15, finalY + 35, 100, finalY + 35);
         doc.text(formDataObject.nomeRecebedor || "", 20, finalY + 39);
       } catch (e) {
         console.warn("Erro ao adicionar assinatura no PDF:", e);
       }
 
-      const fileName = `form_entrega_pecas_${dataFormatadaPDF || "sem_data"}.pdf`;
+      const fileName = `form_entrega_pecas_${
+        dataFormatadaPDF || "sem_data"
+      }.pdf`;
       doc.save(fileName);
       console.info("PDF gerado:", fileName);
     } catch (err) {
@@ -541,30 +630,43 @@
     cameraPreview.style.display = "block";
 
     if (!window.Quagga) {
-      alert("Quagga não está carregado. Importe a biblioteca Quagga.js para usar a câmera.");
+      alert(
+        "Quagga não está carregado. Importe a biblioteca Quagga.js para usar a câmera."
+      );
       stopCamera();
       return;
     }
 
-    Quagga.init({
-      inputStream: {
-        name: "Live",
-        type: "LiveStream",
-        target: cameraPreview.querySelector('video'),
-        constraints: { width: 640, height: 480, facingMode: "environment" }
+    Quagga.init(
+      {
+        inputStream: {
+          name: "Live",
+          type: "LiveStream",
+          target: cameraPreview.querySelector("video"),
+          constraints: { width: 640, height: 480, facingMode: "environment" },
+        },
+        decoder: {
+          readers: [
+            "code_128_reader",
+            "ean_reader",
+            "ean_8_reader",
+            "code_39_reader",
+            "upc_reader",
+          ],
+        },
       },
-      decoder: { readers: ["code_128_reader", "ean_reader", "ean_8_reader", "code_39_reader", "upc_reader"] }
-    }, function(err) {
-      if (err) {
-        console.error("Erro ao inicializar Quagga:", err);
-        alert("Não foi possível acessar a câmera.");
-        stopCamera();
-        return;
+      function (err) {
+        if (err) {
+          console.error("Erro ao inicializar Quagga:", err);
+          alert("Não foi possível acessar a câmera.");
+          stopCamera();
+          return;
+        }
+        Quagga.start();
       }
-      Quagga.start();
-    });
+    );
 
-    Quagga.onDetected(function(result) {
+    Quagga.onDetected(function (result) {
       const code = result && result.codeResult && result.codeResult.code;
       if (code) {
         const el = document.getElementById(targetId);
@@ -575,25 +677,30 @@
   }
 
   function stopCamera() {
-    try { if (window.Quagga && typeof Quagga.stop === "function") Quagga.stop(); } catch (e) {}
+    try {
+      if (window.Quagga && typeof Quagga.stop === "function") Quagga.stop();
+    } catch (e) {}
     cameraPreview.style.display = "none";
     cameraActive = false;
     currentTarget = null;
   }
 
-  cameraPreview.querySelector('.close-camera').addEventListener('click', stopCamera);
+  cameraPreview
+    .querySelector(".close-camera")
+    .addEventListener("click", stopCamera);
 
   // se houver botões com .btn-camera, iniciam a leitura (mantive para compatibilidade)
-  document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.btn-camera').forEach(button => {
-      button.addEventListener('click', function() {
-        const target = this.getAttribute('data-target');
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".btn-camera").forEach((button) => {
+      button.addEventListener("click", function () {
+        const target = this.getAttribute("data-target");
         if (target) startCamera(target);
       });
     });
   });
 
   // expose helper to global if desired
-  window.iniciarLeituraCodigo = function (idInput) { startCamera(idInput); };
-
+  window.iniciarLeituraCodigo = function (idInput) {
+    startCamera(idInput);
+  };
 })();
