@@ -22,14 +22,20 @@
   }
   const ctx = canvas.getContext("2d");
 
+  // obtém contêiner pontilhado (.signature-wrap) — usado para calcular tamanho real
+  const sigWrap = canvas.closest(".signature-wrap") || canvas.parentElement;
+
   // ---------- MANIPULAÇÃO DO CANVAS (DPI / REDIMENSIONAMENTO PRESERVANDO CONTEÚDO) ----------
   function fixCanvasDPI() {
-    // CSS size (px)
-    const w = canvas.clientWidth || 600;
-    const h = canvas.clientHeight || 300;
+    if (!canvas || !ctx || !sigWrap) return;
+
+    // mede o tamanho disponível no contêiner (CSS pixels)
+    const rect = sigWrap.getBoundingClientRect();
+    const w = Math.max(100, Math.floor(rect.width));
+    const h = Math.max(80, Math.floor(rect.height));
     const ratio = Math.max(window.devicePixelRatio || 1, 1);
 
-    // preserve current image
+    // tenta salvar o conteúdo atual (se possível)
     let prevData = null;
     try {
       prevData = canvas.toDataURL();
@@ -37,58 +43,76 @@
       prevData = null;
     }
 
-    // set real pixel size
+    // define tamanho em pixels reais (device pixels)
     canvas.width = Math.round(w * ratio);
     canvas.height = Math.round(h * ratio);
 
-    // keep CSS size
+    // define tamanho CSS para manter layout (em px)
     canvas.style.width = w + "px";
     canvas.style.height = h + "px";
 
-    // reset transform and scale for drawing in CSS coordinate space
+    // reset transform e aplicar escala para desenhar em coordenadas CSS
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.scale(ratio, ratio);
 
-    // drawing defaults (line width measured in CSS px)
+    // definições de desenho (em CSS px)
     ctx.lineWidth = 2;
     ctx.lineCap = "round";
     ctx.strokeStyle = "#000";
 
-    // restore previous drawing if existed
+    // restaurar desenho anterior, escalando para as dimensões CSS atuais
     if (prevData) {
       const img = new Image();
       img.onload = () => {
-        // clear full device pixel canvas then draw scaled to CSS size
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        // draw image using device pixels scaled back to CSS dims (ctx currently reset)
-        // we need to scale back to ratio so drawImage coordinates use CSS px
-        ctx.scale(ratio, ratio);
         try {
-          ctx.drawImage(img, 0, 0, canvas.clientWidth, canvas.clientHeight);
-        } catch (e) {
-          // draw may fail if dataURL tainted by CORS
-          console.warn("Não foi possível restaurar desenho do canvas (CORS?)", e);
+          // desenha a imagem no canvas escalada para as dimensões CSS (w x h)
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.scale(ratio, ratio);
+          ctx.drawImage(img, 0, 0, w, h);
+        } catch (err) {
+          // pode falhar por CORS; apenas logamos
+          console.warn("Não foi possível restaurar desenho do canvas (possível CORS):", err);
         }
       };
       img.src = prevData;
+    } else {
+      // sem desenho anterior: limpa
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.scale(ratio, ratio);
     }
   }
 
-  // init canvas size on load (if script deferred, DOM should exist)
-  window.addEventListener("load", () => {
-    fixCanvasDPI();
-  });
+  // chama no load (assegura que a árvore DOM e estilos já estejam aplicados)
+  window.addEventListener("load", fixCanvasDPI);
 
-  // debounce resize
+  // listeners de resize / orientationchange (debounced)
   let _resizeSigTimeout = null;
   window.addEventListener("resize", () => {
     clearTimeout(_resizeSigTimeout);
     _resizeSigTimeout = setTimeout(() => {
-      // preserve as image and restore inside fixCanvasDPI
       fixCanvasDPI();
-    }, 150);
+    }, 120);
   });
+
+  window.addEventListener("orientationchange", () => {
+    // pequeno delay para o layout se estabilizar após rotação
+    setTimeout(fixCanvasDPI, 140);
+  });
+
+  // ResizeObserver para detectar mudanças no .signature-wrap (adicionar/remover linhas, teclado, etc.)
+  if (window.ResizeObserver && sigWrap) {
+    try {
+      const ro = new ResizeObserver(() => {
+        fixCanvasDPI();
+      });
+      ro.observe(sigWrap);
+    } catch (e) {
+      // se algo falhar, fallback para resize/orientationchange já cobre
+      console.warn("ResizeObserver não pôde ser inicializado:", e);
+    }
+  }
 
   // ---------- DESENHO (mouse + touch) ----------
   let drawing = false;
@@ -108,7 +132,7 @@
     }
   }
 
-  // Mouse events
+  // eventos do mouse
   canvas.addEventListener("mousedown", (e) => {
     drawing = true;
     const p = getPos(e);
@@ -135,7 +159,7 @@
     });
   });
 
-  // Touch events (passive false to allow preventDefault)
+  // eventos touch (passive: false para permitir preventDefault)
   canvas.addEventListener(
     "touchstart",
     (e) => {
@@ -171,25 +195,22 @@
 
   // Limpar assinatura (limpa corretamente nos pixels reais)
   function limparAssinatura() {
-    // reset transform para limpar full device pixels
+    // reset transform para limpar no espaço de pixels reais
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // reapply scale
+    // re-aplica escala para continuar desenhando normalmente
     const ratio = Math.max(window.devicePixelRatio || 1, 1);
     ctx.scale(ratio, ratio);
-
-    // opcional: limpar visual CSS (não necessário se canvas já limpo)
   }
 
   btnClearSig.addEventListener("click", limparAssinatura);
 
   // ---------- MANIPULAÇÃO DA TABELA (linhas dinâmicas) ----------
-  // cabeçalhos esperados (para data-label)
   const HEADER_CODIGO = "Código";
   const HEADER_SERIAL = "Número de Série";
   const HEADER_NOTA = "Nota Fiscal";
-  const HEADER_ACOES = "Ações"; // certifique-se de que o CSS usa "Ações" exatamente
+  const HEADER_ACOES = "Ações";
 
   function makeActionButton(text, cls, onClick) {
     const b = document.createElement("button");
@@ -222,11 +243,9 @@
     tdNota.setAttribute("data-label", HEADER_NOTA);
     tdActions.setAttribute("data-label", HEADER_ACOES);
 
-    // botões com classes para estilização (edit amarelo, delete vermelho)
     const btnEdit = makeActionButton("Editar", "edit-btn", () => editarLinha(tr));
     const btnDelete = makeActionButton("Excluir", "delete-btn", () => excluirLinha(tr));
 
-    // empilha verticalmente no container da célula (CSS cuidará do resto)
     tdActions.appendChild(btnEdit);
     tdActions.appendChild(btnDelete);
 
@@ -241,22 +260,22 @@
     serialInput.value = "";
     notaInput.value = "";
 
-    // opcional: garantir que assinatura/áreas não encolham (CSS já cobre)
+    // chamar ajuste do canvas (layout mudou)
+    fixCanvasDPI();
   }
 
   function addRowFull() {
     const raw = inputCompleto.value.trim();
     if (!raw) return;
-    // split em vírgula, ponto, espaço ou combinação (preserva entradas compostas se necessário)
+
+    // split em vírgula, ponto, quebra de linha ou múltiplos espaços
     const valores = raw
       .split(/[,.;\n\r]+|\s{2,}|[ ]+/)
       .map((v) => v.trim())
       .filter(Boolean);
 
     if (valores.length % 3 !== 0) {
-      alert(
-        "Por favor, insira valores em múltiplos de 3: Código, Serial, Nota Fiscal."
-      );
+      alert("Por favor, insira valores em múltiplos de 3: Código, Serial, Nota Fiscal.");
       return;
     }
 
@@ -291,6 +310,9 @@
     }
 
     inputCompleto.value = "";
+
+    // layout mudou: ajusta canvas
+    fixCanvasDPI();
   }
 
   function editarLinha(tr) {
@@ -300,13 +322,17 @@
       $("#serialProxxi").value = tds[1].textContent;
       $("#notaFiscal").value = tds[2].textContent;
       tr.remove();
-      // foco no campo código para acelerar edição
       codigoInput.focus();
+
+      // ajuste de layout
+      fixCanvasDPI();
     }
   }
 
   function excluirLinha(tr) {
     tr.remove();
+    // ajuste de layout
+    fixCanvasDPI();
   }
 
   btnAdd.addEventListener("click", addRow);
@@ -612,11 +638,9 @@
   });
 
   // ----------------- Quagga / Câmera -----------------
-  // Variáveis para controle da câmera
   let cameraActive = false;
   let currentTarget = null;
 
-  // Elementos para a câmera (cria apenas 1 vez)
   const cameraPreview = document.createElement("div");
   cameraPreview.className = "camera-preview";
   cameraPreview.style.display = "none";
@@ -642,31 +666,34 @@
       return;
     }
 
-    Quagga.init({
-      inputStream: {
-        name: "Live",
-        type: "LiveStream",
-        target: cameraPreview.querySelector('video'),
-        constraints: {
-          width: 640,
-          height: 480,
-          facingMode: "environment"
-        }
+    Quagga.init(
+      {
+        inputStream: {
+          name: "Live",
+          type: "LiveStream",
+          target: cameraPreview.querySelector("video"),
+          constraints: {
+            width: 640,
+            height: 480,
+            facingMode: "environment",
+          },
+        },
+        decoder: {
+          readers: ["code_128_reader", "ean_reader", "ean_8_reader", "code_39_reader", "upc_reader"],
+        },
       },
-      decoder: {
-        readers: ["code_128_reader", "ean_reader", "ean_8_reader", "code_39_reader", "upc_reader"]
+      function (err) {
+        if (err) {
+          console.error("Erro ao inicializar Quagga:", err);
+          alert("Não foi possível acessar a câmera.");
+          stopCamera();
+          return;
+        }
+        Quagga.start();
       }
-    }, function(err) {
-      if (err) {
-        console.error("Erro ao inicializar Quagga:", err);
-        alert("Não foi possível acessar a câmera.");
-        stopCamera();
-        return;
-      }
-      Quagga.start();
-    });
+    );
 
-    Quagga.onDetected(function(result) {
+    Quagga.onDetected(function (result) {
       const code = result && result.codeResult && result.codeResult.code;
       if (code) {
         const el = document.getElementById(targetId);
@@ -685,12 +712,12 @@
     currentTarget = null;
   }
 
-  cameraPreview.querySelector('.close-camera').addEventListener('click', stopCamera);
+  cameraPreview.querySelector(".close-camera").addEventListener("click", stopCamera);
 
-  document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.btn-camera').forEach(button => {
-      button.addEventListener('click', function() {
-        const target = this.getAttribute('data-target');
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".btn-camera").forEach((button) => {
+      button.addEventListener("click", function () {
+        const target = this.getAttribute("data-target");
         if (target) startCamera(target);
       });
     });
@@ -700,4 +727,6 @@
   window.iniciarLeituraCodigo = function (idInput) {
     startCamera(idInput);
   };
+
+  // fim do IIFE
 })();

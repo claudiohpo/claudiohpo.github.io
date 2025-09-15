@@ -117,7 +117,7 @@ td[data-label="Ações"] button {
   font-size: 0.85rem;
 }
 
-/* ===== ASSINATURA (ATUALIZADO) ===== */
+/* ASSINATURA: o wrap controla altura; canvas preenche o wrap */
 .signature-wrap {
   width: 100%;
   box-sizing: border-box;
@@ -128,24 +128,26 @@ td[data-label="Ações"] button {
   padding: 0.6rem;
   display: flex;
   flex-direction: column;
-  align-items: stretch;      /* canvas ocupa toda a largura */
+  align-items: stretch;
   justify-content: center;
   gap: 0.5rem;
-  flex: 0 0 auto;           /* NÃO encolher se o container ficar pequeno */
-  min-height: 320px;        /* garante espaço suficiente para desenhar */
+  flex: 0 0 auto;
+  min-height: 320px;    /* o contêiner define a área disponível */
+  height: auto;         /* permite que mude ao rotacionar */
   overflow: hidden;
 }
 
-/* canvas: usa 100% da largura disponível e altura mínima fixa */
+/* canvas passa a preencher o contêiner */
 #signatureCanvas {
   width: 100%;
-  height: 320px;            /* altura fixa para não diminuir */
+  height: 100%;         /* IMPORTANT: preenche todo o wrap ao rotacionar */
   max-width: 100%;
   border-radius: 8px;
   background: #fff;
   display: block;
-  touch-action: none;       /* melhora o toque em dispositivos móveis */
+  touch-action: none;
 }
+
 
 /* Botões de assinatura: alinhados em linha no desktop, empilhados no mobile */
 .sig-buttons {
