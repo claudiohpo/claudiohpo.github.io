@@ -117,34 +117,49 @@ td[data-label="Ações"] button {
   font-size: 0.85rem;
 }
 
-/* ===== ASSINATURA ===== */
+/* ===== ASSINATURA (ATUALIZADO) ===== */
 .signature-wrap {
+  width: 100%;
+  box-sizing: border-box;
   margin-top: 1rem;
   background: #fafafa;
   border: 2px dashed #ccc;
   border-radius: 8px;
-  padding: 0.5rem;
+  padding: 0.6rem;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;      /* canvas ocupa toda a largura */
+  justify-content: center;
+  gap: 0.5rem;
+  flex: 0 0 auto;           /* NÃO encolher se o container ficar pequeno */
+  min-height: 320px;        /* garante espaço suficiente para desenhar */
+  overflow: hidden;
 }
 
+/* canvas: usa 100% da largura disponível e altura mínima fixa */
 #signatureCanvas {
   width: 100%;
-  height: auto;
+  height: 320px;            /* altura fixa para não diminuir */
   max-width: 100%;
   border-radius: 8px;
   background: #fff;
+  display: block;
+  touch-action: none;       /* melhora o toque em dispositivos móveis */
 }
 
-/* Botões de assinatura */
+/* Botões de assinatura: alinhados em linha no desktop, empilhados no mobile */
 .sig-buttons {
-  margin-top: 0.5rem;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  align-items: center;
 }
+
+
 
 .sig-buttons button {
-  width: auto;
-}
+    width: 100%;
+  }
 
 /* ===== AÇÕES FINAIS ===== */
 .actions {
@@ -214,6 +229,20 @@ footer {
   }
 
   td[data-label="Ações"] button {
+    width: 100%;
+  }
+
+  .signature-wrap {
+    min-height: 300px; /* mantém bom espaço em celulares */
+    padding: 0.5rem;
+  }
+
+  .sig-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sig-buttons button {
     width: 100%;
   }
 }
