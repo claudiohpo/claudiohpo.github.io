@@ -22,20 +22,14 @@
   }
   const ctx = canvas.getContext("2d");
 
-  // contêiner da assinatura (controla a área visual)
-  const sigWrap = canvas.closest(".signature-wrap") || canvas.parentElement;
-
   // ---------- MANIPULAÇÃO DO CANVAS (DPI / REDIMENSIONAMENTO PRESERVANDO CONTEÚDO) ----------
   function fixCanvasDPI() {
-    if (!canvas || !ctx || !sigWrap) return;
-
-    // obtém tamanho atual do contêiner (CSS px)
-    const rect = sigWrap.getBoundingClientRect();
-    let w = Math.max(100, Math.floor(rect.width));
-    let h = Math.max(80, Math.floor(rect.height));
+    // CSS size (px)
+    const w = canvas.clientWidth || 600;
+    const h = canvas.clientHeight || 300;
     const ratio = Math.max(window.devicePixelRatio || 1, 1);
 
-    // salva conteúdo anterior (se possível)
+    // preserve current image
     let prevData = null;
     try {
       prevData = canvas.toDataURL();
@@ -43,61 +37,57 @@
       prevData = null;
     }
 
-    // define tamanho real do canvas em device pixels
-    // (não alteramos a height/width CSS para evitar loop de layout)
+    // set real pixel size
     canvas.width = Math.round(w * ratio);
     canvas.height = Math.round(h * ratio);
 
-    // assegura que o canvas ocupe 100% do contêiner via CSS (apenas define; idealmente seu CSS já controla isso)
-    canvas.style.width = "100%";
-    canvas.style.height = "100%";
+    // keep CSS size
+    canvas.style.width = w + "px";
+    canvas.style.height = h + "px";
 
-    // reset transform e aplicar escala para desenhar em coordenadas CSS
+    // reset transform and scale for drawing in CSS coordinate space
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.scale(ratio, ratio);
 
-    // configurações de desenho em CSS px
+    // drawing defaults (line width measured in CSS px)
     ctx.lineWidth = 2;
     ctx.lineCap = "round";
     ctx.strokeStyle = "#000";
 
-    // restaura desenho anterior, escalando para as dimensões CSS atuais (w x h)
+    // restore previous drawing if existed
     if (prevData) {
       const img = new Image();
       img.onload = () => {
+        // clear full device pixel canvas then draw scaled to CSS size
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // draw image using device pixels scaled back to CSS dims (ctx currently reset)
+        // we need to scale back to ratio so drawImage coordinates use CSS px
+        ctx.scale(ratio, ratio);
         try {
-          ctx.setTransform(1, 0, 0, 1, 0, 0);
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          ctx.scale(ratio, ratio);
-          // desenha usando coordenadas CSS (w, h são o tamanho CSS)
-          ctx.drawImage(img, 0, 0, w, h);
-        } catch (err) {
-          console.warn("Não foi possível restaurar desenho do canvas (CORS ou outro):", err);
+          ctx.drawImage(img, 0, 0, canvas.clientWidth, canvas.clientHeight);
+        } catch (e) {
+          // draw may fail if dataURL tainted by CORS
+          console.warn("Não foi possível restaurar desenho do canvas (CORS?)", e);
         }
       };
       img.src = prevData;
-    } else {
-      // sem desenho anterior: apenas limpa
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.scale(ratio, ratio);
     }
   }
 
-  // chama no load (quando DOM + CSS aplicados)
+  // init canvas size on load (if script deferred, DOM should exist)
   window.addEventListener("load", () => {
-    // small timeout para garantir estilos aplicados
-    setTimeout(fixCanvasDPI, 50);
+    fixCanvasDPI();
   });
 
-  // resize / orientationchange (debounced)
+  // debounce resize
   let _resizeSigTimeout = null;
   window.addEventListener("resize", () => {
     clearTimeout(_resizeSigTimeout);
-    _resizeSigTimeout = setTimeout(fixCanvasDPI, 120);
-  });
-  window.addEventListener("orientationchange", () => {
-    setTimeout(fixCanvasDPI, 140);
+    _resizeSigTimeout = setTimeout(() => {
+      // preserve as image and restore inside fixCanvasDPI
+      fixCanvasDPI();
+    }, 150);
   });
 
   // ---------- DESENHO (mouse + touch) ----------
@@ -118,6 +108,7 @@
     }
   }
 
+  // Mouse events
   canvas.addEventListener("mousedown", (e) => {
     drawing = true;
     const p = getPos(e);
@@ -144,6 +135,7 @@
     });
   });
 
+  // Touch events (passive false to allow preventDefault)
   canvas.addEventListener(
     "touchstart",
     (e) => {
@@ -179,22 +171,25 @@
 
   // Limpar assinatura (limpa corretamente nos pixels reais)
   function limparAssinatura() {
-    try {
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const ratio = Math.max(window.devicePixelRatio || 1, 1);
-      ctx.scale(ratio, ratio);
-    } catch (e) {
-      console.warn("Erro ao limpar assinatura:", e);
-    }
+    // reset transform para limpar full device pixels
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // reapply scale
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+    ctx.scale(ratio, ratio);
+
+    // opcional: limpar visual CSS (não necessário se canvas já limpo)
   }
+
   btnClearSig.addEventListener("click", limparAssinatura);
 
   // ---------- MANIPULAÇÃO DA TABELA (linhas dinâmicas) ----------
+  // cabeçalhos esperados (para data-label)
   const HEADER_CODIGO = "Código";
   const HEADER_SERIAL = "Número de Série";
   const HEADER_NOTA = "Nota Fiscal";
-  const HEADER_ACOES = "Ações";
+  const HEADER_ACOES = "Ações"; // certifique-se de que o CSS usa "Ações" exatamente
 
   function makeActionButton(text, cls, onClick) {
     const b = document.createElement("button");
@@ -221,14 +216,17 @@
     tdSerial.textContent = serialInput.value.trim();
     tdNota.textContent = notaInput.value.trim();
 
+    // set data-labels para responsivo mobile
     tdCodigo.setAttribute("data-label", HEADER_CODIGO);
     tdSerial.setAttribute("data-label", HEADER_SERIAL);
     tdNota.setAttribute("data-label", HEADER_NOTA);
     tdActions.setAttribute("data-label", HEADER_ACOES);
 
+    // botões com classes para estilização (edit amarelo, delete vermelho)
     const btnEdit = makeActionButton("Editar", "edit-btn", () => editarLinha(tr));
     const btnDelete = makeActionButton("Excluir", "delete-btn", () => excluirLinha(tr));
 
+    // empilha verticalmente no container da célula (CSS cuidará do resto)
     tdActions.appendChild(btnEdit);
     tdActions.appendChild(btnDelete);
 
@@ -243,21 +241,22 @@
     serialInput.value = "";
     notaInput.value = "";
 
-    // layout mudou: ajusta canvas (sem loop)
-    fixCanvasDPI();
+    // opcional: garantir que assinatura/áreas não encolham (CSS já cobre)
   }
 
   function addRowFull() {
     const raw = inputCompleto.value.trim();
     if (!raw) return;
-
+    // split em vírgula, ponto, espaço ou combinação (preserva entradas compostas se necessário)
     const valores = raw
       .split(/[,.;\n\r]+|\s{2,}|[ ]+/)
       .map((v) => v.trim())
       .filter(Boolean);
 
     if (valores.length % 3 !== 0) {
-      alert("Por favor, insira valores em múltiplos de 3: Código, Serial, Nota Fiscal.");
+      alert(
+        "Por favor, insira valores em múltiplos de 3: Código, Serial, Nota Fiscal."
+      );
       return;
     }
 
@@ -292,9 +291,6 @@
     }
 
     inputCompleto.value = "";
-
-    // layout mudou: ajusta canvas (sem loop)
-    fixCanvasDPI();
   }
 
   function editarLinha(tr) {
@@ -304,14 +300,13 @@
       $("#serialProxxi").value = tds[1].textContent;
       $("#notaFiscal").value = tds[2].textContent;
       tr.remove();
+      // foco no campo código para acelerar edição
       codigoInput.focus();
-      fixCanvasDPI();
     }
   }
 
   function excluirLinha(tr) {
     tr.remove();
-    fixCanvasDPI();
   }
 
   btnAdd.addEventListener("click", addRow);
@@ -617,9 +612,11 @@
   });
 
   // ----------------- Quagga / Câmera -----------------
+  // Variáveis para controle da câmera
   let cameraActive = false;
   let currentTarget = null;
 
+  // Elementos para a câmera (cria apenas 1 vez)
   const cameraPreview = document.createElement("div");
   cameraPreview.className = "camera-preview";
   cameraPreview.style.display = "none";
@@ -645,34 +642,31 @@
       return;
     }
 
-    Quagga.init(
-      {
-        inputStream: {
-          name: "Live",
-          type: "LiveStream",
-          target: cameraPreview.querySelector("video"),
-          constraints: {
-            width: 640,
-            height: 480,
-            facingMode: "environment",
-          },
-        },
-        decoder: {
-          readers: ["code_128_reader", "ean_reader", "ean_8_reader", "code_39_reader", "upc_reader"],
-        },
-      },
-      function (err) {
-        if (err) {
-          console.error("Erro ao inicializar Quagga:", err);
-          alert("Não foi possível acessar a câmera.");
-          stopCamera();
-          return;
+    Quagga.init({
+      inputStream: {
+        name: "Live",
+        type: "LiveStream",
+        target: cameraPreview.querySelector('video'),
+        constraints: {
+          width: 640,
+          height: 480,
+          facingMode: "environment"
         }
-        Quagga.start();
+      },
+      decoder: {
+        readers: ["code_128_reader", "ean_reader", "ean_8_reader", "code_39_reader", "upc_reader"]
       }
-    );
+    }, function(err) {
+      if (err) {
+        console.error("Erro ao inicializar Quagga:", err);
+        alert("Não foi possível acessar a câmera.");
+        stopCamera();
+        return;
+      }
+      Quagga.start();
+    });
 
-    Quagga.onDetected(function (result) {
+    Quagga.onDetected(function(result) {
       const code = result && result.codeResult && result.codeResult.code;
       if (code) {
         const el = document.getElementById(targetId);
@@ -691,12 +685,12 @@
     currentTarget = null;
   }
 
-  cameraPreview.querySelector(".close-camera").addEventListener("click", stopCamera);
+  cameraPreview.querySelector('.close-camera').addEventListener('click', stopCamera);
 
-  document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll(".btn-camera").forEach((button) => {
-      button.addEventListener("click", function () {
-        const target = this.getAttribute("data-target");
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.btn-camera').forEach(button => {
+      button.addEventListener('click', function() {
+        const target = this.getAttribute('data-target');
         if (target) startCamera(target);
       });
     });
@@ -706,6 +700,4 @@
   window.iniciarLeituraCodigo = function (idInput) {
     startCamera(idInput);
   };
-
-  // fim do IIFE
 })();
