@@ -22,20 +22,20 @@
   }
   const ctx = canvas.getContext("2d");
 
-  // obtém contêiner pontilhado (.signature-wrap) — usado para calcular tamanho real
+  // contêiner da assinatura (controla a área visual)
   const sigWrap = canvas.closest(".signature-wrap") || canvas.parentElement;
 
   // ---------- MANIPULAÇÃO DO CANVAS (DPI / REDIMENSIONAMENTO PRESERVANDO CONTEÚDO) ----------
   function fixCanvasDPI() {
     if (!canvas || !ctx || !sigWrap) return;
 
-    // mede o tamanho disponível no contêiner (CSS pixels)
+    // obtém tamanho atual do contêiner (CSS px)
     const rect = sigWrap.getBoundingClientRect();
-    const w = Math.max(100, Math.floor(rect.width));
-    const h = Math.max(80, Math.floor(rect.height));
+    let w = Math.max(100, Math.floor(rect.width));
+    let h = Math.max(80, Math.floor(rect.height));
     const ratio = Math.max(window.devicePixelRatio || 1, 1);
 
-    // tenta salvar o conteúdo atual (se possível)
+    // salva conteúdo anterior (se possível)
     let prevData = null;
     try {
       prevData = canvas.toDataURL();
@@ -43,76 +43,62 @@
       prevData = null;
     }
 
-    // define tamanho em pixels reais (device pixels)
+    // define tamanho real do canvas em device pixels
+    // (não alteramos a height/width CSS para evitar loop de layout)
     canvas.width = Math.round(w * ratio);
     canvas.height = Math.round(h * ratio);
 
-    // define tamanho CSS para manter layout (em px)
-    canvas.style.width = w + "px";
-    canvas.style.height = h + "px";
+    // assegura que o canvas ocupe 100% do contêiner via CSS (apenas define; idealmente seu CSS já controla isso)
+    canvas.style.width = "100%";
+    canvas.style.height = "100%";
 
     // reset transform e aplicar escala para desenhar em coordenadas CSS
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.scale(ratio, ratio);
 
-    // definições de desenho (em CSS px)
+    // configurações de desenho em CSS px
     ctx.lineWidth = 2;
     ctx.lineCap = "round";
     ctx.strokeStyle = "#000";
 
-    // restaurar desenho anterior, escalando para as dimensões CSS atuais
+    // restaura desenho anterior, escalando para as dimensões CSS atuais (w x h)
     if (prevData) {
       const img = new Image();
       img.onload = () => {
         try {
-          // desenha a imagem no canvas escalada para as dimensões CSS (w x h)
           ctx.setTransform(1, 0, 0, 1, 0, 0);
           ctx.clearRect(0, 0, canvas.width, canvas.height);
           ctx.scale(ratio, ratio);
+          // desenha usando coordenadas CSS (w, h são o tamanho CSS)
           ctx.drawImage(img, 0, 0, w, h);
         } catch (err) {
-          // pode falhar por CORS; apenas logamos
-          console.warn("Não foi possível restaurar desenho do canvas (possível CORS):", err);
+          console.warn("Não foi possível restaurar desenho do canvas (CORS ou outro):", err);
         }
       };
       img.src = prevData;
     } else {
-      // sem desenho anterior: limpa
+      // sem desenho anterior: apenas limpa
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.scale(ratio, ratio);
     }
   }
 
-  // chama no load (assegura que a árvore DOM e estilos já estejam aplicados)
-  window.addEventListener("load", fixCanvasDPI);
+  // chama no load (quando DOM + CSS aplicados)
+  window.addEventListener("load", () => {
+    // small timeout para garantir estilos aplicados
+    setTimeout(fixCanvasDPI, 50);
+  });
 
-  // listeners de resize / orientationchange (debounced)
+  // resize / orientationchange (debounced)
   let _resizeSigTimeout = null;
   window.addEventListener("resize", () => {
     clearTimeout(_resizeSigTimeout);
-    _resizeSigTimeout = setTimeout(() => {
-      fixCanvasDPI();
-    }, 120);
+    _resizeSigTimeout = setTimeout(fixCanvasDPI, 120);
   });
-
   window.addEventListener("orientationchange", () => {
-    // pequeno delay para o layout se estabilizar após rotação
     setTimeout(fixCanvasDPI, 140);
   });
-
-  // ResizeObserver para detectar mudanças no .signature-wrap (adicionar/remover linhas, teclado, etc.)
-  if (window.ResizeObserver && sigWrap) {
-    try {
-      const ro = new ResizeObserver(() => {
-        fixCanvasDPI();
-      });
-      ro.observe(sigWrap);
-    } catch (e) {
-      // se algo falhar, fallback para resize/orientationchange já cobre
-      console.warn("ResizeObserver não pôde ser inicializado:", e);
-    }
-  }
 
   // ---------- DESENHO (mouse + touch) ----------
   let drawing = false;
@@ -132,7 +118,6 @@
     }
   }
 
-  // eventos do mouse
   canvas.addEventListener("mousedown", (e) => {
     drawing = true;
     const p = getPos(e);
@@ -159,7 +144,6 @@
     });
   });
 
-  // eventos touch (passive: false para permitir preventDefault)
   canvas.addEventListener(
     "touchstart",
     (e) => {
@@ -195,15 +179,15 @@
 
   // Limpar assinatura (limpa corretamente nos pixels reais)
   function limparAssinatura() {
-    // reset transform para limpar no espaço de pixels reais
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // re-aplica escala para continuar desenhando normalmente
-    const ratio = Math.max(window.devicePixelRatio || 1, 1);
-    ctx.scale(ratio, ratio);
+    try {
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const ratio = Math.max(window.devicePixelRatio || 1, 1);
+      ctx.scale(ratio, ratio);
+    } catch (e) {
+      console.warn("Erro ao limpar assinatura:", e);
+    }
   }
-
   btnClearSig.addEventListener("click", limparAssinatura);
 
   // ---------- MANIPULAÇÃO DA TABELA (linhas dinâmicas) ----------
@@ -237,7 +221,6 @@
     tdSerial.textContent = serialInput.value.trim();
     tdNota.textContent = notaInput.value.trim();
 
-    // set data-labels para responsivo mobile
     tdCodigo.setAttribute("data-label", HEADER_CODIGO);
     tdSerial.setAttribute("data-label", HEADER_SERIAL);
     tdNota.setAttribute("data-label", HEADER_NOTA);
@@ -260,7 +243,7 @@
     serialInput.value = "";
     notaInput.value = "";
 
-    // chamar ajuste do canvas (layout mudou)
+    // layout mudou: ajusta canvas (sem loop)
     fixCanvasDPI();
   }
 
@@ -268,7 +251,6 @@
     const raw = inputCompleto.value.trim();
     if (!raw) return;
 
-    // split em vírgula, ponto, quebra de linha ou múltiplos espaços
     const valores = raw
       .split(/[,.;\n\r]+|\s{2,}|[ ]+/)
       .map((v) => v.trim())
@@ -311,7 +293,7 @@
 
     inputCompleto.value = "";
 
-    // layout mudou: ajusta canvas
+    // layout mudou: ajusta canvas (sem loop)
     fixCanvasDPI();
   }
 
@@ -323,15 +305,12 @@
       $("#notaFiscal").value = tds[2].textContent;
       tr.remove();
       codigoInput.focus();
-
-      // ajuste de layout
       fixCanvasDPI();
     }
   }
 
   function excluirLinha(tr) {
     tr.remove();
-    // ajuste de layout
     fixCanvasDPI();
   }
 
