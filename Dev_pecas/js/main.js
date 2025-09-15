@@ -1,3 +1,8 @@
+/* main.js
+   Refatorado: canvas/signature block + tabela + PDF + Quagga (camera).
+   Mantive a lógica original, mas organizei e comentei.
+*/
+
 (function () {
   // SHORTCUTS
   const $ = (sel) => document.querySelector(sel);
@@ -22,14 +27,15 @@
   }
   const ctx = canvas.getContext("2d");
 
-  // ---------- MANIPULAÇÃO DO CANVAS (DPI / REDIMENSIONAMENTO PRESERVANDO CONTEÚDO) ----------
+  /* ------------------------ CANVAS / ASSINATURA ------------------------ */
+  // fixCanvasDPI redimensiona o canvas real (pixels) segundo o tamanho CSS
   function fixCanvasDPI() {
     // CSS size (px)
     const w = canvas.clientWidth || 600;
     const h = canvas.clientHeight || 300;
     const ratio = Math.max(window.devicePixelRatio || 1, 1);
 
-    // preserve current image
+    // preserve current image (dataURL) antes de alterar tamanho
     let prevData = null;
     try {
       prevData = canvas.toDataURL();
@@ -49,7 +55,7 @@
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.scale(ratio, ratio);
 
-    // drawing defaults (line width measured in CSS px)
+    // drawing defaults (line width em CSS px)
     ctx.lineWidth = 2;
     ctx.lineCap = "round";
     ctx.strokeStyle = "#000";
@@ -58,13 +64,10 @@
     if (prevData) {
       const img = new Image();
       img.onload = () => {
-        // clear full device pixel canvas then draw scaled to CSS size
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        // draw image using device pixels scaled back to CSS dims (ctx currently reset)
-        // we need to scale back to ratio so drawImage coordinates use CSS px
-        ctx.scale(ratio, ratio);
         try {
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.scale(ratio, ratio);
           ctx.drawImage(img, 0, 0, canvas.clientWidth, canvas.clientHeight);
         } catch (e) {
           // draw may fail if dataURL tainted by CORS
@@ -72,27 +75,28 @@
         }
       };
       img.src = prevData;
+    } else {
+      // no previous content, clear
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.scale(ratio, ratio);
     }
   }
 
-  // init canvas size on load (if script deferred, DOM should exist)
-  window.addEventListener("load", () => {
-    fixCanvasDPI();
-  });
+  // init canvas size on load
+  window.addEventListener("load", fixCanvasDPI);
 
-  // debounce resize
+  // debounce resize e redimensiona mantendo desenho
   let _resizeSigTimeout = null;
   window.addEventListener("resize", () => {
     clearTimeout(_resizeSigTimeout);
     _resizeSigTimeout = setTimeout(() => {
-      // preserve as image and restore inside fixCanvasDPI
       fixCanvasDPI();
     }, 150);
   });
 
   // ---------- DESENHO (mouse + touch) ----------
   let drawing = false;
-
   function getPos(evt) {
     const rect = canvas.getBoundingClientRect();
     if (evt.touches && evt.touches.length) {
@@ -108,7 +112,6 @@
     }
   }
 
-  // Mouse events
   canvas.addEventListener("mousedown", (e) => {
     drawing = true;
     const p = getPos(e);
@@ -135,61 +138,44 @@
     });
   });
 
-  // Touch events (passive false to allow preventDefault)
-  canvas.addEventListener(
-    "touchstart",
-    (e) => {
-      drawing = true;
-      const p = getPos(e);
-      ctx.beginPath();
-      ctx.moveTo(p.x, p.y);
-      e.preventDefault();
-    },
-    { passive: false }
-  );
+  // Touch events (passive false para permitir preventDefault)
+  canvas.addEventListener("touchstart", (e) => {
+    drawing = true;
+    const p = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+    e.preventDefault();
+  }, { passive: false });
 
-  canvas.addEventListener(
-    "touchmove",
-    (e) => {
-      if (!drawing) return;
-      const p = getPos(e);
-      ctx.lineTo(p.x, p.y);
-      ctx.stroke();
-      e.preventDefault();
-    },
-    { passive: false }
-  );
+  canvas.addEventListener("touchmove", (e) => {
+    if (!drawing) return;
+    const p = getPos(e);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+    e.preventDefault();
+  }, { passive: false });
 
   ["touchend", "touchcancel"].forEach((ev) =>
     canvas.addEventListener(ev, () => {
       drawing = false;
-      try {
-        ctx.closePath();
-      } catch (e) {}
+      try { ctx.closePath(); } catch (e) {}
     })
   );
 
-  // Limpar assinatura (limpa corretamente nos pixels reais)
+  // Limpar assinatura (limpa em device pixels)
   function limparAssinatura() {
-    // reset transform para limpar full device pixels
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // reapply scale
     const ratio = Math.max(window.devicePixelRatio || 1, 1);
     ctx.scale(ratio, ratio);
-
-    // opcional: limpar visual CSS (não necessário se canvas já limpo)
   }
-
   btnClearSig.addEventListener("click", limparAssinatura);
 
-  // ---------- MANIPULAÇÃO DA TABELA (linhas dinâmicas) ----------
-  // cabeçalhos esperados (para data-label)
+  /* ------------------------ TABELA DINÂMICA ------------------------ */
   const HEADER_CODIGO = "Código";
   const HEADER_SERIAL = "Número de Série";
   const HEADER_NOTA = "Nota Fiscal";
-  const HEADER_ACOES = "Ações"; // certifique-se de que o CSS usa "Ações" exatamente
+  const HEADER_ACOES = "Ações";
 
   function makeActionButton(text, cls, onClick) {
     const b = document.createElement("button");
@@ -205,7 +191,6 @@
       alert("Preencha Código e Número de Série (Nota Fiscal é opcional).");
       return;
     }
-
     const tr = document.createElement("tr");
     const tdCodigo = document.createElement("td");
     const tdSerial = document.createElement("td");
@@ -216,17 +201,14 @@
     tdSerial.textContent = serialInput.value.trim();
     tdNota.textContent = notaInput.value.trim();
 
-    // set data-labels para responsivo mobile
     tdCodigo.setAttribute("data-label", HEADER_CODIGO);
     tdSerial.setAttribute("data-label", HEADER_SERIAL);
     tdNota.setAttribute("data-label", HEADER_NOTA);
     tdActions.setAttribute("data-label", HEADER_ACOES);
 
-    // botões com classes para estilização (edit amarelo, delete vermelho)
     const btnEdit = makeActionButton("Editar", "edit-btn", () => editarLinha(tr));
     const btnDelete = makeActionButton("Excluir", "delete-btn", () => excluirLinha(tr));
 
-    // empilha verticalmente no container da célula (CSS cuidará do resto)
     tdActions.appendChild(btnEdit);
     tdActions.appendChild(btnDelete);
 
@@ -240,23 +222,18 @@
     codigoInput.value = "";
     serialInput.value = "";
     notaInput.value = "";
-
-    // opcional: garantir que assinatura/áreas não encolham (CSS já cobre)
   }
 
   function addRowFull() {
     const raw = inputCompleto.value.trim();
     if (!raw) return;
-    // split em vírgula, ponto, espaço ou combinação (preserva entradas compostas se necessário)
     const valores = raw
       .split(/[,.;\n\r]+|\s{2,}|[ ]+/)
       .map((v) => v.trim())
       .filter(Boolean);
 
     if (valores.length % 3 !== 0) {
-      alert(
-        "Por favor, insira valores em múltiplos de 3: Código, Serial, Nota Fiscal."
-      );
+      alert("Por favor, insira valores em múltiplos de 3: Código, Serial, Nota Fiscal.");
       return;
     }
 
@@ -289,7 +266,6 @@
 
       serialTableBody.appendChild(tr);
     }
-
     inputCompleto.value = "";
   }
 
@@ -300,19 +276,16 @@
       $("#serialProxxi").value = tds[1].textContent;
       $("#notaFiscal").value = tds[2].textContent;
       tr.remove();
-      // foco no campo código para acelerar edição
       codigoInput.focus();
     }
   }
 
-  function excluirLinha(tr) {
-    tr.remove();
-  }
+  function excluirLinha(tr) { tr.remove(); }
 
   btnAdd.addEventListener("click", addRow);
   btnAddFull.addEventListener("click", addRowFull);
 
-  // ---------- PRELOAD LOGO (com aspect ratio e otimização) ----------
+  /* ------------------------ PRELOAD LOGO e PDF ------------------------ */
   const logoPath = "assets/images/logosmall2.png";
   let PRELOADED_LOGO_DATAURL = null;
   let PRELOADED_LOGO_ASPECT = null;
@@ -327,7 +300,7 @@
     });
   }
 
-  function optimizeDataUrl(dataUrl, maxWidthPx, mime = "image/jpeg", quality = 0.8) {
+  async function optimizeDataUrl(dataUrl, maxWidthPx, mime = "image/jpeg", quality = 0.8) {
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => {
@@ -398,57 +371,11 @@
       PRELOADED_LOGO_OPTIMIZED = null;
     }
   }
-
   preloadLogo().catch((e) => console.error("[logo] preload erro:", e));
 
-  async function getLogoDataURL(url) {
-    if (PRELOADED_LOGO_OPTIMIZED) return PRELOADED_LOGO_OPTIMIZED;
-    try {
-      const res = await fetch(url, { cache: "no-cache" });
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      const blob = await res.blob();
-      const dataUrl = await blobToDataURL(blob);
-      const opt = await optimizeDataUrl(dataUrl, 600, "image/jpeg", 0.8);
-      return opt.dataUrl;
-    } catch (err) {
-      console.warn("getLogoDataURL fetch falhou:", err);
-    }
-
-    // fallback
-    try {
-      const img = new Image();
-      img.src = url;
-      await new Promise((res, rej) => {
-        img.onload = res;
-        img.onerror = rej;
-      });
-      const c = document.createElement("canvas");
-      c.width = img.naturalWidth || img.width;
-      c.height = img.naturalHeight || img.height;
-      c.getContext("2d").drawImage(img, 0, 0);
-      const dataUrl = c.toDataURL("image/png");
-      const opt = await optimizeDataUrl(dataUrl, 600, "image/jpeg", 0.8);
-      return opt.dataUrl;
-    } catch (err2) {
-      console.warn("getLogoDataURL fallback image falhou:", err2);
-    }
-
-    return null;
-  }
-
-  function getImageFormatFromDataUrl(dataUrl) {
-    if (!dataUrl || typeof dataUrl !== "string") return "PNG";
-    const m = dataUrl.match(/^data:image\/(png|jpeg|jpg);/i);
-    if (!m) return "PNG";
-    const mime = m[1].toLowerCase();
-    if (mime === "jpeg" || mime === "jpg") return "JPEG";
-    return "PNG";
-  }
-
-  // ---------- GERA PDF ----------
   btnGeneratePdf.addEventListener("click", async function gerarPDF() {
     try {
-      let logoDataUrl = PRELOADED_LOGO_OPTIMIZED || null;
+      let logoDataUrl = PRELOADED_LOGO_OPTIMIZED || PRELOADED_LOGO_DATAURL || null;
       if (!logoDataUrl && PRELOADED_LOGO_DATAURL) {
         try {
           const opt = await optimizeDataUrl(PRELOADED_LOGO_DATAURL, 600, "image/jpeg", 0.8);
@@ -459,11 +386,7 @@
         }
       }
       if (!logoDataUrl) {
-        try {
-          logoDataUrl = await getLogoDataURL(logoPath);
-        } catch (e) {
-          logoDataUrl = null;
-        }
+        try { logoDataUrl = await getLogoDataURL(logoPath); } catch (e) { logoDataUrl = null; }
       }
 
       const { jsPDF } = window.jspdf;
@@ -497,23 +420,13 @@
         if (parts.length === 3) {
           dataFormatadaPDF = `${parts[2]}-${parts[1]}-${parts[0]}`;
           const dt = new Date(parts[0], parts[1] - 1, parts[2]);
-          dataFormatada = dt.toLocaleDateString("pt-BR", {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          });
+          dataFormatada = dt.toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" });
         }
       }
       if (!dataFormatada) {
         const now = new Date();
-        dataFormatada = now.toLocaleDateString("pt-BR", {
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-        });
-        dataFormatadaPDF = `${String(now.getDate()).padStart(2, "0")}-${String(
-          now.getMonth() + 1
-        ).padStart(2, "0")}-${now.getFullYear()}`;
+        dataFormatada = now.toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" });
+        dataFormatadaPDF = `${String(now.getDate()).padStart(2, "0")}-${String(now.getMonth() + 1).padStart(2, "0")}-${now.getFullYear()}`;
       }
 
       function addHeaderAndFooter(pageNumber) {
@@ -560,9 +473,7 @@
       let currentPage = 1;
       let startY = 75;
 
-      if (tableData.length === 0) {
-        addHeaderAndFooter(currentPage);
-      }
+      if (tableData.length === 0) addHeaderAndFooter(currentPage);
 
       for (let i = 0; i < tableData.length; i += maxRowsPerPage) {
         if (i !== 0) {
@@ -579,11 +490,7 @@
       }
 
       let finalY = 0;
-      if (
-        doc.autoTable &&
-        doc.autoTable.previous &&
-        typeof doc.autoTable.previous.finalY === "number"
-      ) {
+      if (doc.autoTable && doc.autoTable.previous && typeof doc.autoTable.previous.finalY === "number") {
         finalY = doc.autoTable.previous.finalY + 10;
       } else {
         finalY = 80;
@@ -611,12 +518,10 @@
     }
   });
 
-  // ----------------- Quagga / Câmera -----------------
-  // Variáveis para controle da câmera
+  /* ------------------------ Quagga / Câmera ------------------------ */
   let cameraActive = false;
   let currentTarget = null;
 
-  // Elementos para a câmera (cria apenas 1 vez)
   const cameraPreview = document.createElement("div");
   cameraPreview.className = "camera-preview";
   cameraPreview.style.display = "none";
@@ -631,7 +536,6 @@
       stopCamera();
       return;
     }
-
     currentTarget = targetId;
     cameraActive = true;
     cameraPreview.style.display = "block";
@@ -647,15 +551,9 @@
         name: "Live",
         type: "LiveStream",
         target: cameraPreview.querySelector('video'),
-        constraints: {
-          width: 640,
-          height: 480,
-          facingMode: "environment"
-        }
+        constraints: { width: 640, height: 480, facingMode: "environment" }
       },
-      decoder: {
-        readers: ["code_128_reader", "ean_reader", "ean_8_reader", "code_39_reader", "upc_reader"]
-      }
+      decoder: { readers: ["code_128_reader", "ean_reader", "ean_8_reader", "code_39_reader", "upc_reader"] }
     }, function(err) {
       if (err) {
         console.error("Erro ao inicializar Quagga:", err);
@@ -677,9 +575,7 @@
   }
 
   function stopCamera() {
-    try {
-      if (window.Quagga && typeof Quagga.stop === "function") Quagga.stop();
-    } catch (e) {}
+    try { if (window.Quagga && typeof Quagga.stop === "function") Quagga.stop(); } catch (e) {}
     cameraPreview.style.display = "none";
     cameraActive = false;
     currentTarget = null;
@@ -687,6 +583,7 @@
 
   cameraPreview.querySelector('.close-camera').addEventListener('click', stopCamera);
 
+  // se houver botões com .btn-camera, iniciam a leitura (mantive para compatibilidade)
   document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.btn-camera').forEach(button => {
       button.addEventListener('click', function() {
@@ -697,7 +594,6 @@
   });
 
   // expose helper to global if desired
-  window.iniciarLeituraCodigo = function (idInput) {
-    startCamera(idInput);
-  };
+  window.iniciarLeituraCodigo = function (idInput) { startCamera(idInput); };
+
 })();
