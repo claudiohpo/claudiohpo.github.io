@@ -1,211 +1,219 @@
-/* Reset básico */
+/* ===== RESET BÁSICO ===== */
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
 }
 
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f5f5f5;
-    color: #333;
-    padding: 10px;
+  background: #f9f9f9;
+  color: #333;
+  line-height: 1.5;
+  padding: 1rem;
 }
 
+/* ===== TÍTULO ===== */
 h1 {
-    text-align: center;
-    margin-bottom: 20px;
-    font-size: 1.5em;
+  text-align: center;
+  color: #1e3fa9; /* Azul Royal */
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
 }
 
+/* ===== FORMULÁRIO ===== */
 form {
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  max-width: 800px;
+  margin: auto;
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
+  display: block;
+  font-weight: bold;
+  margin: 0.8rem 0 0.3rem;
 }
 
-input[type="text"],
-input[type="date"],
-textarea {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1em;
-}
-
-textarea {
-    resize: vertical;
-}
-
+input,
+textarea,
 button {
-    display: inline-block;
-    padding: 10px 14px;
-    margin: 6px 6px 6px 0;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    font-size: 1em;
-    cursor: pointer;
+  width: 100%;
+  padding: 0.8rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+/* ===== BOTÕES ===== */
+button {
+  background: #1e3fa9; /* Azul Royal padrão */
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
 }
 
 button:hover {
-    background-color: #0056b3;
+  background: #16307d;
 }
 
-#serialTable {
-    width: 100%;
-    margin-bottom: 10px;
-    border-collapse: collapse;
+/* Botão Editar (Amarelo) */
+.edit-btn {
+  background: #f1c40f; /* Amarelo */
+  color: #000;
 }
 
-#serialTable, #serialTable th, #serialTable td {
-    border: 1px solid #ccc;
+.edit-btn:hover {
+  background: #d4ac0d;
 }
 
-#serialTable th, #serialTable td {
-    padding: 8px;
-    text-align: left;
+/* Botão Excluir (Vermelho) */
+.delete-btn {
+  background: #e74c3c; /* Vermelho */
+  color: #fff;
 }
 
-.camera-preview {
-    width: 100%;
-    height: auto;
-    margin-top: 6px;
+.delete-btn:hover {
+  background: #c0392b;
 }
 
-.row {
-    margin-bottom: 10px;
+/* ===== TABELA ===== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.95rem;
 }
 
+thead {
+  background: #1e3fa9;
+  color: #fff;
+}
+
+th, td {
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* Ações: botões empilhados */
+td[data-label="Ações"] {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  justify-content: center;
+  align-items: center;
+}
+
+td[data-label="Ações"] button {
+  width: 90%;
+  padding: 0.5rem;
+  font-size: 0.85rem;
+}
+
+/* ===== ASSINATURA ===== */
 .signature-wrap {
-    margin-top: 10px;
-    margin-bottom: 10px;
+  margin-top: 1rem;
+  background: #fafafa;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 #signatureCanvas {
-    display: block;
-    width: 100%;
-    height: 150px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    touch-action: none; /* evita scroll ao desenhar em touch */
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  border-radius: 8px;
+  background: #fff;
 }
 
+/* Botões de assinatura */
 .sig-buttons {
-    margin-top: 6px;
+  margin-top: 0.5rem;
 }
 
+.sig-buttons button {
+  width: auto;
+}
+
+/* ===== AÇÕES FINAIS ===== */
 .actions {
-    margin-top: 10px;
+  text-align: center;
+  margin-top: 1rem;
 }
 
+.actions button {
+  width: auto;
+  padding: 0.7rem 1.2rem;
+}
+
+/* ===== RODAPÉ ===== */
 footer {
-    text-align: center;
-    margin-top: 20px;
-    padding: 10px;
-    background-color: #f0f0f0;
-    border-top: 1px solid #ccc;
-    font-size: 0.8em;
+  text-align: center;
+  margin-top: 2rem;
+  font-size: 0.9rem;
+  color: #555;
 }
 
-/* Novos estilos para inputs com câmera */
-.input-with-camera {
-    position: relative;
-}
+/* ===== RESPONSIVIDADE ===== */
+@media (max-width: 768px) {
+  body {
+    padding: 0.5rem;
+  }
 
-.input-container {
-    display: flex;
-    align-items: center;
-}
+  h1 {
+    font-size: 1.5rem;
+  }
 
-.input-container input[type="text"] {
-    flex: 1;
-    margin-bottom: 0;
-}
-
-.btn-camera {
-    padding: 10px 12px;
-    margin-left: 5px;
-    background-color: #28a745;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    height: 40px; /* mesma altura do input */
-}
-
-.btn-camera:hover {
-    background-color: #218838;
-}
-
-/* Preview da câmera */
-.camera-preview {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 80%;
-    max-width: 500px;
-    background: #000;
-    z-index: 1000;
-    display: none;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.camera-preview video {
-    width: 100%;
+  table, thead, tbody, th, td, tr {
     display: block;
-}
-
-.camera-preview .close-camera {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: red;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    cursor: pointer;
-    border-radius: 4px;
-}
-
-/* Overlay escuro quando a câmera está aberta */
-.camera-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
     width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    z-index: 999;
+  }
+
+  thead {
     display: none;
-}
+  }
 
-/* Responsivo */
-@media (max-width: 375px) {
-    h1 { font-size: 1.2em; }
-    form { padding: 15px; }
-    input[type="text"], input[type="date"] { padding: 8px; }
-    button { padding: 8px; font-size: 0.9em; }
-    #signatureCanvas { height: 100px; }
-    .btn-camera { 
-        padding: 8px 10px;
-        height: 36px; /* mesma altura do input em mobile */
-    }
-}
+  tr {
+    margin-bottom: 1rem;
+    background: #fff;
+    border-radius: 8px;
+    padding: 0.5rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  }
 
-@media screen and (orientation: landscape) {
-    #signatureCanvas { width: 50%; height: auto; }
-}
+  td {
+    text-align: right;
+    padding-left: 50%;
+    position: relative;
+  }
 
+  td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 0;
+    width: 50%;
+    padding-left: 0.5rem;
+    font-weight: bold;
+    text-align: left;
+  }
+
+  td[data-label="Ações"] {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  td[data-label="Ações"] button {
+    width: 100%;
+  }
+}
