@@ -16,49 +16,81 @@
   const serialTableBody = $("#serialTable tbody");
 
   const canvas = $("#signatureCanvas");
+  if (!canvas) {
+    console.error("Canvas de assinatura não encontrado (id='signatureCanvas').");
+    return;
+  }
   const ctx = canvas.getContext("2d");
 
-  // Ajusta canvas para alta densidade de pixels (melhor qualidade na tela)
+  // ---------- MANIPULAÇÃO DO CANVAS (DPI / REDIMENSIONAMENTO PRESERVANDO CONTEÚDO) ----------
   function fixCanvasDPI() {
-    // canvas client size (CSS px)
+    // CSS size (px)
     const w = canvas.clientWidth || 600;
     const h = canvas.clientHeight || 300;
-    const ratio = window.devicePixelRatio || 1;
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
 
-    // redimensiona canvas real (pixels)
+    // preserve current image
+    let prevData = null;
+    try {
+      prevData = canvas.toDataURL();
+    } catch (err) {
+      prevData = null;
+    }
+
+    // set real pixel size
     canvas.width = Math.round(w * ratio);
     canvas.height = Math.round(h * ratio);
 
-    // preserva o tamanho CSS
+    // keep CSS size
     canvas.style.width = w + "px";
     canvas.style.height = h + "px";
 
-    // reset transform e aplicar escala para desenhar em CSS coordenadas
+    // reset transform and scale for drawing in CSS coordinate space
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.scale(ratio, ratio);
 
+    // drawing defaults (line width measured in CSS px)
     ctx.lineWidth = 2;
     ctx.lineCap = "round";
     ctx.strokeStyle = "#000";
+
+    // restore previous drawing if existed
+    if (prevData) {
+      const img = new Image();
+      img.onload = () => {
+        // clear full device pixel canvas then draw scaled to CSS size
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // draw image using device pixels scaled back to CSS dims (ctx currently reset)
+        // we need to scale back to ratio so drawImage coordinates use CSS px
+        ctx.scale(ratio, ratio);
+        try {
+          ctx.drawImage(img, 0, 0, canvas.clientWidth, canvas.clientHeight);
+        } catch (e) {
+          // draw may fail if dataURL tainted by CORS
+          console.warn("Não foi possível restaurar desenho do canvas (CORS?)", e);
+        }
+      };
+      img.src = prevData;
+    }
   }
 
-  // inicializa tamanho do canvas
-  fixCanvasDPI();
-
-  // Reajusta ao redimensionar a janela (salva e restaura conteúdo)
-  window.addEventListener("resize", () => {
-    const data = canvas.toDataURL();
+  // init canvas size on load (if script deferred, DOM should exist)
+  window.addEventListener("load", () => {
     fixCanvasDPI();
-    const img = new Image();
-    img.onload = () => {
-      // desenha ajustando ao tamanho CSS atual
-      ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
-      ctx.drawImage(img, 0, 0, canvas.clientWidth, canvas.clientHeight);
-    };
-    img.src = data;
   });
 
-  // Desenho (mouse + touch)
+  // debounce resize
+  let _resizeSigTimeout = null;
+  window.addEventListener("resize", () => {
+    clearTimeout(_resizeSigTimeout);
+    _resizeSigTimeout = setTimeout(() => {
+      // preserve as image and restore inside fixCanvasDPI
+      fixCanvasDPI();
+    }, 150);
+  });
+
+  // ---------- DESENHO (mouse + touch) ----------
   let drawing = false;
 
   function getPos(evt) {
@@ -76,6 +108,7 @@
     }
   }
 
+  // Mouse events
   canvas.addEventListener("mousedown", (e) => {
     drawing = true;
     const p = getPos(e);
@@ -92,17 +125,17 @@
     e.preventDefault();
   });
 
-  canvas.addEventListener("mouseup", () => {
-    drawing = false;
-    ctx.closePath();
+  ["mouseup", "mouseleave"].forEach((ev) => {
+    canvas.addEventListener(ev, () => {
+      if (!drawing) return;
+      drawing = false;
+      try {
+        ctx.closePath();
+      } catch (e) {}
+    });
   });
 
-  canvas.addEventListener("mouseout", () => {
-    drawing = false;
-    ctx.closePath();
-  });
-
-  // touch
+  // Touch events (passive false to allow preventDefault)
   canvas.addEventListener(
     "touchstart",
     (e) => {
@@ -127,24 +160,46 @@
     { passive: false }
   );
 
-  canvas.addEventListener("touchend", () => {
-    drawing = false;
-    ctx.closePath();
-  });
+  ["touchend", "touchcancel"].forEach((ev) =>
+    canvas.addEventListener(ev, () => {
+      drawing = false;
+      try {
+        ctx.closePath();
+      } catch (e) {}
+    })
+  );
 
-  // Limpar assinatura
+  // Limpar assinatura (limpa corretamente nos pixels reais)
   function limparAssinatura() {
-    // limpar no sistema de pixels atual (incl. DPI)
+    // reset transform para limpar full device pixels
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // readjust scale
-    const ratio = window.devicePixelRatio || 1;
+
+    // reapply scale
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
     ctx.scale(ratio, ratio);
+
+    // opcional: limpar visual CSS (não necessário se canvas já limpo)
   }
 
   btnClearSig.addEventListener("click", limparAssinatura);
 
-  // Adiciona uma linha simples
+  // ---------- MANIPULAÇÃO DA TABELA (linhas dinâmicas) ----------
+  // cabeçalhos esperados (para data-label)
+  const HEADER_CODIGO = "Código";
+  const HEADER_SERIAL = "Número de Série";
+  const HEADER_NOTA = "Nota Fiscal";
+  const HEADER_ACOES = "Ações"; // certifique-se de que o CSS usa "Ações" exatamente
+
+  function makeActionButton(text, cls, onClick) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = cls;
+    b.textContent = text;
+    b.addEventListener("click", onClick);
+    return b;
+  }
+
   function addRow() {
     if (!codigoInput.value.trim() || !serialInput.value.trim()) {
       alert("Preencha Código e Número de Série (Nota Fiscal é opcional).");
@@ -161,17 +216,17 @@
     tdSerial.textContent = serialInput.value.trim();
     tdNota.textContent = notaInput.value.trim();
 
-    // botões
-    const btnEdit = document.createElement("button");
-    btnEdit.type = "button";
-    btnEdit.textContent = "Editar";
-    btnEdit.addEventListener("click", () => editarLinha(tr));
+    // set data-labels para responsivo mobile
+    tdCodigo.setAttribute("data-label", HEADER_CODIGO);
+    tdSerial.setAttribute("data-label", HEADER_SERIAL);
+    tdNota.setAttribute("data-label", HEADER_NOTA);
+    tdActions.setAttribute("data-label", HEADER_ACOES);
 
-    const btnDelete = document.createElement("button");
-    btnDelete.type = "button";
-    btnDelete.textContent = "Excluir";
-    btnDelete.addEventListener("click", () => excluirLinha(tr));
+    // botões com classes para estilização (edit amarelo, delete vermelho)
+    const btnEdit = makeActionButton("Editar", "edit-btn", () => editarLinha(tr));
+    const btnDelete = makeActionButton("Excluir", "delete-btn", () => excluirLinha(tr));
 
+    // empilha verticalmente no container da célula (CSS cuidará do resto)
     tdActions.appendChild(btnEdit);
     tdActions.appendChild(btnDelete);
 
@@ -185,13 +240,16 @@
     codigoInput.value = "";
     serialInput.value = "";
     notaInput.value = "";
+
+    // opcional: garantir que assinatura/áreas não encolham (CSS já cobre)
   }
 
   function addRowFull() {
     const raw = inputCompleto.value.trim();
     if (!raw) return;
+    // split em vírgula, ponto, espaço ou combinação (preserva entradas compostas se necessário)
     const valores = raw
-      .split(/[, .]+/)
+      .split(/[,.;\n\r]+|\s{2,}|[ ]+/)
       .map((v) => v.trim())
       .filter(Boolean);
 
@@ -209,19 +267,17 @@
       const tdNota = document.createElement("td");
       const tdActions = document.createElement("td");
 
-      tdCodigo.textContent = valores[i];
+      tdCodigo.textContent = valores[i] || "";
       tdSerial.textContent = valores[i + 1] || "";
       tdNota.textContent = valores[i + 2] || "";
 
-      const btnEdit = document.createElement("button");
-      btnEdit.type = "button";
-      btnEdit.textContent = "Editar";
-      btnEdit.addEventListener("click", () => editarLinha(tr));
+      tdCodigo.setAttribute("data-label", HEADER_CODIGO);
+      tdSerial.setAttribute("data-label", HEADER_SERIAL);
+      tdNota.setAttribute("data-label", HEADER_NOTA);
+      tdActions.setAttribute("data-label", HEADER_ACOES);
 
-      const btnDelete = document.createElement("button");
-      btnDelete.type = "button";
-      btnDelete.textContent = "Excluir";
-      btnDelete.addEventListener("click", () => excluirLinha(tr));
+      const btnEdit = makeActionButton("Editar", "edit-btn", () => editarLinha(tr));
+      const btnDelete = makeActionButton("Excluir", "delete-btn", () => excluirLinha(tr));
 
       tdActions.appendChild(btnEdit);
       tdActions.appendChild(btnDelete);
@@ -244,6 +300,8 @@
       $("#serialProxxi").value = tds[1].textContent;
       $("#notaFiscal").value = tds[2].textContent;
       tr.remove();
+      // foco no campo código para acelerar edição
+      codigoInput.focus();
     }
   }
 
@@ -254,14 +312,12 @@
   btnAdd.addEventListener("click", addRow);
   btnAddFull.addEventListener("click", addRowFull);
 
-  // ----------------- PRELOAD LOGO (com aspect ratio e otimização) -----------------
-  // Ajuste o caminho se necessário (relativo ao index.html)
+  // ---------- PRELOAD LOGO (com aspect ratio e otimização) ----------
   const logoPath = "assets/images/logosmall2.png";
-  let PRELOADED_LOGO_DATAURL = null; // original dataURL do arquivo
-  let PRELOADED_LOGO_ASPECT = null; // largura / altura
-  let PRELOADED_LOGO_OPTIMIZED = null; // dataURL otimizada (JPEG) pronta para o PDF
+  let PRELOADED_LOGO_DATAURL = null;
+  let PRELOADED_LOGO_ASPECT = null;
+  let PRELOADED_LOGO_OPTIMIZED = null;
 
-  // util: converte blob -> dataURL
   function blobToDataURL(blob) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -271,7 +327,6 @@
     });
   }
 
-  // util: otimiza um dataURL (img) para JPEG com largura máxima
   function optimizeDataUrl(dataUrl, maxWidthPx, mime = "image/jpeg", quality = 0.8) {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -283,7 +338,6 @@
         c.width = targetW;
         c.height = targetH;
         const cctx = c.getContext("2d");
-        // fundo branco pra evitar problemas com JPEG
         cctx.fillStyle = "#ffffff";
         cctx.fillRect(0, 0, c.width, c.height);
         cctx.drawImage(img, 0, 0, c.width, c.height);
@@ -299,7 +353,6 @@
     });
   }
 
-  // util: otimiza um canvas existente (assinatura) para JPEG com largura máxima
   function optimizeCanvasToDataUrl(srcCanvas, maxWidthPx, mime = "image/jpeg", quality = 0.9) {
     const sw = srcCanvas.width;
     const sh = srcCanvas.height;
@@ -310,25 +363,20 @@
     c.width = targetW;
     c.height = targetH;
     const cctx = c.getContext("2d");
-    // white background for JPEG
     cctx.fillStyle = "#ffffff";
     cctx.fillRect(0, 0, c.width, c.height);
-    // draw original canvas scaled down
     cctx.drawImage(srcCanvas, 0, 0, c.width, c.height);
     return c.toDataURL(mime, quality);
   }
 
   async function preloadLogo() {
-    console.info("[logo] preload start ->", logoPath);
     try {
       const res = await fetch(logoPath, { cache: "no-cache" });
       if (!res.ok) throw new Error("HTTP " + res.status);
       const blob = await res.blob();
-      // converte para dataURL
       const dataUrl = await blobToDataURL(blob);
       PRELOADED_LOGO_DATAURL = dataUrl;
 
-      // pega dimensões via Image
       const img = await new Promise((resolve, reject) => {
         const i = new Image();
         i.onload = () => resolve(i);
@@ -336,85 +384,37 @@
         i.src = dataUrl;
       });
       PRELOADED_LOGO_ASPECT = (img.naturalWidth || img.width) / (img.naturalHeight || img.height);
-      console.info("[logo] carregada (original) aspect:", PRELOADED_LOGO_ASPECT);
 
-      // agora otimiza: reduz largura para algo razoável (ex: 600px) e gera JPEG com qualidade
-      try {
-        const maxWidthPx = 600; // ajuste aqui se quiser mais/menos pixels
-        const optimized = await optimizeDataUrl(PRELOADED_LOGO_DATAURL, maxWidthPx, "image/jpeg", 0.8);
-        PRELOADED_LOGO_OPTIMIZED = optimized.dataUrl;
-        console.info("[logo] otimizada ->", optimized.width + "x" + optimized.height, "chars:", PRELOADED_LOGO_OPTIMIZED.length);
-      } catch (optErr) {
-        console.warn("[logo] otimização falhou, usando original:", optErr);
-        PRELOADED_LOGO_OPTIMIZED = PRELOADED_LOGO_DATAURL;
-      }
-
-      return;
-    } catch (err) {
-      console.warn("[logo] fetch falhou:", err);
-    }
-
-    // fallback por <img> direto (pode taintar se CORS bloquear)
-    try {
-      await new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => {
-          try {
-            const c = document.createElement("canvas");
-            c.width = img.naturalWidth || img.width;
-            c.height = img.naturalHeight || img.height;
-            const cctx = c.getContext("2d");
-            cctx.drawImage(img, 0, 0);
-            PRELOADED_LOGO_DATAURL = c.toDataURL("image/png");
-            PRELOADED_LOGO_ASPECT = (img.naturalWidth || img.width) / (img.naturalHeight || img.height);
-            resolve();
-          } catch (errCanvas) {
-            reject(errCanvas);
-          }
-        };
-        img.onerror = (e) => reject(new Error("Imagem fallback erro: " + e));
-        img.src = logoPath + "?cb=" + Date.now();
-      });
-
-      // otimiza
       try {
         const maxWidthPx = 600;
         const optimized = await optimizeDataUrl(PRELOADED_LOGO_DATAURL, maxWidthPx, "image/jpeg", 0.8);
         PRELOADED_LOGO_OPTIMIZED = optimized.dataUrl;
-        console.info("[logo] fallback otimizada ->", optimized.width + "x" + optimized.height);
       } catch (optErr) {
         PRELOADED_LOGO_OPTIMIZED = PRELOADED_LOGO_DATAURL;
       }
-
-      return;
-    } catch (err2) {
-      console.warn("[logo] fallback <img> falhou:", err2);
+    } catch (err) {
+      console.warn("[logo] preload falhou:", err);
+      PRELOADED_LOGO_DATAURL = null;
+      PRELOADED_LOGO_OPTIMIZED = null;
     }
-
-    console.warn("[logo] não foi possível carregar o logo — PDF será gerado sem logo.");
   }
 
   preloadLogo().catch((e) => console.error("[logo] preload erro:", e));
 
-  // Função que tenta múltiplas estratégias (mantida por compatibilidade)
   async function getLogoDataURL(url) {
-    // tenta usar já otimizado se disponível
     if (PRELOADED_LOGO_OPTIMIZED) return PRELOADED_LOGO_OPTIMIZED;
-    // senão tenta carregar agora (sincrono)
     try {
       const res = await fetch(url, { cache: "no-cache" });
       if (!res.ok) throw new Error("HTTP " + res.status);
       const blob = await res.blob();
       const dataUrl = await blobToDataURL(blob);
-      // otimiza
-      const maxWidthPx = 600;
-      const opt = await optimizeDataUrl(dataUrl, maxWidthPx, "image/jpeg", 0.8);
+      const opt = await optimizeDataUrl(dataUrl, 600, "image/jpeg", 0.8);
       return opt.dataUrl;
     } catch (err) {
       console.warn("getLogoDataURL fetch falhou:", err);
     }
 
-    // fallback image->canvas
+    // fallback
     try {
       const img = new Image();
       img.src = url;
@@ -436,7 +436,6 @@
     return null;
   }
 
-  // Extrai MIME (ex: 'PNG' ou 'JPEG') a partir de dataURL
   function getImageFormatFromDataUrl(dataUrl) {
     if (!dataUrl || typeof dataUrl !== "string") return "PNG";
     const m = dataUrl.match(/^data:image\/(png|jpeg|jpg);/i);
@@ -449,30 +448,24 @@
   // ---------- GERA PDF ----------
   btnGeneratePdf.addEventListener("click", async function gerarPDF() {
     try {
-      // usa a versão otimizada pronta (se houver), senão tenta carregar/otimizar agora
       let logoDataUrl = PRELOADED_LOGO_OPTIMIZED || null;
       if (!logoDataUrl && PRELOADED_LOGO_DATAURL) {
-        // tenta otimizar a original (segurança)
         try {
           const opt = await optimizeDataUrl(PRELOADED_LOGO_DATAURL, 600, "image/jpeg", 0.8);
           logoDataUrl = opt.dataUrl;
           PRELOADED_LOGO_OPTIMIZED = logoDataUrl;
         } catch (e) {
-          console.warn("Erro ao otimizar PRELOADED_LOGO_DATAURL no momento do PDF:", e);
           logoDataUrl = PRELOADED_LOGO_DATAURL;
         }
       }
       if (!logoDataUrl) {
-        // última tentativa síncrona
         try {
           logoDataUrl = await getLogoDataURL(logoPath);
         } catch (e) {
-          console.warn("Tentativa final de carregar logo falhou:", e);
           logoDataUrl = null;
         }
       }
 
-      // usa jsPDF
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
 
@@ -491,7 +484,6 @@
         tableData.push(rowData);
       }
 
-      // obtém dados do form
       const formElement = $("#deliveryForm");
       const formData = new FormData(formElement);
       const formDataObject = {};
@@ -501,7 +493,7 @@
       let dataFormatadaPDF = "";
       let dataFormatada = "";
       if (formDataObject.data) {
-        const parts = formDataObject.data.split("-"); // YYYY-MM-DD
+        const parts = formDataObject.data.split("-");
         if (parts.length === 3) {
           dataFormatadaPDF = `${parts[2]}-${parts[1]}-${parts[0]}`;
           const dt = new Date(parts[0], parts[1] - 1, parts[2]);
@@ -524,20 +516,15 @@
         ).padStart(2, "0")}-${now.getFullYear()}`;
       }
 
-      // função para adicionar cabeçalho e rodapé (usa PRELOADED_LOGO_OPTIMIZED se disponível)
       function addHeaderAndFooter(pageNumber) {
-        // Define largura máxima do logo no PDF (em mm).
-        const logoMaxWidthMm = 40; // largura máxima em mm
+        const logoMaxWidthMm = 40;
         if (logoDataUrl) {
           try {
-            const fmt = getImageFormatFromDataUrl(logoDataUrl); // 'JPEG' ou 'PNG'
-            // converter mm->posição correta: jsPDF usa mm, passamos width/height em mm
-            // preservando proporção: calculamos height a partir da proporção original PRELOADED_LOGO_ASPECT
+            const fmt = getImageFormatFromDataUrl(logoDataUrl);
             let logoWidth = logoMaxWidthMm;
             let logoHeight = logoWidth / (PRELOADED_LOGO_ASPECT || 1);
-            // posicione no canto superior direito (x, y)
             const pageWidth = doc.internal.pageSize.getWidth();
-            const x = pageWidth - 15 - logoWidth; // margem 15mm
+            const x = pageWidth - 15 - logoWidth;
             const y = 8;
             doc.addImage(logoDataUrl, fmt, x, y, logoWidth, logoHeight);
           } catch (e) {
@@ -565,17 +552,14 @@
         doc.setFont(undefined, "normal");
         doc.text(formDataObject.nomeTecnico || "", 52, 64);
 
-        // rodapé
         doc.setFontSize(10);
         doc.setFont(undefined, "normal");
         doc.text(`Página ${pageNumber}`, 105, 290, { align: "center" });
       }
 
-      // gera tabelas paginadas
       let currentPage = 1;
       let startY = 75;
 
-      // se não houver linhas, ainda queremos um cabeçalho
       if (tableData.length === 0) {
         addHeaderAndFooter(currentPage);
       }
@@ -594,7 +578,6 @@
         });
       }
 
-      // lugar pra assinatura
       let finalY = 0;
       if (
         doc.autoTable &&
@@ -606,15 +589,12 @@
         finalY = 80;
       }
 
-      // assinatura: pega dataURL do canvas (assinatura) e otimiza (reduz resolução e comprime)
+      // assinatura: otimizar canvas antes de embutir
       try {
-        // usa otimização para evitar embutir milhões de pixels
-        // escolhe largura em px para assinatura (ex: 600px) — diminuirá peso drasticamente
         const assinaturaOptimized = optimizeCanvasToDataUrl(canvas, 600, "image/jpeg", 0.9);
         const fmtSig = getImageFormatFromDataUrl(assinaturaOptimized);
-        // define tamanho em mm (aprox)
-        const sigWidthMm = 60; // ajuste conforme prefere (em mm)
-        const sigHeightMm = 30; // ajuste conforme prefere (em mm)
+        const sigWidthMm = 60;
+        const sigHeightMm = 30;
         doc.addImage(assinaturaOptimized, fmtSig, 15, finalY, sigWidthMm, sigHeightMm);
         doc.line(15, finalY + 35, 100, finalY + 35);
         doc.text(formDataObject.nomeRecebedor || "", 20, finalY + 39);
@@ -622,11 +602,8 @@
         console.warn("Erro ao adicionar assinatura no PDF:", e);
       }
 
-      // salvar
       const fileName = `form_entrega_pecas_${dataFormatadaPDF || "sem_data"}.pdf`;
       doc.save(fileName);
-
-      // dica de sucesso
       console.info("PDF gerado:", fileName);
     } catch (err) {
       console.error("Erro ao gerar PDF:", err);
@@ -634,92 +611,93 @@
     }
   });
 
-  // Se quiser, pode adicionar funções que mostram a câmera e usam Quagga.
-  window.iniciarLeituraCodigo = function (idInput) {
-    console.warn("iniciarLeituraCodigo(): implemente Quagga ou biblioteca de leitura de código se desejar.");
-  };
-})();
+  // ----------------- Quagga / Câmera -----------------
+  // Variáveis para controle da câmera
+  let cameraActive = false;
+  let currentTarget = null;
 
-
-
-// ... código existente ...
-
-// Variáveis para controle da câmera
-let cameraActive = false;
-let currentTarget = null;
-
-// Elementos para a câmera
-const cameraPreview = document.createElement('div');
-cameraPreview.className = 'camera-preview';
-cameraPreview.innerHTML = `
+  // Elementos para a câmera (cria apenas 1 vez)
+  const cameraPreview = document.createElement("div");
+  cameraPreview.className = "camera-preview";
+  cameraPreview.style.display = "none";
+  cameraPreview.innerHTML = `
     <video id="cameraVideo" autoplay playsinline></video>
     <button type="button" class="close-camera">X</button>
-`;
-document.body.appendChild(cameraPreview);
+  `;
+  document.body.appendChild(cameraPreview);
 
-// Função para iniciar a câmera
-function startCamera(targetId) {
+  function startCamera(targetId) {
     if (cameraActive) {
-        stopCamera();
-        return;
+      stopCamera();
+      return;
     }
 
     currentTarget = targetId;
     cameraActive = true;
-    cameraPreview.style.display = 'block';
+    cameraPreview.style.display = "block";
+
+    if (!window.Quagga) {
+      alert("Quagga não está carregado. Importe a biblioteca Quagga.js para usar a câmera.");
+      stopCamera();
+      return;
+    }
 
     Quagga.init({
-        inputStream: {
-            name: "Live",
-            type: "LiveStream",
-            target: cameraPreview.querySelector('video'),
-            constraints: {
-                width: 640,
-                height: 480,
-                facingMode: "environment" // ou "user" para frontal
-            }
-        },
-        decoder: {
-            readers: ["code_128_reader", "ean_reader", "ean_8_reader", "code_39_reader", "upc_reader"]
+      inputStream: {
+        name: "Live",
+        type: "LiveStream",
+        target: cameraPreview.querySelector('video'),
+        constraints: {
+          width: 640,
+          height: 480,
+          facingMode: "environment"
         }
+      },
+      decoder: {
+        readers: ["code_128_reader", "ean_reader", "ean_8_reader", "code_39_reader", "upc_reader"]
+      }
     }, function(err) {
-        if (err) {
-            console.error("Erro ao inicializar Quagga:", err);
-            alert("Não foi possível acessar a câmera.");
-            stopCamera();
-            return;
-        }
-        Quagga.start();
+      if (err) {
+        console.error("Erro ao inicializar Quagga:", err);
+        alert("Não foi possível acessar a câmera.");
+        stopCamera();
+        return;
+      }
+      Quagga.start();
     });
 
     Quagga.onDetected(function(result) {
-        const code = result.codeResult.code;
-        if (code) {
-            document.getElementById(targetId).value = code;
-            stopCamera();
-        }
+      const code = result && result.codeResult && result.codeResult.code;
+      if (code) {
+        const el = document.getElementById(targetId);
+        if (el) el.value = code;
+        stopCamera();
+      }
     });
-}
+  }
 
-// Função para parar a câmera
-function stopCamera() {
-    Quagga.stop();
-    cameraPreview.style.display = 'none';
+  function stopCamera() {
+    try {
+      if (window.Quagga && typeof Quagga.stop === "function") Quagga.stop();
+    } catch (e) {}
+    cameraPreview.style.display = "none";
     cameraActive = false;
     currentTarget = null;
-}
+  }
 
-// Evento para fechar a câmera
-cameraPreview.querySelector('.close-camera').addEventListener('click', stopCamera);
+  cameraPreview.querySelector('.close-camera').addEventListener('click', stopCamera);
 
-// Adicionar event listeners para os botões de câmera
-document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.btn-camera').forEach(button => {
-        button.addEventListener('click', function() {
-            const target = this.getAttribute('data-target');
-            startCamera(target);
-        });
+      button.addEventListener('click', function() {
+        const target = this.getAttribute('data-target');
+        if (target) startCamera(target);
+      });
     });
-});
+  });
 
-// ... resto do código ...
+  // expose helper to global if desired
+  window.iniciarLeituraCodigo = function (idInput) {
+    startCamera(idInput);
+  };
+})();
