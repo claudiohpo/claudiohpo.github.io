@@ -80,19 +80,15 @@
     window.addEventListener("orientationchange", handleResize);
     window.addEventListener("resize", handleResize);
 
-    function setTodayOnDateInput(selector, options = {}) {
-  const el = document.querySelector(selector);
-  if (!el) return;
-  const force = !!options.force;
-  if (!force && el.value) return; // não sobrescreve se já preenchido
-
-  const now = new Date();
-  const yyyy = now.getFullYear();
-  const mm = String(now.getMonth() + 1).padStart(2, "0");
-  const dd = String(now.getDate()).padStart(2, "0");
-  el.value = `${yyyy}-${mm}-${dd}`;
-}
-    
+    // 👉 Preencher campo de data com a data de hoje
+    const dataInput = document.getElementById("data");
+    if (dataInput) {
+      const hoje = new Date();
+      const ano = hoje.getFullYear();
+      const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+      const dia = String(hoje.getDate()).padStart(2, "0");
+      dataInput.value = `${ano}-${mes}-${dia}`;
+    }
   });
 
   // DESENHO
@@ -728,7 +724,6 @@
     .addEventListener("click", stopCamera);
 
   document.addEventListener("DOMContentLoaded", function () {
-    setTodayOnDateInput("#data");
     document.querySelectorAll(".btn-camera").forEach((button) => {
       button.addEventListener("click", function () {
         const target = this.getAttribute("data-target");
@@ -741,6 +736,3 @@
     startCamera(idInput);
   };
 })();
-
-
-
