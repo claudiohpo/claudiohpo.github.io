@@ -156,6 +156,9 @@ td[data-label="Ações"] button {
 }
 
 #signatureCanvas {
+    pointer-events: auto;
+    position: relative;
+    z-index: 10;
     display: block;
     width: 100%;
     height: var(--sig-height);
@@ -237,6 +240,7 @@ footer {
         margin-left: 0;
         margin-right: 0;
         width: 100%;
+        overflow: visible;
     }
 }
 
