@@ -18,19 +18,101 @@
 
   const canvas = $("#signatureCanvas");
   if (!canvas) {
-    console.error("Canvas de assinatura não encontrado (id='signatureCanvas').");
+    console.error(
+      "Canvas de assinatura não encontrado (id='signatureCanvas')."
+    );
     return;
   }
   const ctx = canvas.getContext("2d");
 
+  // /* ------------------------ CANVAS / ASSINATURA ------------------------ */
+  // function fixCanvasDPI() {
+  //   const w = canvas.clientWidth || 600;
+  //   const h = canvas.clientHeight || 300;
+  //   const ratio = Math.max(window.devicePixelRatio || 1, 1);
+
+  //   let prevData = null;
+  //   try { prevData = canvas.toDataURL(); } catch (err) { prevData = null; }
+
+  //   canvas.width = Math.round(w * ratio);
+  //   canvas.height = Math.round(h * ratio);
+
+  //   canvas.style.width = w + "px";
+  //   canvas.style.height = h + "px";
+
+  //   ctx.setTransform(1, 0, 0, 1, 0, 0);
+  //   ctx.scale(ratio, ratio);
+
+  //   ctx.lineWidth = 2;
+  //   ctx.lineCap = "round";
+  //   ctx.strokeStyle = "#000";
+
+  //   if (prevData) {
+  //     const img = new Image();
+  //     img.onload = () => {
+  //       try {
+  //         ctx.setTransform(1, 0, 0, 1, 0, 0);
+  //         ctx.clearRect(0, 0, canvas.width, canvas.height);
+  //         ctx.scale(ratio, ratio);
+  //         ctx.drawImage(img, 0, 0, canvas.clientWidth, canvas.clientHeight);
+  //       } catch (e) {
+  //         console.warn("Não foi possível restaurar desenho do canvas (CORS?)", e);
+  //       }
+  //     };
+  //     img.src = prevData;
+  //   } else {
+  //     ctx.setTransform(1, 0, 0, 1, 0, 0);
+  //     ctx.clearRect(0, 0, canvas.width, canvas.height);
+  //     ctx.scale(ratio, ratio);
+  //   }
+  // }
+
+  // window.addEventListener("load", fixCanvasDPI);
+  // let _resizeSigTimeout = null;
+  // window.addEventListener("resize", () => {
+  //   clearTimeout(_resizeSigTimeout);
+  //   _resizeSigTimeout = setTimeout(() => { fixCanvasDPI(); }, 150);
+  // });
+
+  // // DESENHO
+  // let drawing = false;
+  // function getPos(evt) {
+  //   const rect = canvas.getBoundingClientRect();
+  //   if (evt.touches && evt.touches.length) {
+  //     return { x: evt.touches[0].clientX - rect.left, y: evt.touches[0].clientY - rect.top };
+  //   } else {
+  //     return { x: evt.clientX - rect.left, y: evt.clientY - rect.top };
+  //   }
+  // }
+
+  // canvas.addEventListener("mousedown", (e) => { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); e.preventDefault(); });
+  // canvas.addEventListener("mousemove", (e) => { if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); e.preventDefault(); });
+  // ["mouseup", "mouseleave"].forEach((ev) => canvas.addEventListener(ev, () => { if (!drawing) return; drawing = false; try { ctx.closePath(); } catch (e) {} }));
+  // canvas.addEventListener("touchstart", (e) => { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); e.preventDefault(); }, { passive: false });
+  // canvas.addEventListener("touchmove", (e) => { if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); e.preventDefault(); }, { passive: false });
+  // ["touchend", "touchcancel"].forEach((ev) => canvas.addEventListener(ev, () => { drawing = false; try { ctx.closePath(); } catch (e) {} }));
+
+  // function limparAssinatura() {
+  //   ctx.setTransform(1, 0, 0, 1, 0, 0);
+  //   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  //   const ratio = Math.max(window.devicePixelRatio || 1, 1);
+  //   ctx.scale(ratio, ratio);
+  // }
+  // btnClearSig.addEventListener("click", limparAssinatura);
+
   /* ------------------------ CANVAS / ASSINATURA ------------------------ */
   function fixCanvasDPI() {
-    const w = canvas.clientWidth || 600;
-    const h = canvas.clientHeight || 300;
+    const container = canvas.parentElement;
+    const w = container.clientWidth || 600;
+    const h = container.clientHeight || 300;
     const ratio = Math.max(window.devicePixelRatio || 1, 1);
 
     let prevData = null;
-    try { prevData = canvas.toDataURL(); } catch (err) { prevData = null; }
+    try {
+      prevData = canvas.toDataURL();
+    } catch (err) {
+      prevData = null;
+    }
 
     canvas.width = Math.round(w * ratio);
     canvas.height = Math.round(h * ratio);
@@ -54,7 +136,10 @@
           ctx.scale(ratio, ratio);
           ctx.drawImage(img, 0, 0, canvas.clientWidth, canvas.clientHeight);
         } catch (e) {
-          console.warn("Não foi possível restaurar desenho do canvas (CORS?)", e);
+          console.warn(
+            "Não foi possível restaurar desenho do canvas (CORS?)",
+            e
+          );
         }
       };
       img.src = prevData;
@@ -65,11 +150,20 @@
     }
   }
 
-  window.addEventListener("load", fixCanvasDPI);
-  let _resizeSigTimeout = null;
-  window.addEventListener("resize", () => {
-    clearTimeout(_resizeSigTimeout);
-    _resizeSigTimeout = setTimeout(() => { fixCanvasDPI(); }, 150);
+  // Função para lidar com mudanças de orientação
+  function handleOrientationChange() {
+    // Força o redimensionamento do canvas
+    setTimeout(() => {
+      fixCanvasDPI();
+    }, 300);
+  }
+
+  window.addEventListener("load", () => {
+    fixCanvasDPI();
+    // Adiciona listener para mudanças de orientação
+    window.addEventListener("orientationchange", handleOrientationChange);
+    // Também adiciona listener para resize para garantir que funcione em todos os dispositivos
+    window.addEventListener("resize", handleOrientationChange);
   });
 
   // DESENHO
@@ -77,26 +171,86 @@
   function getPos(evt) {
     const rect = canvas.getBoundingClientRect();
     if (evt.touches && evt.touches.length) {
-      return { x: evt.touches[0].clientX - rect.left, y: evt.touches[0].clientY - rect.top };
+      return {
+        x: evt.touches[0].clientX - rect.left,
+        y: evt.touches[0].clientY - rect.top,
+      };
     } else {
       return { x: evt.clientX - rect.left, y: evt.clientY - rect.top };
     }
   }
 
-  canvas.addEventListener("mousedown", (e) => { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); e.preventDefault(); });
-  canvas.addEventListener("mousemove", (e) => { if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); e.preventDefault(); });
-  ["mouseup", "mouseleave"].forEach((ev) => canvas.addEventListener(ev, () => { if (!drawing) return; drawing = false; try { ctx.closePath(); } catch (e) {} }));
-  canvas.addEventListener("touchstart", (e) => { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); e.preventDefault(); }, { passive: false });
-  canvas.addEventListener("touchmove", (e) => { if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); e.preventDefault(); }, { passive: false });
-  ["touchend", "touchcancel"].forEach((ev) => canvas.addEventListener(ev, () => { drawing = false; try { ctx.closePath(); } catch (e) {} }));
+  canvas.addEventListener("mousedown", (e) => {
+    drawing = true;
+    const p = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+    e.preventDefault();
+  });
+  canvas.addEventListener("mousemove", (e) => {
+    if (!drawing) return;
+    const p = getPos(e);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+    e.preventDefault();
+  });
+  ["mouseup", "mouseleave"].forEach((ev) =>
+    canvas.addEventListener(ev, () => {
+      if (!drawing) return;
+      drawing = false;
+      try {
+        ctx.closePath();
+      } catch (e) {}
+    })
+  );
+  canvas.addEventListener(
+    "touchstart",
+    (e) => {
+      drawing = true;
+      const p = getPos(e);
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+      e.preventDefault();
+    },
+    { passive: false }
+  );
+  canvas.addEventListener(
+    "touchmove",
+    (e) => {
+      if (!drawing) return;
+      const p = getPos(e);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+      e.preventDefault();
+    },
+    { passive: false }
+  );
+  ["touchend", "touchcancel"].forEach((ev) =>
+    canvas.addEventListener(ev, () => {
+      drawing = false;
+      try {
+        ctx.closePath();
+      } catch (e) {}
+    })
+  );
 
   function limparAssinatura() {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    F;
     const ratio = Math.max(window.devicePixelRatio || 1, 1);
     ctx.scale(ratio, ratio);
   }
   btnClearSig.addEventListener("click", limparAssinatura);
+
+  // Observar mudanças no container do canvas
+  if (typeof ResizeObserver !== "undefined") {
+    const container = canvas.parentElement;
+    const resizeObserver = new ResizeObserver((entries) => {
+      setTimeout(fixCanvasDPI, 100);
+    });
+    resizeObserver.observe(container);
+  }
 
   /* ------------------------ TABELA DINÂMICA (sem alterações) ------------------------ */
   const HEADER_CODIGO = "Código";
@@ -133,8 +287,12 @@
     tdNota.setAttribute("data-label", HEADER_NOTA);
     tdActions.setAttribute("data-label", HEADER_ACOES);
 
-    const btnEdit = makeActionButton("Editar", "edit-btn", () => editarLinha(tr));
-    const btnDelete = makeActionButton("Excluir", "delete-btn", () => excluirLinha(tr));
+    const btnEdit = makeActionButton("Editar", "edit-btn", () =>
+      editarLinha(tr)
+    );
+    const btnDelete = makeActionButton("Excluir", "delete-btn", () =>
+      excluirLinha(tr)
+    );
 
     tdActions.appendChild(btnEdit);
     tdActions.appendChild(btnDelete);
@@ -154,10 +312,15 @@
   function addRowFull() {
     const raw = inputCompleto.value.trim();
     if (!raw) return;
-    const valores = raw.split(/[,.;\n\r]+|\s{2,}|[ ]+/).map((v) => v.trim()).filter(Boolean);
+    const valores = raw
+      .split(/[,.;\n\r]+|\s{2,}|[ ]+/)
+      .map((v) => v.trim())
+      .filter(Boolean);
 
     if (valores.length % 3 !== 0) {
-      alert("Por favor, insira valores em múltiplos de 3: Código, Serial, Nota Fiscal.");
+      alert(
+        "Por favor, insira valores em múltiplos de 3: Código, Serial, Nota Fiscal."
+      );
       return;
     }
 
@@ -177,8 +340,12 @@
       tdNota.setAttribute("data-label", HEADER_NOTA);
       tdActions.setAttribute("data-label", HEADER_ACOES);
 
-      const btnEdit = makeActionButton("Editar", "edit-btn", () => editarLinha(tr));
-      const btnDelete = makeActionButton("Excluir", "delete-btn", () => excluirLinha(tr));
+      const btnEdit = makeActionButton("Editar", "edit-btn", () =>
+        editarLinha(tr)
+      );
+      const btnDelete = makeActionButton("Excluir", "delete-btn", () =>
+        excluirLinha(tr)
+      );
 
       tdActions.appendChild(btnEdit);
       tdActions.appendChild(btnDelete);
@@ -204,7 +371,9 @@
     }
   }
 
-  function excluirLinha(tr) { tr.remove(); }
+  function excluirLinha(tr) {
+    tr.remove();
+  }
 
   btnAdd.addEventListener("click", addRow);
   btnAddFull.addEventListener("click", addRowFull);
@@ -224,11 +393,17 @@
     });
   }
 
-  async function optimizeDataUrl(dataUrl, maxWidthPx, mime = "image/jpeg", quality = 0.75) {
+  async function optimizeDataUrl(
+    dataUrl,
+    maxWidthPx,
+    mime = "image/jpeg",
+    quality = 0.75
+  ) {
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => {
-        const aspect = (img.naturalWidth || img.width) / (img.naturalHeight || img.height);
+        const aspect =
+          (img.naturalWidth || img.width) / (img.naturalHeight || img.height);
         const targetW = Math.min(maxWidthPx, img.naturalWidth || img.width);
         const targetH = Math.round(targetW / aspect) || 1;
         const c = document.createElement("canvas");
@@ -250,7 +425,12 @@
     });
   }
 
-  function optimizeCanvasToDataUrl(srcCanvas, maxWidthPx, mime = "image/jpeg", quality = 0.75) {
+  function optimizeCanvasToDataUrl(
+    srcCanvas,
+    maxWidthPx,
+    mime = "image/jpeg",
+    quality = 0.75
+  ) {
     const sw = srcCanvas.width;
     const sh = srcCanvas.height;
     const aspect = sw / sh || 1;
@@ -281,12 +461,18 @@
         i.onerror = reject;
         i.src = dataUrl;
       });
-      PRELOADED_LOGO_ASPECT = (img.naturalWidth || img.width) / (img.naturalHeight || img.height);
+      PRELOADED_LOGO_ASPECT =
+        (img.naturalWidth || img.width) / (img.naturalHeight || img.height);
 
       try {
         // reduzir largura do logo para 300px por padrão e qualidade 0.75
         const maxWidthPx = 300;
-        const optimized = await optimizeDataUrl(PRELOADED_LOGO_DATAURL, maxWidthPx, "image/jpeg", 0.75);
+        const optimized = await optimizeDataUrl(
+          PRELOADED_LOGO_DATAURL,
+          maxWidthPx,
+          "image/jpeg",
+          0.75
+        );
         PRELOADED_LOGO_OPTIMIZED = optimized.dataUrl;
       } catch (optErr) {
         PRELOADED_LOGO_OPTIMIZED = PRELOADED_LOGO_DATAURL;
@@ -316,7 +502,10 @@
     try {
       const img = new Image();
       img.src = url;
-      await new Promise((res, rej) => { img.onload = res; img.onerror = rej; });
+      await new Promise((res, rej) => {
+        img.onload = res;
+        img.onerror = rej;
+      });
       const c = document.createElement("canvas");
       c.width = img.naturalWidth || img.width;
       c.height = img.naturalHeight || img.height;
@@ -343,10 +532,16 @@
   btnGeneratePdf.addEventListener("click", async function gerarPDF() {
     try {
       // prefer optimized preloaded logo
-      let logoDataUrl = PRELOADED_LOGO_OPTIMIZED || PRELOADED_LOGO_DATAURL || null;
+      let logoDataUrl =
+        PRELOADED_LOGO_OPTIMIZED || PRELOADED_LOGO_DATAURL || null;
       if (!logoDataUrl && PRELOADED_LOGO_DATAURL) {
         try {
-          const opt = await optimizeDataUrl(PRELOADED_LOGO_DATAURL, 300, "image/jpeg", 0.75);
+          const opt = await optimizeDataUrl(
+            PRELOADED_LOGO_DATAURL,
+            300,
+            "image/jpeg",
+            0.75
+          );
           logoDataUrl = opt.dataUrl;
           PRELOADED_LOGO_OPTIMIZED = logoDataUrl;
         } catch (e) {
@@ -354,7 +549,11 @@
         }
       }
       if (!logoDataUrl) {
-        try { logoDataUrl = await getLogoDataURL(logoPath); } catch (e) { logoDataUrl = null; }
+        try {
+          logoDataUrl = await getLogoDataURL(logoPath);
+        } catch (e) {
+          logoDataUrl = null;
+        }
       }
 
       const { jsPDF } = window.jspdf;
@@ -387,13 +586,23 @@
         if (parts.length === 3) {
           dataFormatadaPDF = `${parts[2]}-${parts[1]}-${parts[0]}`;
           const dt = new Date(parts[0], parts[1] - 1, parts[2]);
-          dataFormatada = dt.toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" });
+          dataFormatada = dt.toLocaleDateString("pt-BR", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          });
         }
       }
       if (!dataFormatada) {
         const now = new Date();
-        dataFormatada = now.toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" });
-        dataFormatadaPDF = `${String(now.getDate()).padStart(2, "0")}-${String(now.getMonth() + 1).padStart(2, "0")}-${now.getFullYear()}`;
+        dataFormatada = now.toLocaleDateString("pt-BR", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        });
+        dataFormatadaPDF = `${String(now.getDate()).padStart(2, "0")}-${String(
+          now.getMonth() + 1
+        ).padStart(2, "0")}-${now.getFullYear()}`;
       }
 
       function addHeaderAndFooter(pageNumber) {
@@ -414,7 +623,9 @@
 
         doc.setFontSize(20);
         doc.setFont(undefined, "bold");
-        doc.text("Formulário de Entrega de Peças", 105, 30, { align: "center" });
+        doc.text("Formulário de Entrega de Peças", 105, 30, {
+          align: "center",
+        });
 
         doc.setFontSize(12);
         doc.setFont(undefined, "bold");
@@ -442,13 +653,25 @@
       if (tableData.length === 0) addHeaderAndFooter(currentPage);
 
       for (let i = 0; i < tableData.length; i += maxRowsPerPage) {
-        if (i !== 0) { doc.addPage(); currentPage++; }
+        if (i !== 0) {
+          doc.addPage();
+          currentPage++;
+        }
         addHeaderAndFooter(currentPage);
-        doc.autoTable({ head: [tableColumnNames], body: tableData.slice(i, i + maxRowsPerPage), startY: startY, styles: { fontSize: 10 } });
+        doc.autoTable({
+          head: [tableColumnNames],
+          body: tableData.slice(i, i + maxRowsPerPage),
+          startY: startY,
+          styles: { fontSize: 10 },
+        });
       }
 
       let finalY = 0;
-      if (doc.autoTable && doc.autoTable.previous && typeof doc.autoTable.previous.finalY === "number") {
+      if (
+        doc.autoTable &&
+        doc.autoTable.previous &&
+        typeof doc.autoTable.previous.finalY === "number"
+      ) {
         finalY = doc.autoTable.previous.finalY + 10;
       } else {
         finalY = 80;
@@ -457,11 +680,23 @@
       // ----- ASSINATURA: gerar JPEG otimizado (much smaller que PNG) -----
       try {
         // Ajuste aqui: maxWidthPx e qualidade. Diminuir qualidade => menor arquivo.
-        const assinaturaOptimized = optimizeCanvasToDataUrl(canvas, 600, "image/jpeg", 0.6);
+        const assinaturaOptimized = optimizeCanvasToDataUrl(
+          canvas,
+          600,
+          "image/jpeg",
+          0.6
+        );
         const fmtSig = getImageFormatFromDataUrl(assinaturaOptimized);
         const sigWidthMm = 60;
         const sigHeightMm = 30;
-        doc.addImage(assinaturaOptimized, fmtSig, 15, finalY, sigWidthMm, sigHeightMm);
+        doc.addImage(
+          assinaturaOptimized,
+          fmtSig,
+          15,
+          finalY,
+          sigWidthMm,
+          sigHeightMm
+        );
 
         doc.line(15, finalY + 35, 100, finalY + 35);
         doc.text(formDataObject.nomeRecebedor || "", 20, finalY + 39);
@@ -469,7 +704,9 @@
         console.warn("Erro ao adicionar assinatura no PDF:", e);
       }
 
-      const fileName = `form_entrega_pecas_${dataFormatadaPDF || "sem_data"}.pdf`;
+      const fileName = `form_entrega_pecas_${
+        dataFormatadaPDF || "sem_data"
+      }.pdf`;
       doc.save(fileName);
       console.info("PDF gerado:", fileName);
     } catch (err) {
@@ -492,24 +729,50 @@
   document.body.appendChild(cameraPreview);
 
   function startCamera(targetId) {
-    if (cameraActive) { stopCamera(); return; }
+    if (cameraActive) {
+      stopCamera();
+      return;
+    }
     currentTarget = targetId;
     cameraActive = true;
     cameraPreview.style.display = "block";
 
     if (!window.Quagga) {
-      alert("Quagga não está carregado. Importe a biblioteca Quagga.js para usar a câmera.");
+      alert(
+        "Quagga não está carregado. Importe a biblioteca Quagga.js para usar a câmera."
+      );
       stopCamera();
       return;
     }
 
-    Quagga.init({
-      inputStream: { name: "Live", type: "LiveStream", target: cameraPreview.querySelector("video"), constraints: { width: 640, height: 480, facingMode: "environment" } },
-      decoder: { readers: ["code_128_reader","ean_reader","ean_8_reader","code_39_reader","upc_reader"] }
-    }, function (err) {
-      if (err) { console.error("Erro ao inicializar Quagga:", err); alert("Não foi possível acessar a câmera."); stopCamera(); return; }
-      Quagga.start();
-    });
+    Quagga.init(
+      {
+        inputStream: {
+          name: "Live",
+          type: "LiveStream",
+          target: cameraPreview.querySelector("video"),
+          constraints: { width: 640, height: 480, facingMode: "environment" },
+        },
+        decoder: {
+          readers: [
+            "code_128_reader",
+            "ean_reader",
+            "ean_8_reader",
+            "code_39_reader",
+            "upc_reader",
+          ],
+        },
+      },
+      function (err) {
+        if (err) {
+          console.error("Erro ao inicializar Quagga:", err);
+          alert("Não foi possível acessar a câmera.");
+          stopCamera();
+          return;
+        }
+        Quagga.start();
+      }
+    );
 
     Quagga.onDetected(function (result) {
       const code = result && result.codeResult && result.codeResult.code;
@@ -522,13 +785,17 @@
   }
 
   function stopCamera() {
-    try { if (window.Quagga && typeof Quagga.stop === "function") Quagga.stop(); } catch (e) {}
+    try {
+      if (window.Quagga && typeof Quagga.stop === "function") Quagga.stop();
+    } catch (e) {}
     cameraPreview.style.display = "none";
     cameraActive = false;
     currentTarget = null;
   }
 
-  cameraPreview.querySelector(".close-camera").addEventListener("click", stopCamera);
+  cameraPreview
+    .querySelector(".close-camera")
+    .addEventListener("click", stopCamera);
 
   document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll(".btn-camera").forEach((button) => {
@@ -539,5 +806,7 @@
     });
   });
 
-  window.iniciarLeituraCodigo = function (idInput) { startCamera(idInput); };
+  window.iniciarLeituraCodigo = function (idInput) {
+    startCamera(idInput);
+  };
 })();

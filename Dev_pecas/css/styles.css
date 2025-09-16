@@ -1,257 +1,275 @@
 /* styles.css
-   Refatorado — variáveis para fácil ajuste.
-*/
+           Refatorado — variáveis para fácil ajuste.
+        */
 
 /* ===== VARIÁVEIS (Ajuste aqui) ===== */
-:root{
-  --page-padding: 1rem;        /* padding horizontal da página (body) */
-  --form-max-width: 800px;     /* largura máxima do formulário central */
-  --sig-height: 300px;         /* altura fixa do canvas de assinatura */
-  --sig-border-color: #ccc;
-  --sig-border-radius: 8px;
-  --sig-bg: #fafafa;
+:root {
+    --page-padding: 1rem;
+    /* padding horizontal da página (body) */
+    --form-max-width: 800px;
+    /* largura máxima do formulário central */
+    --sig-height: 300px;
+    /* altura fixa do canvas de assinatura */
+    --sig-border-color: #ccc;
+    --sig-border-radius: 8px;
+    --sig-bg: #fafafa;
 }
 
 /* ===== RESET BÁSICO ===== */
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
 }
 
 body {
-  background: #f9f9f9;
-  color: #333;
-  line-height: 1.5;
-  padding: var(--page-padding);
+    background: #f9f9f9;
+    color: #333;
+    line-height: 1.5;
+    padding: var(--page-padding);
 }
 
 /* ===== TÍTULO ===== */
 h1 {
-  text-align: center;
-  color: #1e3fa9;
-  margin-bottom: 1.5rem;
-  font-size: 1.8rem;
+    text-align: center;
+    color: #1e3fa9;
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
 }
 
 /* ===== FORMULÁRIO ===== */
 form {
-  max-width: var(--form-max-width);
-  margin: auto;
-  background: #fff;
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    max-width: var(--form-max-width);
+    margin: auto;
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 label {
-  display: block;
-  font-weight: bold;
-  margin: 0.8rem 0 0.3rem;
+    display: table; /* valor antigo era block*/
+    font-weight: bold;
+    margin: 0.8rem 0 0.3rem;
 }
 
 input,
 textarea,
 button {
-  width: 100%;
-  padding: 0.8rem;
-  margin-bottom: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 1rem;
+    width: 100%;
+    padding: 0.8rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
 }
 
 /* ===== BOTÕES ===== */
 button {
-  background: #1e3fa9;
-  color: #fff;
-  border: none;
-  cursor: pointer;
-  font-weight: bold;
-  transition: 0.25s;
+    background: #1e3fa9;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.25s;
 }
 
 button:hover {
-  background: #16307d;
+    background: #16307d;
 }
 
 /* Botão Editar (Amarelo) */
-.edit-btn { background: #f1c40f; color: #000; }
-.edit-btn:hover { background: #d4ac0d; }
+.edit-btn {
+    background: #f1c40f;
+    color: #000;
+}
+
+.edit-btn:hover {
+    background: #d4ac0d;
+}
 
 /* Botão Excluir (Vermelho) */
-.delete-btn { background: #e74c3c; color: #fff; }
-.delete-btn:hover { background: #c0392b; }
+.delete-btn {
+    background: #e74c3c;
+    color: #fff;
+}
+
+.delete-btn:hover {
+    background: #c0392b;
+}
 
 /* ===== TABELA ===== */
 table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 1rem 0;
-  font-size: 0.95rem;
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: 0.95rem;
 }
 
-thead { background: #1e3fa9; color: #fff; }
-th, td {
-  padding: 0.8rem;
-  border: 1px solid #ddd;
-  text-align: center;
-  vertical-align: middle;
+thead {
+    background: #1e3fa9;
+    color: #fff;
+}
+
+th,
+td {
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    text-align: center;
+    vertical-align: middle;
 }
 
 /* Ações: botões empilhados */
 td[data-label="Ações"] {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  justify-content: center;
-  align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    justify-content: center;
+    align-items: center;
 }
 
 td[data-label="Ações"] button {
-  width: 90%;
-  padding: 0.5rem;
-  font-size: 0.85rem;
+    width: 90%;
+    padding: 0.5rem;
+    font-size: 0.85rem;
 }
 
 /* ===== ASSINATURA - AREA FULL-BLEED ===== */
-/* A área de assinatura ocupa toda a largura da página (full-bleed)
-   mas continua dentro do fluxo do formulário. Para ajustar alturas/tamanhos,
-   altere as variáveis no :root (--sig-height, --page-padding, --form-max-width). */
-
 .signature-wrap {
-  /* expandir horizontalmente além do max-width do form para "full width" */
-  width: calc(100% + 2 * var(--page-padding));
-  margin-left: calc(-1 * var(--page-padding));
-  margin-right: calc(-1 * var(--page-padding));
-
-  box-sizing: border-box;
-  margin-top: 1rem;
-  background: var(--sig-bg);
-  border: 2px dashed var(--sig-border-color);
-  border-radius: var(--sig-border-radius);
-  padding: 0.6rem;
-
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  justify-content: center;
-  gap: 0.5rem;
-
-  /* altura do container segue a altura fixa do canvas */
-  min-height: var(--sig-height);
-  overflow: hidden;
+    width: calc(100% + 2 * var(--page-padding));
+    margin-left: calc(-1 * var(--page-padding));
+    margin-right: calc(-1 * var(--page-padding));
+    box-sizing: border-box;
+    margin-top: 1rem;
+    background: var(--sig-bg);
+    border: 2px dashed var(--sig-border-color);
+    border-radius: var(--sig-border-radius);
+    padding: 0.6rem;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: var(--sig-height);
+    overflow: hidden;
 }
 
-/* Canvas: ocupa 100% da largura do container e tem altura fixa (variável) */
 #signatureCanvas {
-  display: block;
-  width: 100%;
-  height: var(--sig-height);   /* para alterar altura, mude --sig-height */
-  max-width: 100%;
-  border-radius: calc(var(--sig-border-radius) - 2px);
-  background: #fff;
-  touch-action: none; /* melhora interação em mobile */
+    display: block;
+    width: 100%;
+    height: var(--sig-height);
+    max-width: 100%;
+    border-radius: calc(var(--sig-border-radius) - 2px);
+    background: #fff;
+    touch-action: none;
 }
 
-/* Botões de assinatura
-   - padrão desktop: centralizados
-   - se você quiser que ocupem toda a largura no desktop, adicione a classe "full" ao container (.sig-buttons.full)
-*/
 .sig-buttons {
-  display: flex;
-  gap: 0.5rem;
-  justify-content: center;  /* <-- botão centralizado em telas grandes */
-  align-items: center;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    align-items: center;
 }
 
-/* se você preferir que os botões ocupem toda a largura (desktop),
-   altere adicionando a classe "full" no HTML: <div class="sig-buttons full"> */
 .sig-buttons.full {
-  justify-content: space-between;
+    justify-content: space-between;
 }
 
-/* quando existe apenas 1 botão e você quer que ele ocupe todo o espaço
-   horizontal (ex: "Limpar Assinatura" full-width), use:
-   <div class="sig-buttons full">
-     <button class="...">Limpar Assinatura</button>
-   </div>
-   e o botão ficará largo abaixo */
 .sig-buttons.full button {
-  width: 100%;
-  flex: 1 1 auto;
+    width: 100%;
+    flex: 1 1 auto;
 }
-
-/* padrão quando há vários botões: o botão tem width: auto (herdado) */
 
 /* ===== AÇÕES FINAIS ===== */
-.actions { text-align: center; margin-top: 1rem; }
-.actions button { width: auto; padding: 0.7rem 1.2rem; }
+.actions {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.actions button {
+    width: auto;
+    padding: 0.7rem 1.2rem;
+}
 
 /* ===== RODAPÉ ===== */
-footer { text-align: center; margin-top: 2rem; font-size: 0.9rem; color: #555; }
+footer {
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 0.9rem;
+    color: #555;
+}
 
 /* ===== RESPONSIVIDADE ===== */
 @media (max-width: 768px) {
-  body { padding: calc(var(--page-padding) / 2); }
+    body {
+        padding: calc(var(--page-padding) / 2);
+    }
 
-  h1 { font-size: 1.5rem; }
+    h1 {
+        font-size: 1.5rem;
+    }
 
-  table, thead, tbody, th, td, tr {
-    display: block;
-    width: 100%;
-  }
+    table,
+    thead,
+    tbody,
+    th,
+    td,
+    tr {
+        display: block;
+        width: 100%;
+    }
 
-  thead { display: none; }
+    thead {
+        display: none;
+    }
 
-  tr {
-    margin-bottom: 1rem;
-    background: #fff;
-    border-radius: 8px;
-    padding: 0.5rem;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-  }
+    tr {
+        margin-bottom: 1rem;
+        background: #fff;
+        border-radius: 8px;
+        padding: 0.5rem;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
 
-  td {
-    text-align: right;
-    padding-left: 50%;
-    position: relative;
-  }
+    td {
+        text-align: right;
+        padding-left: 50%;
+        position: relative;
+    }
 
-  td::before {
-    content: attr(data-label);
-    position: absolute;
-    left: 0;
-    width: 50%;
-    padding-left: 0.5rem;
-    font-weight: bold;
-    text-align: left;
-  }
+    td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 0;
+        width: 50%;
+        padding-left: 0.5rem;
+        font-weight: bold;
+        text-align: left;
+    }
 
-  td[data-label="Ações"] {
-    flex-direction: column;
-    align-items: stretch;
-  }
+    td[data-label="Ações"] {
+        flex-direction: column;
+        align-items: stretch;
+    }
 
-  td[data-label="Ações"] button {
-    width: 100%;
-  }
+    td[data-label="Ações"] button {
+        width: 100%;
+    }
 }
 
-/* quando tela muito pequena, empilhar os botões e torná-los full width */
 @media (max-width: 540px) {
-  .signature-wrap {
-    padding: 0.5rem;
-    min-height: calc(var(--sig-height) - 20px);
-  }
+    .signature-wrap {
+        padding: 0.5rem;
+        min-height: calc(var(--sig-height) - 20px);
+    }
 
-  .sig-buttons {
-    flex-direction: column;
-    align-items: stretch;
-  }
+    .sig-buttons {
+        flex-direction: column;
+        align-items: stretch;
+    }
 
-  .sig-buttons button {
-    width: 100%;
-  }
+    .sig-buttons button {
+        width: 100%;
+    }
 }
