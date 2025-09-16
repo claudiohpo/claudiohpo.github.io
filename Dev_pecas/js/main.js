@@ -1,4 +1,3 @@
-
 /* main.js (atualizado: assinatura e logo otimizados para reduzir tamanho do PDF) */
 (function () {
   // SHORTCUTS
@@ -35,46 +34,48 @@
 
     const ratio = window.devicePixelRatio || 1;
 
-    // Definir dimensões do canvas
-    canvas.width = cssWidth * ratio;
-    canvas.height = cssHeight * ratio;
+    // definir dimensões reais do canvas (pixels físicos)
+    canvas.width = Math.round(cssWidth * ratio);
+    canvas.height = Math.round(cssHeight * ratio);
+
+    // manter tamanho CSS para layout
     canvas.style.width = cssWidth + "px";
     canvas.style.height = cssHeight + "px";
 
-    // Configurar contexto
+    // aplicar transform para que as coordenadas de desenho possam ser em CSS pixels
+    // (ctx é transformado, portanto não precisamos escalar as coordenadas manualmente)
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-    ctx.lineWidth = 2;
+
+    // ajustar linha para ficar consistente visualmente (opcional ajustar valor)
+    // Para obter ~2px visíveis em CSS, definimos lineWidth em unidades CSS:
+    ctx.lineWidth = 2; // se ficar muito grosso em alguns dispositivos, ajuste para 1.5 ou 1
     ctx.lineCap = "round";
     ctx.strokeStyle = "#000";
 
-    // Limpar o canvas
+    // limpar corretamente (resetando a transform temporariamente)
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-}
+    ctx.restore();
+  }
 
   // Função para lidar com mudanças de orientação e redimensionamento
   function debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
+      const later = () => {
         clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
     };
-}
+  }
 
-const handleResize = debounce(() => {
+  const handleResize = debounce(() => {
     fixCanvasDPI();
-}, 100);
+  }, 100);
 
-window.addEventListener("load", () => {
-    fixCanvasDPI();
-    window.addEventListener("orientationchange", handleResize);
-    window.addEventListener("resize", handleResize);
-});
-
-  // Inicialização
   window.addEventListener("load", () => {
     fixCanvasDPI();
     window.addEventListener("orientationchange", handleResize);
@@ -85,77 +86,87 @@ window.addEventListener("load", () => {
   let drawing = false;
   function getPos(evt) {
     const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width; // Escala para o canvas real
-    const scaleY = canvas.height / rect.height;
 
     if (evt.touches && evt.touches.length) {
-        return {
-            x: (evt.touches[0].clientX - rect.left) * scaleX,
-            y: (evt.touches[0].clientY - rect.top) * scaleY
-        };
+      return {
+        x: evt.touches[0].clientX - rect.left,
+        y: evt.touches[0].clientY - rect.top,
+      };
     } else {
-        return {
-            x: (evt.clientX - rect.left) * scaleX,
-            y: (evt.clientY - rect.top) * scaleY
-        };
+      return {
+        x: evt.clientX - rect.left,
+        y: evt.clientY - rect.top,
+      };
     }
-}
-
-  canvas.addEventListener("mousedown", (e) => { 
-    drawing = true; 
-    const p = getPos(e); 
-    ctx.beginPath(); 
-    ctx.moveTo(p.x, p.y); 
-    e.preventDefault(); 
-  });
-  
-  canvas.addEventListener("mousemove", (e) => { 
-    if (!drawing) return; 
-    const p = getPos(e); 
-    ctx.lineTo(p.x, p.y); 
-    ctx.stroke(); 
-    e.preventDefault(); 
-  });
-  
-  ["mouseup", "mouseleave"].forEach((ev) => {
-    canvas.addEventListener(ev, () => { 
-        if (!drawing) return; 
-        drawing = false; 
-        try { 
-            ctx.closePath(); 
-        } catch (e) {} 
-    });
-  });
-  
-  canvas.addEventListener("touchstart", (e) => { 
-    drawing = true; 
-    const p = getPos(e); 
-    ctx.beginPath(); 
-    ctx.moveTo(p.x, p.y); 
-    e.preventDefault(); 
-  }, { passive: false });
-  
-  canvas.addEventListener("touchmove", (e) => { 
-    if (!drawing) return; 
-    const p = getPos(e); 
-    ctx.lineTo(p.x, p.y); 
-    ctx.stroke(); 
-    e.preventDefault(); 
-  }, { passive: false });
-  
-  ["touchend", "touchcancel"].forEach((ev) => {
-    canvas.addEventListener(ev, () => { 
-        drawing = false; 
-        try { 
-            ctx.closePath(); 
-        } catch (e) {} 
-    });
-  });
-
-  function limparAssinatura() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
-  
+
+  canvas.addEventListener("mousedown", (e) => {
+    drawing = true;
+    const p = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+    e.preventDefault();
+  });
+
+  canvas.addEventListener("mousemove", (e) => {
+    if (!drawing) return;
+    const p = getPos(e);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+    e.preventDefault();
+  });
+
+  ["mouseup", "mouseleave"].forEach((ev) => {
+    canvas.addEventListener(ev, () => {
+      if (!drawing) return;
+      drawing = false;
+      try {
+        ctx.closePath();
+      } catch (e) {}
+    });
+  });
+
+  canvas.addEventListener(
+    "touchstart",
+    (e) => {
+      drawing = true;
+      const p = getPos(e);
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+      e.preventDefault();
+    },
+    { passive: false }
+  );
+
+  canvas.addEventListener(
+    "touchmove",
+    (e) => {
+      if (!drawing) return;
+      const p = getPos(e);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+      e.preventDefault();
+    },
+    { passive: false }
+  );
+
+  ["touchend", "touchcancel"].forEach((ev) => {
+    canvas.addEventListener(ev, () => {
+      drawing = false;
+      try {
+        ctx.closePath();
+      } catch (e) {}
+    });
+  });
+
+  // limpar assinatura respeitando transform
+  function limparAssinatura() {
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.restore();
+  }
+
   btnClearSig.addEventListener("click", limparAssinatura);
 
   /* ------------------------ TABELA DINÂMICA (sem alterações) ------------------------ */
