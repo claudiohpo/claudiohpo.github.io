@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <!-- Última alteração: 15/09/2025 -->
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -48,8 +49,9 @@
             <input type="text" id="codigoPeca" placeholder="Código da Peça" autocapitalize="characters" />
             <button type="button" class="btn-camera" data-target="codigoPeca" aria-label="Abrir câmera para Código">
                 <!-- ícone simples de câmera -->
-                <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <path fill="currentColor" d="M12 5.5L14 7h3a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h3l2-1.5zM12 9.5a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/>
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 48 48">
+                    <path fill="#fff"
+                        d="M6 8h1v32H6zm2 0h2v32H8zm5 0h1v32h-1zm3 0h3v32h-3zm5 0h1v32h-1zm3 0h2v32h-2zm4 0h1v32h-1zm3 0h4v32h-4zm6 0h1v32h-1zm3 0h2v32h-2z" />
                 </svg>
             </button>
         </div>
@@ -58,8 +60,9 @@
         <div class="row">
             <input type="text" id="serialProxxi" placeholder="Número de Série" autocapitalize="characters" />
             <button type="button" class="btn-camera" data-target="serialProxxi" aria-label="Abrir câmera para Serial">
-                <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <path fill="currentColor" d="M12 5.5L14 7h3a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h3l2-1.5zM12 9.5a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/>
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 48 48">
+                    <path fill="#fff"
+                        d="M6 8h1v32H6zm2 0h2v32H8zm5 0h1v32h-1zm3 0h3v32h-3zm5 0h1v32h-1zm3 0h2v32h-2zm4 0h1v32h-1zm3 0h4v32h-4zm6 0h1v32h-1zm3 0h2v32h-2z" />
                 </svg>
             </button>
         </div>
@@ -67,9 +70,11 @@
         <!-- campo Nota Fiscal + botão câmera -->
         <div class="row">
             <input type="text" id="notaFiscal" placeholder="Nota Fiscal" autocapitalize="characters" />
-            <button type="button" class="btn-camera" data-target="notaFiscal" aria-label="Abrir câmera para Nota Fiscal">
-                <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <path fill="currentColor" d="M12 5.5L14 7h3a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h3l2-1.5zM12 9.5a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/>
+            <button type="button" class="btn-camera" data-target="notaFiscal"
+                aria-label="Abrir câmera para Nota Fiscal">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 48 48">
+                    <path fill="#fff"
+                        d="M6 8h1v32H6zm2 0h2v32H8zm5 0h1v32h-1zm3 0h3v32h-3zm5 0h1v32h-1zm3 0h2v32h-2zm4 0h1v32h-1zm3 0h4v32h-4zm6 0h1v32h-1zm3 0h2v32h-2z" />
                 </svg>
             </button>
         </div>
@@ -77,10 +82,13 @@
         <button type="button" id="btnAdd">Adicionar</button>
 
         <div class="row row-textarea">
-            <textarea id="inputCompleto" placeholder="Informar na Sequência: 'Código da Peça, Serial, Nota Fiscal' &#10;Separados por vírgula, ponto, ponto e vírgula ou espaço."autocapitalize="characters" rows="4"></textarea>
+            <textarea id="inputCompleto"
+                placeholder="Informar na Sequência: 'Código da Peça, Serial, Nota Fiscal' &#10;Separados por vírgula, ponto, ponto e vírgula ou espaço."
+                autocapitalize="characters" rows="4"></textarea>
             <button type="button" class="btn-camera" data-target="inputCompleto" aria-label="Abrir câmera para Adição">
-                <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <path fill="currentColor" d="M12 5.5L14 7h3a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h3l2-1.5zM12 9.5a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/>
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 48 48">
+                    <path fill="#fff"
+                        d="M6 8h1v32H6zm2 0h2v32H8zm5 0h1v32h-1zm3 0h3v32h-3zm5 0h1v32h-1zm3 0h2v32h-2zm4 0h1v32h-1zm3 0h4v32h-4zm6 0h1v32h-1zm3 0h2v32h-2z" />
                 </svg>
             </button>
         </div>
@@ -114,11 +122,12 @@
 
     <footer>
         <p>© 2025 - Desenvolvido por <a href="https://github.com/claudiohpo" class="link-branco" target="_blank"
-        rel="noopener">Cláudio
-        Oliveira</a></p>
+                rel="noopener">Cláudio
+                Oliveira</a></p>
     </footer>
 
     <!-- script principal -->
     <script src="js/main.js" defer></script>
 </body>
+
 </html>

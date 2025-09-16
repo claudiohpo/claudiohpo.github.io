@@ -314,7 +314,7 @@ footer {
     fill: white;
     width: 20px;                 /* manter largura “base” pequena */
     height: 20px;                /* manter altura “base” pequena */
-    transform: scale(2);         /* escala visual 3x */
+    transform: scale(1.5);         /* escala visual 3x */
     transform-origin: center;    /* escalar a partir do centro */
     display: block;
     pointer-events: none;        /* evita que o SVG capture cliques fora do botão */
