@@ -1,4 +1,3 @@
-/* main.js (atualizado: assinatura e logo otimizados para reduzir tamanho do PDF) */
 (function () {
   // SHORTCUTS
   const $ = (sel) => document.querySelector(sel);

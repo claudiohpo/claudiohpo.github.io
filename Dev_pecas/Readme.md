@@ -79,16 +79,15 @@ Este projeto é um sistema em **HTML, CSS e JavaScript** para gerenciamento da e
 
 ---
 
-## 👨‍💻 Autores
+## 👨‍💻 Autor
 
-- [Diego Sakai](https://github.com/sakaidi)  
 - [Cláudio Henrique](https://github.com/claudiohpo)  
 
-📅 Última alteração: **21/09/2024**  
+📅 Última alteração: **15/09/2025**  
 
 ---
 
 ## 📄 Licença
 
-Este projeto é de uso **restrito**, todos os direitos reservados © 2024.
+Este projeto é de uso **restrito**, todos os direitos reservados © 2025.
 """

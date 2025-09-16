@@ -1,97 +1,103 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <!-- Última alteração: 15/09/2025 -->
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Formulário de Entrega de Peças</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Formulário de Entrega de Peças</title>
 
-  <!-- bibliotecas -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
+    <!-- bibliotecas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
 
-  <!-- CSS -->
-  <link rel="stylesheet" href="css/styles.css" />
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/styles.css" />
 </head>
 
 <body>
-  <h1>Formulário de Entrega de Peças</h1>
+    <h1>Formulário de Entrega de Peças</h1>
 
-  <form id="deliveryForm" novalidate>
-    <label for="data"><strong>Data:</strong></label>
-    <input type="date" id="data" name="data" required />
+    <form id="deliveryForm" novalidate>
+        <label for="data"><strong>Data:</strong></label>
+        <input type="date" id="data" name="data" required />
 
-    <label for="nomeRecebedor"><strong>Nome do Recebedor:</strong></label>
-    <input type="text" id="nomeRecebedor" name="nomeRecebedor" required />
+        <label for="nomeRecebedor"><strong>Nome do Recebedor:</strong></label>
+        <input type="text" id="nomeRecebedor" name="nomeRecebedor" required />
 
-    <label for="nomeTecnico"><strong>Nome Técnico:</strong></label>
-    <input type="text" id="nomeTecnico" name="nomeTecnico" required />
+        <label for="nomeTecnico"><strong>Nome Técnico:</strong></label>
+        <input type="text" id="nomeTecnico" name="nomeTecnico" required />
 
-    <div class="table-wrapper">
-    <table id="serialTable">
-      <thead>
-        <tr>
-          <th>Código</th>
-          <th>Número de Série</th>
-          <th>Nota Fiscal</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-    </div>
+        <div class="table-wrapper">
+            <table id="serialTable">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Número de Série</th>
+                        <th>Nota Fiscal</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
 
-    <div class="row">
-      <input type="text" id="codigoPeca" placeholder="Código da Peça" autocapitalize="characters" />
-      <div id="camera-preview-codigoPeca" class="camera-preview"></div>
-    </div>
+        <div class="row">
+            <input type="text" id="codigoPeca" placeholder="Código da Peça" autocapitalize="characters" />
+            <div id="camera-preview-codigoPeca" class="camera-preview"></div>
+        </div>
 
-    <div class="row">
-      <input type="text" id="serialProxxi" placeholder="Número de Série" autocapitalize="characters" />
-      <div id="camera-preview-serialProxxi" class="camera-preview"></div>
-    </div>
+        <div class="row">
+            <input type="text" id="serialProxxi" placeholder="Número de Série" autocapitalize="characters" />
+            <div id="camera-preview-serialProxxi" class="camera-preview"></div>
+        </div>
 
-    <div class="row">
-      <input type="text" id="notaFiscal" placeholder="Nota Fiscal" autocapitalize="characters" />
-      <div id="camera-preview-notaFiscal" class="camera-preview"></div>
-    </div>
+        <div class="row">
+            <input type="text" id="notaFiscal" placeholder="Nota Fiscal" autocapitalize="characters" />
+            <div id="camera-preview-notaFiscal" class="camera-preview"></div>
+        </div>
 
-    <button type="button" id="btnAdd">Adicionar</button>
+        <button type="button" id="btnAdd">Adicionar</button>
 
-    <div>
-      <label for="inputCompleto"><strong>Preencha os códigos separados por vírgula, espaço ou ponto: </strong></label>
-      <textarea id="inputCompleto" placeholder="Código da Peça, Serial, Nota Fiscal" autocapitalize="characters" rows="4"></textarea>
-      <button type="button" id="btnAddFull">Adicionar (vários)</button>
-    </div>
+        <div>
+            <label for="inputCompleto"><strong>Preencha os códigos separados por vírgula, espaço ou ponto:
+                </strong></label>
+            <textarea id="inputCompleto" placeholder="Código da Peça, Serial, Nota Fiscal" autocapitalize="characters"
+                rows="4"></textarea>
+            <button type="button" id="btnAddFull">Adicionar (vários)</button>
+        </div>
 
-    <label for="assinatura">Assinatura Recebedor:</label>
+        <label for="assinatura">Assinatura Recebedor:</label>
 
-    <!-- signature-wrap: full-bleed. Para deixar o botão "Limpar Assinatura" ocupando toda largura
+        <!-- signature-wrap: full-bleed. Para deixar o botão "Limpar Assinatura" ocupando toda largura
          no desktop, adicione class="sig-buttons full" no elemento de botões (ver CSS). -->
-    <div class="signature-wrap">
-      <!-- canvas sem width/height inline — o tamanho é controlado por CSS (--sig-height) -->
-      <canvas id="signatureCanvas"></canvas>
+        <div class="signature-wrap">
+            <!-- canvas sem width/height inline — o tamanho é controlado por CSS (--sig-height) -->
+            <canvas id="signatureCanvas"></canvas>
 
-      <!-- por padrão fica centralizado em desktop e full-width em mobile;
+            <!-- por padrão fica centralizado em desktop e full-width em mobile;
            para forçar full-width no desktop, mude aqui:
            <div class="sig-buttons full"> ... </div> -->
-      <div class="sig-buttons">
-        <button type="button" id="btnClearSig">Limpar Assinatura</button>
-      </div>
-    </div>
+            <div class="sig-buttons">
+                <button type="button" id="btnClearSig">Limpar Assinatura</button>
+            </div>
+        </div>
 
-    <div class="actions">
-      <button type="button" id="btnGeneratePdf">Gerar PDF</button>
-    </div>
-  </form>
+        <div class="actions">
+            <button type="button" id="btnGeneratePdf">Gerar PDF</button>
+        </div>
+    </form>
 
-  <footer>
-    &copy; 2024 Diego Sakai &amp; Cláudio Henrique. Todos os direitos reservados.
-  </footer>
+    <footer>
+        <p>© 2025 - Desenvolvido por <a href="https://github.com/claudiohpo" class="link-branco" target="_blank"
+        rel="noopener">Cláudio
+        Oliveira</a></p>
+    </footer>
 
-  <!-- script principal -->
-  <script src="js/main.js" defer></script>
+    <!-- script principal -->
+    <script src="js/main.js" defer></script>
 </body>
+
 </html>

@@ -49,7 +49,7 @@ form {
 }
 
 label {
-    display: block; 
+    display: block;
     font-weight: bold;
     margin: 0.8rem 0 0.3rem;
 }
@@ -151,7 +151,8 @@ td[data-label="Ações"] button {
     gap: 0.5rem;
     min-height: var(--sig-height);
     overflow: visible;
-    touch-action: none; /* Adicionado para reforçar */
+    touch-action: none;
+    /* Adicionado para reforçar */
 }
 
 #signatureCanvas {
@@ -210,17 +211,17 @@ footer {
         font-size: 1.5rem;
     }
 
-   
+
 
     table {
-    display: table;
-    width: 100%;
-    overflow-x: auto;
-  }
+        display: table;
+        width: 100%;
+        overflow-x: auto;
+    }
 
-  .table-wrapper {
-    overflow-x: auto;
-  }
+    .table-wrapper {
+        overflow-x: auto;
+    }
 
 
     td[data-label="Ações"] {
@@ -231,7 +232,7 @@ footer {
     td[data-label="Ações"] button {
         width: 100%;
     }
-    
+
     .signature-wrap {
         margin-left: 0;
         margin-right: 0;
