@@ -8,8 +8,8 @@
     /* padding horizontal da página (body) */
     --form-max-width: 800px;
     /* largura máxima do formulário central */
-    --sig-height: 300px;
-    /* altura fixa do canvas de assinatura */
+    --sig-height: 200px;
+    /* altura fixa do canvas de assinatura (reduzida para evitar estouro) */
     --sig-border-color: #ccc;
     --sig-border-radius: 8px;
     --sig-bg: #fafafa;
@@ -49,7 +49,7 @@ form {
 }
 
 label {
-    display: table; /* valor antigo era block*/
+    display: block; /* valor antigo era block*/
     font-weight: bold;
     margin: 0.8rem 0 0.3rem;
 }
@@ -163,6 +163,7 @@ td[data-label="Ações"] button {
     border-radius: calc(var(--sig-border-radius) - 2px);
     background: #fff;
     touch-action: none;
+    border: 1px solid #ddd; /* Adicionada borda para melhor visualização */
 }
 
 .sig-buttons {
@@ -254,6 +255,12 @@ footer {
     }
 
     td[data-label="Ações"] button {
+        width: 100%;
+    }
+    
+    .signature-wrap {
+        margin-left: 0;
+        margin-right: 0;
         width: 100%;
     }
 }
