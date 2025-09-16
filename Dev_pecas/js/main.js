@@ -822,7 +822,7 @@
           // evitar duplicatas exatas (opcional)
           const parts = existing.split(/[,]+/).map(s => s.trim()).filter(Boolean);
           if (!parts.includes(code)) {
-            el.value = existing + ", " + code;
+            el.value = existing + "," + code;
           }
         }
       } else {

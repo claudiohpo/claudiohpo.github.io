@@ -305,14 +305,21 @@ footer {
     color: white;
     border: none;
     cursor: pointer;
+    padding: 0;
+    overflow: visible;
 }
 
-/* ícone dentro do botão */
+/* ícone dentro do botão — aumentado visualmente sem mudar a caixa do botão */
 .btn-camera svg {
     fill: white;
-    width: 20px;
-    height: 20px;
+    width: 20px;                 /* manter largura “base” pequena */
+    height: 20px;                /* manter altura “base” pequena */
+    transform: scale(2);         /* escala visual 3x */
+    transform-origin: center;    /* escalar a partir do centro */
+    display: block;
+    pointer-events: none;        /* evita que o SVG capture cliques fora do botão */
 }
+
 
 /* MODAL / OVERLAY da câmera */
 .camera-preview-modal {
