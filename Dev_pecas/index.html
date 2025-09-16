@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <!-- Última alteração: 15/09/2025 -->
-
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -44,42 +43,57 @@
             </table>
         </div>
 
+        <!-- campo Código da Peça + botão câmera -->
         <div class="row">
             <input type="text" id="codigoPeca" placeholder="Código da Peça" autocapitalize="characters" />
-            <div id="camera-preview-codigoPeca" class="camera-preview"></div>
+            <button type="button" class="btn-camera" data-target="codigoPeca" aria-label="Abrir câmera para Código">
+                <!-- ícone simples de câmera -->
+                <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path fill="currentColor" d="M12 5.5L14 7h3a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h3l2-1.5zM12 9.5a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/>
+                </svg>
+            </button>
         </div>
 
+        <!-- campo Numero de Série + botão câmera -->
         <div class="row">
             <input type="text" id="serialProxxi" placeholder="Número de Série" autocapitalize="characters" />
-            <div id="camera-preview-serialProxxi" class="camera-preview"></div>
+            <button type="button" class="btn-camera" data-target="serialProxxi" aria-label="Abrir câmera para Serial">
+                <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path fill="currentColor" d="M12 5.5L14 7h3a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h3l2-1.5zM12 9.5a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/>
+                </svg>
+            </button>
         </div>
 
+        <!-- campo Nota Fiscal + botão câmera -->
         <div class="row">
             <input type="text" id="notaFiscal" placeholder="Nota Fiscal" autocapitalize="characters" />
-            <div id="camera-preview-notaFiscal" class="camera-preview"></div>
+            <button type="button" class="btn-camera" data-target="notaFiscal" aria-label="Abrir câmera para Nota Fiscal">
+                <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path fill="currentColor" d="M12 5.5L14 7h3a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h3l2-1.5zM12 9.5a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/>
+                </svg>
+            </button>
         </div>
 
         <button type="button" id="btnAdd">Adicionar</button>
 
+        <div class="row row-textarea">
+            <textarea id="inputCompleto" placeholder="Código da Peça, Serial, Nota Fiscal" autocapitalize="characters" rows="4"></textarea>
+            <button type="button" class="btn-camera" data-target="inputCompleto" aria-label="Abrir câmera para Adição">
+                <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path fill="currentColor" d="M12 5.5L14 7h3a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h3l2-1.5zM12 9.5a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/>
+                </svg>
+            </button>
+        </div>
         <div>
-            <label for="inputCompleto"><strong>Preencha os códigos separados por vírgula, espaço ou ponto:
-                </strong></label>
-            <textarea id="inputCompleto" placeholder="Código da Peça, Serial, Nota Fiscal" autocapitalize="characters"
-                rows="4"></textarea>
             <button type="button" id="btnAddFull">Adicionar (vários)</button>
         </div>
 
         <label for="assinatura">Assinatura Recebedor:</label>
 
-        <!-- signature-wrap: full-bleed. Para deixar o botão "Limpar Assinatura" ocupando toda largura
-         no desktop, adicione class="sig-buttons full" no elemento de botões (ver CSS). -->
         <div class="signature-wrap">
             <!-- canvas sem width/height inline — o tamanho é controlado por CSS (--sig-height) -->
             <canvas id="signatureCanvas"></canvas>
 
-            <!-- por padrão fica centralizado em desktop e full-width em mobile;
-           para forçar full-width no desktop, mude aqui:
-           <div class="sig-buttons full"> ... </div> -->
             <div class="sig-buttons">
                 <button type="button" id="btnClearSig">Limpar Assinatura</button>
             </div>
@@ -90,6 +104,14 @@
         </div>
     </form>
 
+    <!-- Modal / overlay de preview da câmera (criado dinamicamente também no JS, mas deixo aqui como fallback) -->
+    <div id="cameraPreviewModal" class="camera-preview-modal" aria-hidden="true">
+        <div class="camera-inner">
+            <video id="cameraVideo" autoplay playsinline muted></video>
+            <button type="button" class="close-camera" aria-label="Fechar câmera">✕</button>
+        </div>
+    </div>
+
     <footer>
         <p>© 2025 - Desenvolvido por <a href="https://github.com/claudiohpo" class="link-branco" target="_blank"
         rel="noopener">Cláudio
@@ -99,5 +121,4 @@
     <!-- script principal -->
     <script src="js/main.js" defer></script>
 </body>
-
 </html>
