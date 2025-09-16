@@ -137,11 +137,9 @@ td[data-label="Ações"] button {
 
 /* ===== ASSINATURA - AREA FULL-BLEED ===== */
 .signature-wrap {
-    width: calc(100% + 2 * var(--page-padding));
-    margin-left: calc(-1 * var(--page-padding));
-    margin-right: calc(-1 * var(--page-padding));
-    box-sizing: border-box;
-    margin-top: 1rem;
+    position: relative;
+    width: 100%;
+    margin: 1rem 0;
     background: var(--sig-bg);
     border: 2px dashed var(--sig-border-color);
     border-radius: var(--sig-border-radius);
@@ -152,21 +150,19 @@ td[data-label="Ações"] button {
     justify-content: center;
     gap: 0.5rem;
     min-height: var(--sig-height);
-    overflow: hidden;
+    overflow: visible;
+    touch-action: none; /* Adicionado para reforçar */
 }
 
 #signatureCanvas {
-    pointer-events: auto;
-    position: relative;
-    z-index: 10;
     display: block;
     width: 100%;
     height: var(--sig-height);
     max-width: 100%;
     border-radius: calc(var(--sig-border-radius) - 2px);
     background: #fff;
+    border: 1px solid #ddd;
     touch-action: none;
-    border: 1px solid #ddd; /* Adicionada borda para melhor visualização */
 }
 
 .sig-buttons {
