@@ -91,7 +91,7 @@ function fixCanvasDPI() {
   ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
   ctx.lineWidth = 2;
   ctx.lineCap = "round";
-  ctx.strokeStyle = "#000";
+  ctx.strokeStyle = "#0d1457ff";
 
   // restaura a imagem previamente salva (assíncrono)
   if (dataUrl) {
