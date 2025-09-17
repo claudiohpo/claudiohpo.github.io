@@ -52,68 +52,77 @@
   // }
 
   // === fixCanvasDPI preservando desenho e evitando resizes inúteis ===
+// ===== fixCanvasDPI (versão estável que preserva desenho e mantém desenho funcional) =====
 let __lastCanvasCssW = 0;
 let __lastCanvasCssH = 0;
 let __lastDeviceRatio = window.devicePixelRatio || 1;
 
 function fixCanvasDPI() {
+  if (!canvas) return;
+
   const computedStyle = getComputedStyle(canvas);
-  const cssWidth = parseInt(computedStyle.width) || 600;
-  const cssHeight = parseInt(computedStyle.height) || 200;
+  const cssWidth = Math.round(parseFloat(computedStyle.width)) || 600;
+  const cssHeight = Math.round(parseFloat(computedStyle.height)) || 200;
   const ratio = window.devicePixelRatio || 1;
 
-  // Se nada mudou em largura/altura CSS nem ratio -> não faz nada.
-  // Importante: frequentemente o teclado móvel muda somente a altura do viewport;
-  // se a largura CSS do canvas não mudou, evitamos recriar o canvas (preserva assinatura).
+  // se nada mudou — sair (muito importante para não apagar ao abrir teclado mobile)
   if (cssWidth === __lastCanvasCssW && cssHeight === __lastCanvasCssH && ratio === __lastDeviceRatio) {
     return;
   }
 
-  // Salva conteúdo atual do canvas (em pixels atuais)
-  const prevPixelW = canvas.width;
-  const prevPixelH = canvas.height;
-  const tmp = document.createElement("canvas");
-  tmp.width = prevPixelW || 1;
-  tmp.height = prevPixelH || 1;
-  const tctx = tmp.getContext("2d");
+  // salva o desenho atual como dataURL (forma segura)
+  let dataUrl = null;
   try {
-    tctx.drawImage(canvas, 0, 0);
+    dataUrl = canvas.toDataURL();
   } catch (e) {
-    // drawing may fail if canvas empty — ignore
+    // se falhar (muito raro), apenas continue sem restaurar
+    console.warn("fixCanvasDPI: toDataURL falhou:", e);
   }
 
-  // Redefine tamanho real (pixels físicos) do canvas
+  // redefine tamanho físico do canvas (em device pixels)
   canvas.width = Math.round(cssWidth * ratio);
   canvas.height = Math.round(cssHeight * ratio);
 
-  // Mantém tamanho CSS para layout
+  // mantém o tamanho CSS para layout
   canvas.style.width = cssWidth + "px";
   canvas.style.height = cssHeight + "px";
 
-  // Ajusta contexto para usar coordenadas em CSS pixels
+  // prepara o contexto para desenhar em CSS pixels (escala física)
   ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
   ctx.lineWidth = 2;
   ctx.lineCap = "round";
   ctx.strokeStyle = "#000";
 
-  // Restaura o conteúdo anterior, escalando para o novo pixel-size
-  ctx.save();
-  ctx.setTransform(1, 0, 0, 1, 0, 0); // desenha com transform identity
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  // redimensiona o conteúdo salvo para caber no novo canvas (mantendo visual)
-  try {
-    ctx.drawImage(tmp, 0, 0, tmp.width, tmp.height, 0, 0, canvas.width, canvas.height);
-  } catch (e) {
-    // se falhar, não quebra; continue
-    console.warn("Restaurando imagem do canvas falhou:", e);
+  // restaura a imagem previamente salva (assíncrono)
+  if (dataUrl) {
+    const img = new Image();
+    img.onload = function () {
+      try {
+        // desenhar a imagem do dataURL no canvas recém redimensionado
+        ctx.save();
+        ctx.setTransform(1, 0, 0, 1, 0, 0); // desenha imagem em pixels do canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, canvas.width, canvas.height);
+        ctx.restore();
+      } catch (err) {
+        console.warn("fixCanvasDPI: falha ao desenhar imagem restaurada:", err);
+      }
+    };
+    img.onerror = function (e) {
+      console.warn("fixCanvasDPI: imagem de restauração falhou ao carregar:", e);
+    };
+    img.src = dataUrl;
+  } else {
+    // sem dataUrl, apenas limpa (caso inicial)
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
-  ctx.restore();
 
-  // grava último estado para comparar na próxima chamada
+  // grava valores para próxima verificação
   __lastCanvasCssW = cssWidth;
   __lastCanvasCssH = cssHeight;
   __lastDeviceRatio = ratio;
 }
+
 
 
   function debounce(func, wait) {
