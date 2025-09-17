@@ -52,78 +52,96 @@
   // }
 
   // === fixCanvasDPI preservando desenho e evitando resizes inúteis ===
-// ===== fixCanvasDPI (versão estável que preserva desenho e mantém desenho funcional) =====
-let __lastCanvasCssW = 0;
-let __lastCanvasCssH = 0;
-let __lastDeviceRatio = window.devicePixelRatio || 1;
+  // ===== fixCanvasDPI (versão estável que preserva desenho e mantém desenho funcional) =====
+  let __lastCanvasCssW = 0;
+  let __lastCanvasCssH = 0;
+  let __lastDeviceRatio = window.devicePixelRatio || 1;
 
-function fixCanvasDPI() {
-  if (!canvas) return;
+  function fixCanvasDPI() {
+    if (!canvas) return;
 
-  const computedStyle = getComputedStyle(canvas);
-  const cssWidth = Math.round(parseFloat(computedStyle.width)) || 600;
-  const cssHeight = Math.round(parseFloat(computedStyle.height)) || 200;
-  const ratio = window.devicePixelRatio || 1;
+    const computedStyle = getComputedStyle(canvas);
+    const cssWidth = Math.round(parseFloat(computedStyle.width)) || 600;
+    const cssHeight = Math.round(parseFloat(computedStyle.height)) || 200;
+    const ratio = window.devicePixelRatio || 1;
 
-  // se nada mudou — sair (muito importante para não apagar ao abrir teclado mobile)
-  if (cssWidth === __lastCanvasCssW && cssHeight === __lastCanvasCssH && ratio === __lastDeviceRatio) {
-    return;
+    // se nada mudou — sair (muito importante para não apagar ao abrir teclado mobile)
+    if (
+      cssWidth === __lastCanvasCssW &&
+      cssHeight === __lastCanvasCssH &&
+      ratio === __lastDeviceRatio
+    ) {
+      return;
+    }
+
+    // salva o desenho atual como dataURL (forma segura)
+    let dataUrl = null;
+    try {
+      dataUrl = canvas.toDataURL();
+    } catch (e) {
+      // se falhar (muito raro), apenas continue sem restaurar
+      console.warn("fixCanvasDPI: toDataURL falhou:", e);
+    }
+
+    // redefine tamanho físico do canvas (em device pixels)
+    canvas.width = Math.round(cssWidth * ratio);
+    canvas.height = Math.round(cssHeight * ratio);
+
+    // mantém o tamanho CSS para layout
+    canvas.style.width = cssWidth + "px";
+    canvas.style.height = cssHeight + "px";
+
+    // prepara o contexto para desenhar em CSS pixels (escala física)
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "#0d1457ff";
+
+    // restaura a imagem previamente salva (assíncrono)
+    if (dataUrl) {
+      const img = new Image();
+      img.onload = function () {
+        try {
+          // desenhar a imagem do dataURL no canvas recém redimensionado
+          ctx.save();
+          ctx.setTransform(1, 0, 0, 1, 0, 0); // desenha imagem em pixels do canvas
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(
+            img,
+            0,
+            0,
+            img.width,
+            img.height,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+          );
+          ctx.restore();
+        } catch (err) {
+          console.warn(
+            "fixCanvasDPI: falha ao desenhar imagem restaurada:",
+            err
+          );
+        }
+      };
+      img.onerror = function (e) {
+        console.warn(
+          "fixCanvasDPI: imagem de restauração falhou ao carregar:",
+          e
+        );
+      };
+      img.src = dataUrl;
+    } else {
+      // sem dataUrl, apenas limpa (caso inicial)
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // grava valores para próxima verificação
+    __lastCanvasCssW = cssWidth;
+    __lastCanvasCssH = cssHeight;
+    __lastDeviceRatio = ratio;
   }
-
-  // salva o desenho atual como dataURL (forma segura)
-  let dataUrl = null;
-  try {
-    dataUrl = canvas.toDataURL();
-  } catch (e) {
-    // se falhar (muito raro), apenas continue sem restaurar
-    console.warn("fixCanvasDPI: toDataURL falhou:", e);
-  }
-
-  // redefine tamanho físico do canvas (em device pixels)
-  canvas.width = Math.round(cssWidth * ratio);
-  canvas.height = Math.round(cssHeight * ratio);
-
-  // mantém o tamanho CSS para layout
-  canvas.style.width = cssWidth + "px";
-  canvas.style.height = cssHeight + "px";
-
-  // prepara o contexto para desenhar em CSS pixels (escala física)
-  ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-  ctx.lineWidth = 2;
-  ctx.lineCap = "round";
-  ctx.strokeStyle = "#0d1457ff";
-
-  // restaura a imagem previamente salva (assíncrono)
-  if (dataUrl) {
-    const img = new Image();
-    img.onload = function () {
-      try {
-        // desenhar a imagem do dataURL no canvas recém redimensionado
-        ctx.save();
-        ctx.setTransform(1, 0, 0, 1, 0, 0); // desenha imagem em pixels do canvas
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, canvas.width, canvas.height);
-        ctx.restore();
-      } catch (err) {
-        console.warn("fixCanvasDPI: falha ao desenhar imagem restaurada:", err);
-      }
-    };
-    img.onerror = function (e) {
-      console.warn("fixCanvasDPI: imagem de restauração falhou ao carregar:", e);
-    };
-    img.src = dataUrl;
-  } else {
-    // sem dataUrl, apenas limpa (caso inicial)
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-  }
-
-  // grava valores para próxima verificação
-  __lastCanvasCssW = cssWidth;
-  __lastCanvasCssH = cssHeight;
-  __lastDeviceRatio = ratio;
-}
-
-
 
   function debounce(func, wait) {
     let timeout;
@@ -665,7 +683,7 @@ function fixCanvasDPI() {
         finalY = 80;
       }
 
-      // ----- ASSINATURA: gerar JPEG otimizado (much smaller que PNG) -----
+      // ----- ASSINATURA: gerar JPEG otimizado (mantendo proporção) -----
       try {
         const assinaturaOptimized = optimizeCanvasToDataUrl(
           canvas,
@@ -674,22 +692,99 @@ function fixCanvasDPI() {
           0.6
         );
         const fmtSig = getImageFormatFromDataUrl(assinaturaOptimized);
-        const sigWidthMm = 60;
-        const sigHeightMm = 30;
+
+        // carregar imagem para saber proporção real
+        const imgSig = await new Promise((resolve, reject) => {
+          const im = new Image();
+          im.onload = () => resolve(im);
+          im.onerror = reject;
+          im.src = assinaturaOptimized;
+        });
+
+        // aspecto da assinatura (largura / altura)
+        const aspect =
+          (imgSig.naturalWidth || imgSig.width) /
+            (imgSig.naturalHeight || imgSig.height) || 1;
+
+        // limites e cálculos em mm
+        const pageWidthMm = doc.internal.pageSize.getWidth();
+        const leftMarginMm = 15;
+        const rightMarginMm = 15;
+        const availWidthMm = Math.max(
+          10,
+          pageWidthMm - leftMarginMm - rightMarginMm
+        );
+
+        // largura desejada base (mm). Não ultrapassar a largura disponível.
+        const baseWidthMm = Math.min(60, availWidthMm);
+        // calcula altura para preservar proporção
+        const baseHeightMm = baseWidthMm / aspect;
+
+        // ajustar se altura ficar muito alta
+        const maxHeightMm = 80;
+        let sigWidthMm = baseWidthMm;
+        let sigHeightMm = baseHeightMm;
+        if (sigHeightMm > maxHeightMm) {
+          sigHeightMm = maxHeightMm;
+          sigWidthMm = sigHeightMm * aspect;
+          if (sigWidthMm > availWidthMm) {
+            sigWidthMm = availWidthMm;
+            sigHeightMm = sigWidthMm / aspect;
+          }
+        }
+
+        const sigX = leftMarginMm;
+        const sigY = finalY;
+
         doc.addImage(
           assinaturaOptimized,
           fmtSig,
-          15,
-          finalY,
+          sigX,
+          sigY,
           sigWidthMm,
           sigHeightMm
         );
 
-        doc.line(15, finalY + 35, 100, finalY + 35);
-        doc.text(formDataObject.nomeRecebedor || "", 20, finalY + 39);
+        // linha e nome abaixo da assinatura (posicionadas com base na altura real)
+        doc.line(
+          sigX,
+          sigY + sigHeightMm + 5,
+          sigX + Math.min(85, sigWidthMm),
+          sigY + sigHeightMm + 5
+        );
+        doc.text(
+          formDataObject.nomeRecebedor || "",
+          sigX,
+          sigY + sigHeightMm + 9
+        );
       } catch (e) {
         console.warn("Erro ao adicionar assinatura no PDF:", e);
       }
+
+      // try {
+      //   const assinaturaOptimized = optimizeCanvasToDataUrl(
+      //     canvas,
+      //     600,
+      //     "image/jpeg",
+      //     0.6
+      //   );
+      //   const fmtSig = getImageFormatFromDataUrl(assinaturaOptimized);
+      //   const sigWidthMm = 60;
+      //   const sigHeightMm = 30;
+      //   doc.addImage(
+      //     assinaturaOptimized,
+      //     fmtSig,
+      //     15,
+      //     finalY,
+      //     sigWidthMm,
+      //     sigHeightMm
+      //   );
+
+      //   doc.line(15, finalY + 35, 100, finalY + 35);
+      //   doc.text(formDataObject.nomeRecebedor || "", 20, finalY + 39);
+      // } catch (e) {
+      //   console.warn("Erro ao adicionar assinatura no PDF:", e);
+      // }
 
       const fileName = `form_entrega_pecas_${
         dataFormatadaPDF || "sem_data"
@@ -713,7 +808,9 @@ function fixCanvasDPI() {
 
   const cameraModal = document.getElementById("cameraPreviewModal");
   const cameraVideo = document.getElementById("cameraVideo");
-  const closeCameraBtn = cameraModal ? cameraModal.querySelector(".close-camera") : null;
+  const closeCameraBtn = cameraModal
+    ? cameraModal.querySelector(".close-camera")
+    : null;
 
   function showCameraModal() {
     if (cameraModal) cameraModal.classList.add("show");
@@ -793,7 +890,7 @@ function fixCanvasDPI() {
           const barcodes = await barcodeDetector.detect(cameraVideo);
           if (barcodes && barcodes.length) {
             const bc = barcodes[0];
-            const code = bc.rawValue || bc.rawText || (bc?.rawValue);
+            const code = bc.rawValue || bc.rawText || bc?.rawValue;
             if (code) {
               handleDetected(code);
               return;
@@ -815,7 +912,11 @@ function fixCanvasDPI() {
         quaggaActive = true;
         // parar Quagga anterior se houver
         if (window.Quagga && typeof window.Quagga.stop === "function") {
-          try { window.Quagga.stop(); } catch (e) { /* ignore */ }
+          try {
+            window.Quagga.stop();
+          } catch (e) {
+            /* ignore */
+          }
         }
         window.Quagga.init(
           {
@@ -844,7 +945,9 @@ function fixCanvasDPI() {
             if (err) {
               console.error("Erro ao inicializar Quagga:", err);
               quaggaActive = false;
-              alert("Não foi possível inicializar o leitor de códigos (Quagga).");
+              alert(
+                "Não foi possível inicializar o leitor de códigos (Quagga)."
+              );
               stopCamera();
               return;
             }
@@ -894,7 +997,10 @@ function fixCanvasDPI() {
           el.value = code;
         } else {
           // evitar duplicatas exatas (opcional)
-          const parts = existing.split(/[,]+/).map(s => s.trim()).filter(Boolean);
+          const parts = existing
+            .split(/[,]+/)
+            .map((s) => s.trim())
+            .filter(Boolean);
           if (!parts.includes(code)) {
             el.value = existing + "," + code;
           }
@@ -964,8 +1070,6 @@ function fixCanvasDPI() {
 
   /* ------------------------ FIM Leitura por Câmera ------------------------ */
 })();
-
-
 
 // (function () {
 //   // SHORTCUTS
