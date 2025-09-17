@@ -734,7 +734,7 @@
         }
 
         const sigX = leftMarginMm;
-        const sigY = finalY;
+        const sigY = finalY + 10;
 
         doc.addImage(
           assinaturaOptimized,
