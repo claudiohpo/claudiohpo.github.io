@@ -26,7 +26,7 @@
   let isInitialized = false;
 
   /* ------------------------ CANVAS / ASSINATURA ------------------------ */
-  /*function fixCanvasDPI() {
+  function fixCanvasDPI() {
     const computedStyle = getComputedStyle(canvas);
     const cssWidth = parseInt(computedStyle.width) || 600;
     const cssHeight = parseInt(computedStyle.height) || 200;
@@ -61,9 +61,9 @@
       clearTimeout(timeout);
       timeout = setTimeout(later, wait);
     };
-  }*/
+  }
 
-// === fixCanvasDPI preservando desenho e evitando resizes inúteis ===
+/*// === fixCanvasDPI preservando desenho e evitando resizes inúteis ===
 let __lastCanvasCssW = 0;
 let __lastCanvasCssH = 0;
 let __lastDeviceRatio = window.devicePixelRatio || 1;
@@ -125,7 +125,7 @@ function fixCanvasDPI() {
   __lastCanvasCssW = cssWidth;
   __lastCanvasCssH = cssHeight;
   __lastDeviceRatio = ratio;
-}
+}*/
 
   const handleResize = debounce(() => {
     fixCanvasDPI();
