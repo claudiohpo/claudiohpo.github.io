@@ -1,0 +1,377 @@
+/* styles.css
+           Refatorado — variáveis para fácil ajuste.
+        */
+
+/* ===== VARIÁVEIS (Ajuste aqui) ===== */
+:root {
+    --page-padding: 1rem;
+    /* padding horizontal da página (body) */
+    --form-max-width: 800px;
+    /* largura máxima do formulário central */
+    --sig-height: 200px;
+    /* altura fixa do canvas de assinatura (reduzida para evitar estouro) */
+    --sig-border-color: #ccc;
+    --sig-border-radius: 8px;
+    --sig-bg: #fafafa;
+}
+
+/* ===== RESET BÁSICO ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #f9f9f9;
+    color: #333;
+    line-height: 1.5;
+    padding: var(--page-padding);
+}
+
+/* ===== TÍTULO ===== */
+h1 {
+    text-align: center;
+    color: #1e3fa9;
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+}
+
+/* ===== FORMULÁRIO ===== */
+form {
+    max-width: var(--form-max-width);
+    margin: auto;
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin: 0.8rem 0 0.3rem;
+}
+
+input,
+textarea,
+button {
+    width: 100%;
+    padding: 0.8rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+/* ===== BOTÕES ===== */
+button {
+    background: #1e3fa9;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.25s;
+}
+
+button:hover {
+    background: #16307d;
+}
+
+/* Botão Editar (Amarelo) */
+.edit-btn {
+    background: #f1c40f;
+    color: #000;
+}
+
+.edit-btn:hover {
+    background: #d4ac0d;
+}
+
+/* Botão Excluir (Vermelho) */
+.delete-btn {
+    background: #e74c3c;
+    color: #fff;
+}
+
+.delete-btn:hover {
+    background: #c0392b;
+}
+
+/* ===== TABELA ===== */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: 0.95rem;
+}
+
+thead {
+    background: #1e3fa9;
+    color: #fff;
+}
+
+th,
+td {
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Ações: botões empilhados */
+td[data-label="Ações"] {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    justify-content: center;
+    align-items: center;
+}
+
+td[data-label="Ações"] button {
+    width: 90%;
+    padding: 0.5rem;
+    font-size: 0.85rem;
+}
+
+/* ===== ASSINATURA - AREA FULL-BLEED ===== */
+.signature-wrap {
+    position: relative;
+    width: 100%;
+    margin: 1rem 0;
+    background: var(--sig-bg);
+    border: 2px dashed var(--sig-border-color);
+    border-radius: var(--sig-border-radius);
+    padding: 0.6rem;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: var(--sig-height);
+    overflow: visible;
+    touch-action: none;
+    /* Adicionado para reforçar */
+}
+
+#signatureCanvas {
+    display: block;
+    width: 100%;
+    height: var(--sig-height);
+    max-width: 100%;
+    border-radius: calc(var(--sig-border-radius) - 2px);
+    background: #fff;
+    border: 1px solid #ddd;
+    touch-action: none;
+}
+
+.sig-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    align-items: center;
+}
+
+.sig-buttons.full {
+    justify-content: space-between;
+}
+
+.sig-buttons.full button {
+    width: 100%;
+    flex: 1 1 auto;
+}
+
+/* ===== AÇÕES FINAIS ===== */
+.actions {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.actions button {
+    width: auto;
+    padding: 0.7rem 1.2rem;
+}
+
+/* ===== RODAPÉ ===== */
+footer {
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+/* ===== RESPONSIVIDADE ===== */
+@media (max-width: 768px) {
+    body {
+        padding: calc(var(--page-padding) / 2);
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+
+
+
+    table {
+        display: table;
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+
+    td[data-label="Ações"] {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    td[data-label="Ações"] button {
+        width: 100%;
+    }
+
+    .signature-wrap {
+        margin-left: 0;
+        margin-right: 0;
+        width: 100%;
+        overflow: visible;
+    }
+}
+
+@media (max-width: 540px) {
+    .signature-wrap {
+        padding: 0.5rem;
+        min-height: calc(var(--sig-height) - 20px);
+    }
+
+    .sig-buttons {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .sig-buttons button {
+        width: 100%;
+    }
+}
+
+/* ===== VARIÁVEIS PARA AJUSTES RÁPIDOS ===== */
+:root {
+    --page-padding: 1rem;
+    --form-max-width: 800px;
+    --sig-height: 200px;
+    --sig-border-color: #ccc;
+    --sig-border-radius: 8px;
+    --sig-bg: #fafafa;
+    --camera-button-size: 44px;
+    --camera-modal-bg: rgba(0,0,0,0.75);
+}
+
+/* LINHA: input + botão câmera (mantém na mesma linha, responsivo) */
+.row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+/* textarea com comportamento levemente diferente */
+.row.row-textarea textarea {
+    min-height: 78px;
+    resize: vertical;
+}
+
+/* input/textarea dentro de .row ocupam o máximo do espaço disponível */
+.row input[type="text"],
+.row textarea {
+    flex: 1 1 auto;
+    padding: 0.8rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+/* botão câmera ao lado do campo (fixo, não quebra linha) */
+.btn-camera {
+    flex: 0 0 var(--camera-button-size);
+    height: var(--camera-button-size);
+    width: var(--camera-button-size);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: #1e3fa9;
+    color: white;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    overflow: visible;
+}
+
+/* ícone dentro do botão — aumentado visualmente sem mudar a caixa do botão */
+.btn-camera svg {
+    fill: white;
+    width: 20px;                 /* manter largura “base” pequena */
+    height: 20px;                /* manter altura “base” pequena */
+    transform: scale(1.5);         /* escala visual 3x */
+    transform-origin: center;    /* escalar a partir do centro */
+    display: block;
+    pointer-events: none;        /* evita que o SVG capture cliques fora do botão */
+}
+
+
+/* MODAL / OVERLAY da câmera */
+.camera-preview-modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: var(--camera-modal-bg);
+    z-index: 10000;
+    padding: 1rem;
+}
+
+.camera-preview-modal.show { display: flex; }
+
+.camera-inner {
+    position: relative;
+    width: 100%;
+    max-width: 720px;
+    aspect-ratio: 4/3;
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+}
+
+.camera-inner video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* botão de fechar no modal da câmera */
+.camera-inner .close-camera {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* Ajustes para mobile */
+@media (max-width: 768px) {
+    :root { --camera-button-size: 40px; }
+    .camera-inner { max-width: 100%; aspect-ratio: 3/4; }
+}
+
+@media (max-width: 540px) {
+    .sig-buttons { flex-direction: column; align-items: stretch; }
+    .sig-buttons button { width: 100%; }
+}

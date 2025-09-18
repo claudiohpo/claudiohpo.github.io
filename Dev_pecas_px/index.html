@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<!-- Última alteração: 15/09/2025 -->
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Formulário de Entrega de Peças</title>
+
+    <!-- bibliotecas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/styles.css" />
+
+<link rel="icon" type="image/png" href="assets/images/favicon-96x96.png" sizes="96x96" />
+<link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg" />
+<link rel="shortcut icon" href="assets/images/favicon.ico" />
+<link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-title" content="Devolução de Peças " />
+<link rel="manifest" href="assets/images/site.webmanifest" />
+
+</head>
+
+<body>
+    <h1>Formulário de Entrega de Peças</h1>
+
+    <form id="deliveryForm" novalidate>
+        <label for="data"><strong>Data:</strong></label>
+        <input type="date" id="data" name="data" required />
+
+        <label for="nomeRecebedor"><strong>Nome do Recebedor:</strong></label>
+        <input type="text" id="nomeRecebedor" name="nomeRecebedor" required />
+
+        <label for="nomeTecnico"><strong>Nome Técnico:</strong></label>
+        <input type="text" id="nomeTecnico" name="nomeTecnico" required />
+
+        <div class="table-wrapper">
+            <table id="serialTable">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Número de Série</th>
+                        <th>Nota Fiscal</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <!-- campo Código da Peça + botão câmera -->
+        <div class="row">
+            <input type="text" id="codigoPeca" placeholder="Código da Peça" autocapitalize="characters" />
+            <button type="button" class="btn-camera" data-target="codigoPeca" aria-label="Abrir câmera para Código">
+                <!-- ícone simples de câmera -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 48 48">
+                    <path fill="#fff"
+                        d="M6 8h1v32H6zm2 0h2v32H8zm5 0h1v32h-1zm3 0h3v32h-3zm5 0h1v32h-1zm3 0h2v32h-2zm4 0h1v32h-1zm3 0h4v32h-4zm6 0h1v32h-1zm3 0h2v32h-2z" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- campo Numero de Série + botão câmera -->
+        <div class="row">
+            <input type="text" id="serialProxxi" placeholder="Número de Série" autocapitalize="characters" />
+            <button type="button" class="btn-camera" data-target="serialProxxi" aria-label="Abrir câmera para Serial">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 48 48">
+                    <path fill="#fff"
+                        d="M6 8h1v32H6zm2 0h2v32H8zm5 0h1v32h-1zm3 0h3v32h-3zm5 0h1v32h-1zm3 0h2v32h-2zm4 0h1v32h-1zm3 0h4v32h-4zm6 0h1v32h-1zm3 0h2v32h-2z" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- campo Nota Fiscal + botão câmera -->
+        <div class="row">
+            <input type="text" id="notaFiscal" placeholder="Nota Fiscal" autocapitalize="characters" />
+            <button type="button" class="btn-camera" data-target="notaFiscal"
+                aria-label="Abrir câmera para Nota Fiscal">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 48 48">
+                    <path fill="#fff"
+                        d="M6 8h1v32H6zm2 0h2v32H8zm5 0h1v32h-1zm3 0h3v32h-3zm5 0h1v32h-1zm3 0h2v32h-2zm4 0h1v32h-1zm3 0h4v32h-4zm6 0h1v32h-1zm3 0h2v32h-2z" />
+                </svg>
+            </button>
+        </div>
+
+        <button type="button" id="btnAdd">Adicionar</button>
+
+        <div class="row row-textarea">
+            <textarea id="inputCompleto"
+                placeholder="Informar na Sequência: 'Código da Peça, Serial, Nota Fiscal' &#10;Separados por vírgula, ponto, ponto e vírgula ou espaço."
+                autocapitalize="characters" rows="4"></textarea>
+            <button type="button" class="btn-camera" data-target="inputCompleto" aria-label="Abrir câmera para Adição">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 48 48">
+                    <path fill="#fff"
+                        d="M6 8h1v32H6zm2 0h2v32H8zm5 0h1v32h-1zm3 0h3v32h-3zm5 0h1v32h-1zm3 0h2v32h-2zm4 0h1v32h-1zm3 0h4v32h-4zm6 0h1v32h-1zm3 0h2v32h-2z" />
+                </svg>
+            </button>
+        </div>
+        <div>
+            <button type="button" id="btnAddFull">Adicionar (vários)</button>
+        </div>
+
+        <label for="assinatura">Assinatura Recebedor:</label>
+
+        <div class="signature-wrap">
+            <!-- canvas sem width/height inline — o tamanho é controlado por CSS (--sig-height) -->
+            <canvas id="signatureCanvas"></canvas>
+
+            <div class="sig-buttons">
+                <button type="button" id="btnClearSig">Limpar Assinatura</button>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button type="button" id="btnGeneratePdf">Gerar PDF</button>
+        </div>
+    </form>
+
+    <!-- Modal / overlay de preview da câmera (criado dinamicamente também no JS, mas deixo aqui como fallback) -->
+    <div id="cameraPreviewModal" class="camera-preview-modal" aria-hidden="true">
+        <div class="camera-inner">
+            <video id="cameraVideo" autoplay playsinline muted></video>
+            <button type="button" class="close-camera" aria-label="Fechar câmera">✕</button>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2025 - Desenvolvido por <a href="https://github.com/claudiohpo" class="link-branco" target="_blank"
+                rel="noopener">Cláudio
+                Oliveira</a></p>
+    </footer>
+
+    <!-- script principal -->
+    <script src="js/main.js" defer></script>
+</body>
+
+</html>
