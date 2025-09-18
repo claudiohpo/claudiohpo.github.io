@@ -35,7 +35,6 @@ Repositório com páginas, protótipos e experimentos públicos hospedados via *
 * Algumas demos incluem otimizações de imagem (pré-load e compressão) para reduzir o tamanho do PDF final
 
 
-```
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat&logo=html5&logoColor=white)
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat&logo=css3&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&logo=javascript&logoColor=black)
@@ -43,7 +42,7 @@ Repositório com páginas, protótipos e experimentos públicos hospedados via *
 ![SignaturePad](https://img.shields.io/badge/SignaturePad-4A90E2?style=flat)
 ![QuaggaJS](https://img.shields.io/badge/QuaggaJS-00AEEF?style=flat)
 ![GitHub Pages](https://img.shields.io/badge/GitHub_Pages-181717?style=flat&logo=github&logoColor=white)
-```
+
 
 ---
 
