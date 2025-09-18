@@ -95,7 +95,7 @@
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
     ctx.lineWidth = 2;
     ctx.lineCap = "round";
-    ctx.strokeStyle = "#0d1457ff";
+    ctx.strokeStyle = "#003366";
 
     // restaura a imagem previamente salva (assíncrono)
     if (dataUrl) {
