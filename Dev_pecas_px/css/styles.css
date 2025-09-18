@@ -1,7 +1,3 @@
-/* styles.css
-           Refatorado — variáveis para fácil ajuste.
-        */
-
 /* ===== VARIÁVEIS (Ajuste aqui) ===== */
 :root {
     --page-padding: 1rem;
@@ -266,7 +262,7 @@ footer {
     --sig-border-radius: 8px;
     --sig-bg: #fafafa;
     --camera-button-size: 44px;
-    --camera-modal-bg: rgba(0,0,0,0.75);
+    --camera-modal-bg: rgba(0, 0, 0, 0.75);
 }
 
 /* LINHA: input + botão câmera (mantém na mesma linha, responsivo) */
@@ -312,12 +308,17 @@ footer {
 /* ícone dentro do botão — aumentado visualmente sem mudar a caixa do botão */
 .btn-camera svg {
     fill: white;
-    width: 20px;                 /* manter largura “base” pequena */
-    height: 20px;                /* manter altura “base” pequena */
-    transform: scale(1.5);         /* escala visual 3x */
-    transform-origin: center;    /* escalar a partir do centro */
+    width: 20px;
+    /* manter largura “base” pequena */
+    height: 20px;
+    /* manter altura “base” pequena */
+    transform: scale(1.5);
+    /* escala visual 3x */
+    transform-origin: center;
+    /* escalar a partir do centro */
     display: block;
-    pointer-events: none;        /* evita que o SVG capture cliques fora do botão */
+    pointer-events: none;
+    /* evita que o SVG capture cliques fora do botão */
 }
 
 
@@ -333,7 +334,9 @@ footer {
     padding: 1rem;
 }
 
-.camera-preview-modal.show { display: flex; }
+.camera-preview-modal.show {
+    display: flex;
+}
 
 .camera-inner {
     position: relative;
@@ -343,7 +346,7 @@ footer {
     background: #000;
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
 }
 
 .camera-inner video {
@@ -357,7 +360,7 @@ footer {
     position: absolute;
     top: 8px;
     right: 8px;
-    background: rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.1);
     color: white;
     border: none;
     padding: 6px 10px;
@@ -367,11 +370,23 @@ footer {
 
 /* Ajustes para mobile */
 @media (max-width: 768px) {
-    :root { --camera-button-size: 40px; }
-    .camera-inner { max-width: 100%; aspect-ratio: 3/4; }
+    :root {
+        --camera-button-size: 40px;
+    }
+
+    .camera-inner {
+        max-width: 100%;
+        aspect-ratio: 3/4;
+    }
 }
 
 @media (max-width: 540px) {
-    .sig-buttons { flex-direction: column; align-items: stretch; }
-    .sig-buttons button { width: 100%; }
+    .sig-buttons {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .sig-buttons button {
+        width: 100%;
+    }
 }
