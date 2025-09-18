@@ -951,9 +951,9 @@
             .split(/[,]+/)
             .map((s) => s.trim())
             .filter(Boolean);
-          if (!parts.includes(code)) {
+          //if (!parts.includes(code)) {      -> Retirado 18/09
             el.value = existing + "," + code;
-          }
+          //}                                 -> Retirado 18/09
         }
       } else {
         el.value = code;
