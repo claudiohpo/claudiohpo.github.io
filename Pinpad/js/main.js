@@ -249,7 +249,21 @@ Matrícula: ${matricula}`;
     els.photoRemove.hidden = true;
   }
 
-  els.btnPhotoCamera.addEventListener("click", () => els.photoInputCamera.click());
+  // Coarse pointer (touch) ~= phone/tablet: the OS camera app (via the file
+  // input's capture attribute) gives a better result there than a webpage
+  // webcam preview. Desktop/mouse devices get a live camera modal instead,
+  // matching the barcode-scan experience.
+  function isTouchDevice() {
+    return window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+  }
+
+  els.btnPhotoCamera.addEventListener("click", () => {
+    if (isTouchDevice()) {
+      els.photoInputCamera.click();
+    } else {
+      startPhotoCapture();
+    }
+  });
   els.btnPhotoGallery.addEventListener("click", () => els.photoInputGallery.click());
 
   els.photoInputCamera.addEventListener("change", () => {
@@ -397,13 +411,15 @@ Matrícula: ${matricula}`;
   const cameraVideo = document.getElementById("cameraVideo");
   const quaggaContainer = document.getElementById("quaggaContainer");
   const cameraHint = document.getElementById("cameraHint");
+  const capturePhotoBtn = document.getElementById("capturePhotoBtn");
   const closeCameraBtn = cameraModal.querySelector(".camera-modal__close");
 
-  function showCameraModal() {
+  function showCameraModal(mode) {
     cameraModal.classList.add("show");
+    cameraModal.classList.toggle("mode-photo", mode === "photo");
   }
   function hideCameraModal() {
-    cameraModal.classList.remove("show");
+    cameraModal.classList.remove("show", "mode-photo");
   }
 
   // Checks native BarcodeDetector support against the formats we actually
@@ -430,7 +446,7 @@ Matrícula: ${matricula}`;
 
     currentTarget = targetId;
     cameraActive = true;
-    showCameraModal();
+    showCameraModal("scan");
     cameraHint.textContent = "Iniciando câmera…";
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -556,6 +572,57 @@ Matrícula: ${matricula}`;
       stopCamera();
     }
   }
+
+  async function startPhotoCapture() {
+    if (cameraActive) stopCamera();
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      // no webcam API at all — fall back to the regular file picker
+      els.photoInputCamera.click();
+      return;
+    }
+
+    cameraActive = true;
+    activeEngine = "photo";
+    cameraVideo.hidden = false;
+    quaggaContainer.hidden = true;
+    showCameraModal("photo");
+
+    try {
+      currentStream = await navigator.mediaDevices.getUserMedia({
+        video: { width: { ideal: 1280 }, height: { ideal: 960 } },
+        audio: false,
+      });
+      cameraVideo.srcObject = currentStream;
+      await cameraVideo.play();
+    } catch (err) {
+      console.error("Erro ao acessar webcam:", err);
+      showToast("Não foi possível acessar a câmera do computador. Verifique as permissões do navegador.");
+      stopCamera();
+    }
+  }
+
+  capturePhotoBtn.addEventListener("click", () => {
+    if (activeEngine !== "photo" || !cameraVideo.videoWidth) return;
+    const canvas = document.createElement("canvas");
+    canvas.width = cameraVideo.videoWidth;
+    canvas.height = cameraVideo.videoHeight;
+    canvas.getContext("2d").drawImage(cameraVideo, 0, 0, canvas.width, canvas.height);
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          showToast("Não foi possível capturar a foto. Tente novamente.");
+          return;
+        }
+        const file = new File([blob], `rollout-pinpad-${Date.now()}.jpg`, { type: "image/jpeg" });
+        setPhoto(file);
+        stopCamera();
+        showToast("Foto capturada ✓");
+      },
+      "image/jpeg",
+      0.92
+    );
+  });
 
   function stopCamera() {
     cameraActive = false;

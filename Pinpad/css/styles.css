@@ -566,6 +566,41 @@ input.field-invalid { border-color: var(--danger); }
 }
 .camera-modal__close:hover { background: rgba(255,255,255,0.28); }
 
+.camera-modal__capture {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  background: rgba(255,255,255,0.18);
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.camera-modal__capture:hover { background: rgba(255,255,255,0.3); }
+.camera-modal__capture:active { transform: translateX(-50%) scale(0.92); }
+.camera-modal__capture-dot {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: block;
+}
+
+/* photo mode: hide the barcode framing guide, show the shutter button */
+.camera-modal.mode-photo .camera-modal__guide,
+.camera-modal.mode-photo .camera-modal__hint {
+  display: none;
+}
+.camera-modal.mode-photo .camera-modal__capture {
+  display: flex;
+}
+
 /* =========================================================
    TOAST
    ========================================================= */
