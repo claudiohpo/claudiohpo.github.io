@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-br" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Rollout PinPad</title>
+<meta name="description" content="Geração rápida de texto e foto padronizados para rollout de PinPad" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/styles.css" />
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230A0E14'/%3E%3Crect x='24' y='20' width='52' height='64' rx='8' fill='none' stroke='%23F2A93B' stroke-width='5'/%3E%3Ccircle cx='50' cy='34' r='5' fill='%23F2A93B'/%3E%3Crect x='32' y='48' width='36' height='4' fill='%23F2A93B'/%3E%3Crect x='32' y='58' width='36' height='4' fill='%2334D8A6'/%3E%3Crect x='32' y='68' width='22' height='4' fill='%2334D8A6'/%3E%3C/svg%3E">
+</head>
+<body>
+
+<div class="noise-overlay" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div class="topbar__brand">
+    <span class="topbar__mark" aria-hidden="true">
+      <svg viewBox="0 0 48 48" width="26" height="26"><rect x="10" y="6" width="28" height="36" rx="5" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="24" cy="15" r="2.4" fill="currentColor"/><rect x="16" y="23" width="16" height="2.6" fill="currentColor"/><rect x="16" y="29" width="16" height="2.6" fill="currentColor" opacity="0.55"/><rect x="16" y="35" width="10" height="2.6" fill="currentColor" opacity="0.55"/></svg>
+    </span>
+    <div>
+      <h1>Rollout PinPad</h1>
+      <p class="topbar__sub">Padronize o registro de instalação em segundos</p>
+    </div>
+  </div>
+  <button type="button" id="themeToggle" class="theme-toggle" aria-label="Alternar tema claro/escuro">
+    <svg class="icon-sun" viewBox="0 0 24 24" width="19" height="19"><circle cx="12" cy="12" r="4.6" fill="currentColor"/><g stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="12" y1="1.5" x2="12" y2="4.5"/><line x1="12" y1="19.5" x2="12" y2="22.5"/><line x1="1.5" y1="12" x2="4.5" y2="12"/><line x1="19.5" y1="12" x2="22.5" y2="12"/><line x1="4.2" y1="4.2" x2="6.3" y2="6.3"/><line x1="17.7" y1="17.7" x2="19.8" y2="19.8"/><line x1="4.2" y1="19.8" x2="6.3" y2="17.7"/><line x1="17.7" y1="6.3" x2="19.8" y2="4.2"/></g></svg>
+    <svg class="icon-moon" viewBox="0 0 24 24" width="19" height="19"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z" fill="currentColor"/></svg>
+  </button>
+</header>
+
+<main class="layout">
+
+  <form id="pinpadForm" class="form-col" autocomplete="off" novalidate>
+
+    <!-- FOTO -->
+    <section class="card">
+      <div class="card__head">
+        <span class="card__index">Foto</span>
+        <h2>Registro fotográfico</h2>
+      </div>
+      <label for="photoInput" class="photo-drop" id="photoDrop">
+        <div class="photo-drop__empty" id="photoEmptyState">
+          <svg viewBox="0 0 24 24" width="30" height="30"><path fill="currentColor" d="M9 3l-1.8 2H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3.2L15 3H9zm3 5a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2.2A2.8 2.8 0 1 0 12 15.8a2.8 2.8 0 0 0 0-5.6z"/></svg>
+          <span>Toque para tirar foto ou escolher da galeria</span>
+        </div>
+        <img id="photoPreview" alt="Pré-visualização da foto" hidden />
+      </label>
+      <input type="file" id="photoInput" accept="image/*" hidden />
+      <button type="button" id="photoRemove" class="link-btn" hidden>Remover foto</button>
+    </section>
+
+    <!-- HOST -->
+    <section class="card">
+      <div class="card__head">
+        <span class="card__index">Host</span>
+        <h2>Estação de destino</h2>
+      </div>
+      <div class="radio-group" role="radiogroup" aria-label="Tipo de host">
+        <label class="radio-pill">
+          <input type="radio" name="hostMode" value="mesmo" checked />
+          <span>Mesmo Host</span>
+        </label>
+        <label class="radio-pill">
+          <input type="radio" name="hostMode" value="outro" />
+          <span>Outro Host</span>
+        </label>
+      </div>
+
+      <div class="field-grid">
+        <div class="field">
+          <label for="agencia">Agência</label>
+          <input type="text" id="agencia" inputmode="numeric" maxlength="4" placeholder="0000" />
+        </div>
+        <div class="field">
+          <label for="posto">Posto</label>
+          <input type="text" id="posto" inputmode="numeric" maxlength="3" placeholder="000" />
+        </div>
+        <div class="field">
+          <label for="estacao">Estação</label>
+          <input type="text" id="estacao" inputmode="numeric" maxlength="3" placeholder="000" />
+        </div>
+      </div>
+
+      <div class="field field--collapsible" id="novoHostWrap" hidden>
+        <label for="novoHostname">Novo hostname (nº da estação)</label>
+        <input type="text" id="novoHostname" inputmode="numeric" maxlength="3" placeholder="000" />
+      </div>
+    </section>
+
+    <!-- EQUIPAMENTO -->
+    <section class="card">
+      <div class="card__head">
+        <span class="card__index">Equip.</span>
+        <h2>Números de série</h2>
+      </div>
+
+      <div class="field">
+        <label for="serialAntigo">S/N Antigo</label>
+        <div class="row">
+          <input type="text" id="serialAntigo" inputmode="numeric" placeholder="000-000-000" maxlength="11" />
+          <button type="button" class="btn-camera" data-target="serialAntigo" aria-label="Escanear código de barras — S/N Antigo">
+            <svg viewBox="0 0 48 48" width="20" height="20"><path fill="currentColor" d="M6 8h1v32H6zm2 0h2v32H8zm5 0h1v32h-1zm3 0h3v32h-3zm5 0h1v32h-1zm3 0h2v32h-2zm4 0h1v32h-1zm3 0h4v32h-4zm6 0h1v32h-1zm3 0h2v32h-2z"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="serialNovo">S/N Novo</label>
+        <div class="row">
+          <input type="text" id="serialNovo" inputmode="numeric" placeholder="000-000-000" maxlength="11" />
+          <button type="button" class="btn-camera" data-target="serialNovo" aria-label="Escanear código de barras — S/N Novo">
+            <svg viewBox="0 0 48 48" width="20" height="20"><path fill="currentColor" d="M6 8h1v32H6zm2 0h2v32H8zm5 0h1v32h-1zm3 0h3v32h-3zm5 0h1v32h-1zm3 0h2v32h-2zm4 0h1v32h-1zm3 0h4v32h-4zm6 0h1v32h-1zm3 0h2v32h-2z"/></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESPONSÁVEL -->
+    <section class="card">
+      <div class="card__head">
+        <span class="card__index">Resp.</span>
+        <h2>Responsável da agência</h2>
+      </div>
+      <div class="field">
+        <label for="nomeResponsavel">Nome</label>
+        <input type="text" id="nomeResponsavel" placeholder="Nome completo" autocapitalize="words" />
+      </div>
+      <div class="field">
+        <label for="matricula">Matrícula</label>
+        <input type="text" id="matricula" inputmode="numeric" maxlength="7" placeholder="0000000" />
+      </div>
+    </section>
+
+  </form>
+
+  <!-- PREVIEW / RECEIPT -->
+  <aside class="preview-col">
+    <div class="receipt-wrap">
+      <div class="receipt" id="receipt">
+        <div class="receipt__title">ROLLOUT PINPAD</div>
+        <pre id="receiptText" class="receipt__body">Preencha os dados ao lado…</pre>
+        <div class="receipt__barcode" aria-hidden="true">
+          <svg viewBox="0 0 200 34" preserveAspectRatio="none"><g fill="currentColor"></g></svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" id="btnShare" class="btn btn--primary">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M18 16.1a3 3 0 0 0-2.1.86l-6.6-3.85a3.2 3.2 0 0 0 0-2.22l6.53-3.8a3 3 0 1 0-.94-1.72l-6.53 3.8a3 3 0 1 0 0 5.66l6.6 3.85a3 3 0 1 0 3.04-2.58z"/></svg>
+        Compartilhar no WhatsApp
+      </button>
+      <button type="button" id="btnCopy" class="btn btn--ghost">Copiar somente texto</button>
+      <button type="button" id="btnClear" class="btn btn--text">Limpar formulário</button>
+    </div>
+    <p class="hint" id="shareHint"></p>
+  </aside>
+
+</main>
+
+<footer class="page-footer">
+  <p>Rollout PinPad · uso interno</p>
+</footer>
+
+<!-- CAMERA MODAL -->
+<div id="cameraPreviewModal" class="camera-modal" aria-hidden="true">
+  <div class="camera-modal__inner">
+    <video id="cameraVideo" autoplay playsinline muted></video>
+    <div class="camera-modal__guide"></div>
+    <p class="camera-modal__hint">Aponte para o código de barras do equipamento</p>
+    <button type="button" class="camera-modal__close" aria-label="Fechar câmera">✕</button>
+  </div>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
+<script src="js/main.js" defer></script>
+</body>
+</html>
