@@ -58,7 +58,10 @@
     btnCopy: document.getElementById("btnCopy"),
     btnClear: document.getElementById("btnClear"),
     shareHint: document.getElementById("shareHint"),
-    photoInput: document.getElementById("photoInput"),
+    photoInputCamera: document.getElementById("photoInputCamera"),
+    photoInputGallery: document.getElementById("photoInputGallery"),
+    btnPhotoCamera: document.getElementById("btnPhotoCamera"),
+    btnPhotoGallery: document.getElementById("btnPhotoGallery"),
     photoDrop: document.getElementById("photoDrop"),
     photoPreview: document.getElementById("photoPreview"),
     photoEmptyState: document.getElementById("photoEmptyState"),
@@ -220,31 +223,50 @@ Matrícula: ${matricula}`;
      PHOTO UPLOAD
      ========================================================= */
   let currentPhotoFile = null;
+  let currentPhotoUrl = null;
 
-  els.photoDrop.addEventListener("click", (e) => {
-    // label already triggers input via "for", but keep programmatic fallback
-  });
-
-  els.photoInput.addEventListener("change", () => {
-    const file = els.photoInput.files && els.photoInput.files[0];
+  function setPhoto(file) {
     if (!file) return;
+    // always replaces whatever photo was there before — only one is ever kept
+    if (currentPhotoUrl) URL.revokeObjectURL(currentPhotoUrl);
     currentPhotoFile = file;
-    const url = URL.createObjectURL(file);
-    els.photoPreview.src = url;
+    currentPhotoUrl = URL.createObjectURL(file);
+    els.photoPreview.src = currentPhotoUrl;
     els.photoPreview.hidden = false;
     els.photoEmptyState.hidden = true;
     els.photoRemove.hidden = false;
-  });
+  }
 
-  els.photoRemove.addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+  function clearPhoto() {
+    if (currentPhotoUrl) URL.revokeObjectURL(currentPhotoUrl);
     currentPhotoFile = null;
-    els.photoInput.value = "";
+    currentPhotoUrl = null;
+    els.photoInputCamera.value = "";
+    els.photoInputGallery.value = "";
     els.photoPreview.removeAttribute("src");
     els.photoPreview.hidden = true;
     els.photoEmptyState.hidden = false;
     els.photoRemove.hidden = true;
+  }
+
+  els.btnPhotoCamera.addEventListener("click", () => els.photoInputCamera.click());
+  els.btnPhotoGallery.addEventListener("click", () => els.photoInputGallery.click());
+
+  els.photoInputCamera.addEventListener("change", () => {
+    const file = els.photoInputCamera.files && els.photoInputCamera.files[0];
+    if (file) setPhoto(file);
+    els.photoInputGallery.value = ""; // keep the two inputs in sync — single photo only
+  });
+
+  els.photoInputGallery.addEventListener("change", () => {
+    const file = els.photoInputGallery.files && els.photoInputGallery.files[0];
+    if (file) setPhoto(file);
+    els.photoInputCamera.value = "";
+  });
+
+  els.photoRemove.addEventListener("click", (e) => {
+    e.preventDefault();
+    clearPhoto();
   });
 
   /* =========================================================
@@ -350,12 +372,7 @@ Matrícula: ${matricula}`;
   els.btnClear.addEventListener("click", () => {
     document.getElementById("pinpadForm").reset();
     els.novoHostWrap.hidden = true;
-    currentPhotoFile = null;
-    els.photoInput.value = "";
-    els.photoPreview.removeAttribute("src");
-    els.photoPreview.hidden = true;
-    els.photoEmptyState.hidden = false;
-    els.photoRemove.hidden = true;
+    clearPhoto();
     updateReceipt();
     showToast("Formulário limpo");
   });
