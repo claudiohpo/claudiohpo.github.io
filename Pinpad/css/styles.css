@@ -510,6 +510,26 @@ input.field-invalid { border-color: var(--danger); }
   object-fit: cover;
 }
 
+.quagga-container {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.quagga-container video,
+.quagga-container canvas {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+}
+
+#cameraVideo[hidden],
+.quagga-container[hidden] {
+  display: none;
+}
+
 .camera-modal__guide {
   position: absolute;
   inset: 30% 10%;

@@ -213,7 +213,7 @@ Matrícula: ${matricula}`;
       els.btnCopy.disabled = false;
     } else {
       els.receiptText.textContent =
-        `Preencha os campos abaixo para gerar o texto:\n\n• ${result.missing.join("\n• ")}`;
+        `Faltam preencher:\n\n• ${result.missing.join("\n• ")}`;
       els.btnShare.disabled = false; // keep clickable to surface validation via toast
       els.btnCopy.disabled = false;
     }
@@ -380,24 +380,49 @@ Matrícula: ${matricula}`;
   /* =========================================================
      CAMERA BARCODE SCAN (BarcodeDetector nativo + fallback Quagga)
      Adaptado do projeto de referência do usuário.
+
+     IMPORTANTE: os dois motores de leitura NUNCA disputam a mesma
+     câmera/elemento de vídeo. O BarcodeDetector usa o <video> próprio
+     (getUserMedia controlado por nós); o Quagga usa seu próprio
+     container e gerencia sua própria captura de câmera internamente.
+     Só um dos dois é ativado por sessão de leitura.
      ========================================================= */
   let cameraActive = false;
   let currentTarget = null;
   let currentStream = null;
-  let barcodeDetector = null;
   let rafId = null;
+  let activeEngine = null; // "detector" | "quagga" | null
 
   const cameraModal = document.getElementById("cameraPreviewModal");
   const cameraVideo = document.getElementById("cameraVideo");
+  const quaggaContainer = document.getElementById("quaggaContainer");
+  const cameraHint = document.getElementById("cameraHint");
   const closeCameraBtn = cameraModal.querySelector(".camera-modal__close");
 
   function showCameraModal() {
     cameraModal.classList.add("show");
-    cameraVideo.setAttribute("aria-hidden", "false");
   }
   function hideCameraModal() {
     cameraModal.classList.remove("show");
-    cameraVideo.setAttribute("aria-hidden", "true");
+  }
+
+  // Checks native BarcodeDetector support against the formats we actually
+  // need, so the constructor never throws on browsers with partial support.
+  async function getUsableDetector() {
+    if (!("BarcodeDetector" in window)) return null;
+    const wanted = ["code_128", "ean_13", "ean_8", "code_39", "upc_e", "upc_a", "qr_code"];
+    try {
+      let formats = wanted;
+      if (typeof BarcodeDetector.getSupportedFormats === "function") {
+        const supported = await BarcodeDetector.getSupportedFormats();
+        formats = wanted.filter((f) => supported.includes(f));
+        if (!formats.length) return null;
+      }
+      return new BarcodeDetector({ formats });
+    } catch (e) {
+      console.warn("BarcodeDetector indisponível, usando Quagga:", e);
+      return null;
+    }
   }
 
   async function startCamera(targetId) {
@@ -406,12 +431,30 @@ Matrícula: ${matricula}`;
     currentTarget = targetId;
     cameraActive = true;
     showCameraModal();
+    cameraHint.textContent = "Iniciando câmera…";
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       showToast("Este navegador não suporta acesso à câmera.");
       stopCamera();
       return;
     }
+
+    const detector = await getUsableDetector();
+
+    if (detector) {
+      await startWithDetector(detector);
+    } else if (window.Quagga) {
+      await startWithQuagga();
+    } else {
+      showToast("Leitura por câmera não disponível neste navegador.");
+      stopCamera();
+    }
+  }
+
+  async function startWithDetector(detector) {
+    activeEngine = "detector";
+    cameraVideo.hidden = false;
+    quaggaContainer.hidden = true;
 
     try {
       currentStream = await navigator.mediaDevices.getUserMedia({
@@ -422,60 +465,50 @@ Matrícula: ${matricula}`;
         },
         audio: false,
       });
-      if ("srcObject" in cameraVideo) {
-        cameraVideo.srcObject = currentStream;
-      } else {
-        cameraVideo.src = window.URL.createObjectURL(currentStream);
-      }
+      cameraVideo.srcObject = currentStream;
       await cameraVideo.play();
     } catch (err) {
       console.error("Erro getUserMedia:", err);
-      showToast("Não foi possível acessar a câmera. Verifique as permissões.");
+      showToast("Não foi possível acessar a câmera. Verifique as permissões do navegador.");
       stopCamera();
       return;
     }
 
-    if ("BarcodeDetector" in window) {
-      try {
-        const formats = ["code_128", "ean_13", "ean_8", "code_39", "upc_e", "upc_a", "qr_code"];
-        barcodeDetector = new BarcodeDetector({ formats });
-      } catch (e) {
-        barcodeDetector = null;
-      }
-    }
+    cameraHint.textContent = "Aponte para o código de barras do equipamento";
 
-    if (barcodeDetector) {
-      const detectFrame = async () => {
-        if (!cameraActive) return;
-        try {
-          const barcodes = await barcodeDetector.detect(cameraVideo);
-          if (barcodes && barcodes.length) {
-            const code = barcodes[0].rawValue;
-            if (code) {
-              handleDetected(code);
-              return;
-            }
+    const detectFrame = async () => {
+      if (!cameraActive || activeEngine !== "detector") return;
+      try {
+        const barcodes = await detector.detect(cameraVideo);
+        if (barcodes && barcodes.length) {
+          const code = barcodes[0].rawValue;
+          if (code) {
+            handleDetected(code);
+            return;
           }
-        } catch (err) {
-          /* detect can throw transiently — ignore and retry next frame */
         }
-        rafId = requestAnimationFrame(detectFrame);
-      };
+      } catch (err) {
+        /* detect() can throw transiently on some frames — ignore and retry */
+      }
       rafId = requestAnimationFrame(detectFrame);
-      return;
-    }
+    };
+    rafId = requestAnimationFrame(detectFrame);
+  }
 
-    if (window.Quagga) {
-      try {
-        if (typeof window.Quagga.stop === "function") {
-          try { window.Quagga.stop(); } catch (e) {}
-        }
+  async function startWithQuagga() {
+    activeEngine = "quagga";
+    cameraVideo.hidden = true;
+    quaggaContainer.hidden = false;
+    quaggaContainer.innerHTML = ""; // clear any leftovers from a previous session
+
+    try {
+      await new Promise((resolve, reject) => {
         window.Quagga.init(
           {
             inputStream: {
               name: "Live",
               type: "LiveStream",
-              target: cameraVideo,
+              target: quaggaContainer,
               constraints: {
                 facingMode: "environment",
                 width: { ideal: 1280 },
@@ -487,34 +520,24 @@ Matrícula: ${matricula}`;
             },
             locate: true,
           },
-          function (err) {
-            if (err) {
-              console.error("Erro ao inicializar Quagga:", err);
-              showToast("Não foi possível inicializar o leitor de código de barras.");
-              stopCamera();
-              return;
-            }
-            try {
-              window.Quagga.start();
-            } catch (startErr) {
-              console.error("Quagga start erro:", startErr);
-              stopCamera();
-            }
-          }
+          (err) => (err ? reject(err) : resolve())
         );
-        window.Quagga.onDetected(function (result) {
-          const code = result && result.codeResult && result.codeResult.code;
-          if (code) handleDetected(code);
-        });
-      } catch (e) {
-        console.error("Quagga fallback erro:", e);
-        stopCamera();
-      }
-      return;
-    }
+      });
 
-    showToast("Leitura por câmera não disponível neste navegador.");
-    stopCamera();
+      window.Quagga.start();
+      cameraHint.textContent = "Aponte para o código de barras do equipamento";
+      window.Quagga.onDetected(handleQuaggaDetected);
+    } catch (err) {
+      console.error("Erro ao inicializar Quagga:", err);
+      showToast("Não foi possível acessar a câmera para leitura do código de barras.");
+      stopCamera();
+    }
+  }
+
+  function handleQuaggaDetected(result) {
+    if (activeEngine !== "quagga") return;
+    const code = result && result.codeResult && result.codeResult.code;
+    if (code) handleDetected(code);
   }
 
   function handleDetected(code) {
@@ -537,6 +560,8 @@ Matrícula: ${matricula}`;
   function stopCamera() {
     cameraActive = false;
     currentTarget = null;
+    const engine = activeEngine;
+    activeEngine = null;
 
     if (rafId) {
       cancelAnimationFrame(rafId);
@@ -545,18 +570,27 @@ Matrícula: ${matricula}`;
 
     hideCameraModal();
 
+    // stop our own getUserMedia stream (detector path)
     try {
       if (currentStream && currentStream.getTracks) {
         currentStream.getTracks().forEach((t) => t.stop());
       }
     } catch (e) {}
     currentStream = null;
+    cameraVideo.srcObject = null;
 
-    try {
-      if (window.Quagga && typeof window.Quagga.stop === "function") {
-        window.Quagga.stop();
-      }
-    } catch (e) {}
+    // stop Quagga's own internally-managed stream (quagga path)
+    if (engine === "quagga" && window.Quagga) {
+      try {
+        if (typeof window.Quagga.offDetected === "function") {
+          window.Quagga.offDetected(handleQuaggaDetected);
+        }
+        if (typeof window.Quagga.stop === "function") {
+          window.Quagga.stop();
+        }
+      } catch (e) {}
+      quaggaContainer.innerHTML = "";
+    }
   }
 
   closeCameraBtn.addEventListener("click", stopCamera);

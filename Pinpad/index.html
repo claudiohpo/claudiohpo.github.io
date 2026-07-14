@@ -157,7 +157,7 @@
     <div class="receipt-wrap">
       <div class="receipt" id="receipt">
         <div class="receipt__title">ROLLOUT PINPAD</div>
-        <pre id="receiptText" class="receipt__body">Preencha os dados ao lado…</pre>
+        <pre id="receiptText" class="receipt__body">Preencha o formulário para gerar o texto…</pre>
         <div class="receipt__barcode" aria-hidden="true">
           <svg viewBox="0 0 200 34" preserveAspectRatio="none"><g fill="currentColor"></g></svg>
         </div>
@@ -185,8 +185,9 @@
 <div id="cameraPreviewModal" class="camera-modal" aria-hidden="true">
   <div class="camera-modal__inner">
     <video id="cameraVideo" autoplay playsinline muted></video>
+    <div id="quaggaContainer" class="quagga-container" hidden></div>
     <div class="camera-modal__guide"></div>
-    <p class="camera-modal__hint">Aponte para o código de barras do equipamento</p>
+    <p class="camera-modal__hint" id="cameraHint">Aponte para o código de barras do equipamento</p>
     <button type="button" class="camera-modal__close" aria-label="Fechar câmera">✕</button>
   </div>
 </div>
