@@ -3,9 +3,23 @@
 Página estática (HTML/CSS/JS puro, sem build) para padronizar o registro de instalação/rollout de PinPad: foto + texto formatado, prontos para enviar via WhatsApp.
 
 ## Publicar no GitHub Pages
-1. Crie um repositório no GitHub e envie estes 3 itens mantendo a estrutura: `index.html`, `css/styles.css`, `js/main.js`.
+1. Crie um repositório no GitHub e envie **todos** os arquivos mantendo a estrutura:
+   - `index.html`, `css/`, `js/`
+   - `favicon.svg`, `favicon-96x96.png`, `favicon.ico`, `apple-touch-icon.png`
+   - `site.webmanifest`
+   - `icons/` (ícones usados ao instalar como app no Android)
 2. Em **Settings → Pages**, selecione a branch (ex.: `main`) e a pasta raiz (`/`).
 3. Acesse a URL gerada (ex.: `https://seuusuario.github.io/rollout-pinpad/`).
+
+## Ícone / instalar como app (Android e iOS)
+O projeto já vem com o conjunto completo de ícones para funcionar como um app instalável (PWA):
+- `favicon.svg` / `favicon-96x96.png` / `favicon.ico` — ícone da aba do navegador.
+- `apple-touch-icon.png` (180×180) — ícone ao adicionar à tela inicial no iPhone/iPad.
+- `icons/android-chrome-192x192.png` e `icons/android-chrome-512x512.png` — ícone padrão no Android.
+- `icons/maskable-icon-192x192.png` e `icons/maskable-icon-512x512.png` — versão "maskable", com a arte recuada para dentro da área segura, para o Android não cortar o desenho ao aplicar o formato adaptativo (círculo, quadrado arredondado, etc. dependendo do launcher do aparelho).
+- `site.webmanifest` — define nome, cor de tema e os ícones acima, permitindo o Chrome no Android oferecer "Instalar app" / "Adicionar à tela inicial", abrindo em modo standalone (sem barra de endereço, como um app nativo).
+
+Se quiser trocar as cores/desenho do ícone, edite `favicon.svg` (é o mesmo desenho usado como base para gerar todos os PNGs).
 
 ## Como funciona
 - **Foto**: toque no quadro para abrir a câmera ou a galeria (o próprio navegador do celular oferece as duas opções).
