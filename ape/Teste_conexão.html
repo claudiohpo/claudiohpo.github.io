@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101114">
+  <title>Gastos Apartamento | Teste OneDrive</title>
+
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #101114; --card: #1b1d22; --surface: #252830;
+      --text: #f4f5f7; --muted: #a6abb5; --border: #353943;
+      --primary: #3979ed; --primary-hover: #2864d2;
+      --success: #35c779; --danger: #ff6565; --warning: #f5c451;
+    }
+    body.light {
+      color-scheme: light;
+      --bg: #f2f4f7; --card: #fff; --surface: #f0f2f5;
+      --text: #17191e; --muted: #606775; --border: #dce0e7;
+      --primary: #2563eb; --primary-hover: #1d4ed8;
+      --success: #138a4b; --danger: #c83232; --warning: #946200;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; padding: 20px;
+      display: grid; place-items: center;
+      background: var(--bg); color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Arial, sans-serif;
+      transition: background .2s, color .2s;
+    }
+    .app { width: 100%; max-width: 470px; }
+    header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:18px; }
+    .brand { font-size: 17px; font-weight: 800; letter-spacing:.3px; }
+    .brand span { color: var(--primary); }
+    button {
+      min-height: 46px; border: 0; border-radius: 12px; padding: 12px 16px;
+      font: inherit; font-weight: 700; cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    button:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
+    button:disabled { opacity: .58; cursor: wait; }
+    .theme {
+      min-width: 48px; background: var(--card); color: var(--text);
+      border: 1px solid var(--border); font-size: 19px;
+    }
+    .card {
+      padding: 24px; border-radius: 20px; background: var(--card);
+      border: 1px solid var(--border); box-shadow: 0 14px 40px #0002;
+    }
+    .cloud { font-size: 36px; margin-bottom: 12px; }
+    h1 { margin: 0 0 9px; font-size: 23px; }
+    .intro { color: var(--muted); font-size: 14px; line-height: 1.55; margin: 0 0 21px; }
+    .details { background: var(--surface); border-radius: 13px; padding: 15px; margin-bottom: 18px; }
+    .detail + .detail { margin-top: 13px; }
+    .label { display:block; color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.6px; margin-bottom:4px; }
+    .value { font-size:13px; overflow-wrap:anywhere; line-height:1.45; }
+    .primary { width:100%; background:var(--primary); color:white; }
+    .primary:hover:not(:disabled) { background:var(--primary-hover); }
+    .secondary {
+      width:100%; margin-top:10px; background:transparent; color:var(--text);
+      border:1px solid var(--border);
+    }
+    #status {
+      display:none; white-space:pre-wrap; overflow-wrap:anywhere;
+      margin-top:16px; padding:14px; border-radius:12px;
+      font-size:13px; line-height:1.55; border:1px solid var(--border);
+      background:var(--surface);
+    }
+    #status.success { display:block; color:var(--success); border-color:var(--success); }
+    #status.error { display:block; color:var(--danger); border-color:var(--danger); }
+    #status.info { display:block; color:var(--text); }
+    .foot { text-align:center; color:var(--muted); font-size:11px; margin-top:16px; }
+    @media (max-width:380px) { body { padding:12px; } .card { padding:19px; } h1 {font-size:21px;} }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div class="brand">GASTOS <span>APARTAMENTO</span></div>
+      <button type="button" class="theme" id="themeButton" aria-label="Alternar tema" title="Alternar tema">☀️</button>
+    </header>
+
+    <section class="card">
+      <div class="cloud" aria-hidden="true">☁️</div>
+      <h1>Teste de conexão com OneDrive</h1>
+      <p class="intro">
+        Autentique sua conta Microsoft e verifique se o aplicativo consegue
+        identificar você e acessar a pasta exclusiva do próprio aplicativo.
+      </p>
+
+      <div class="details">
+        <div class="detail">
+          <span class="label">Aplicativo</span>
+          <div class="value">Gastos Apartamento</div>
+        </div>
+        <div class="detail">
+          <span class="label">Conta aceita</span>
+          <div class="value">Conta pessoal Microsoft (Hotmail / Outlook)</div>
+        </div>
+        <div class="detail">
+          <span class="label">Permissões solicitadas</span>
+          <div class="value">User.Read · Files.ReadWrite.AppFolder</div>
+        </div>
+        <div class="detail">
+          <span class="label">Status</span>
+          <div class="value" id="connectionStatus">Aguardando validação</div>
+        </div>
+        <div class="detail">
+          <span class="label">Conta autenticada</span>
+          <div class="value" id="accountInfo">Nenhuma</div>
+        </div>
+      </div>
+
+      <button type="button" class="primary" id="validateButton">
+        Validar acesso ao OneDrive
+      </button>
+      <button type="button" class="secondary" id="logoutButton">
+        Sair da conta
+      </button>
+      <div id="status" role="status" aria-live="polite"></div>
+    </section>
+
+    <footer class="foot">Gastos Apartamento · Diagnóstico de autenticação</footer>
+  </main>
+
+  <script type="module">
+    import {
+      PublicClientApplication,
+      InteractionRequiredAuthError
+    } from "https://esm.sh/@azure/msal-browser@4.26.2";
+
+    "use strict";
+
+    // Dados do registro no Microsoft Entra ID.
+    const CLIENT_ID = "27e745a6-42db-48ec-99ad-3fe9a61ceebe";
+    const DIRECTORY_TENANT_ID = "8464ae23-3c79-4994-b0e4-0d3096faca1b";
+    // Object ID do registro: a04eff43-7428-4e0e-a69c-86c08a50217f
+    // Não é usado no fluxo OAuth. Para contas pessoais, a autoridade correta
+    // é /consumers, e não o ID do diretório.
+
+    const REDIRECT_URI = "https://claudiohpo.github.io/ape/";
+    const AUTHORITY = "https://login.microsoftonline.com/consumers";
+    const SCOPES = ["User.Read", "Files.ReadWrite.AppFolder"];
+    const GRAPH_BASE = "https://graph.microsoft.com/v1.0";
+
+    const statusElement = document.getElementById("status");
+    const validateButton = document.getElementById("validateButton");
+    const logoutButton = document.getElementById("logoutButton");
+    const connectionStatus = document.getElementById("connectionStatus");
+    const accountInfo = document.getElementById("accountInfo");
+
+    function showStatus(message, type = "info") {
+      statusElement.textContent = message;
+      statusElement.className = type;
+    }
+
+    function setBusy(isBusy, label) {
+      validateButton.disabled = isBusy;
+      logoutButton.disabled = isBusy;
+      validateButton.textContent = isBusy ? label : "Validar acesso ao OneDrive";
+    }
+
+    // Tema: inicializa e persiste a preferência no navegador.
+    const themeButton = document.getElementById("themeButton");
+    function setTheme(theme) {
+      document.body.classList.toggle("light", theme === "light");
+      themeButton.textContent = theme === "light" ? "🌙" : "☀️";
+      themeButton.setAttribute(
+        "aria-label",
+        theme === "light" ? "Ativar tema escuro" : "Ativar tema claro"
+      );
+      try { localStorage.setItem("gastosTheme", theme); } catch (_) {}
+    }
+    let savedTheme = "dark";
+    try { savedTheme = localStorage.getItem("gastosTheme") || "dark"; } catch (_) {}
+    setTheme(savedTheme);
+    themeButton.addEventListener("click", () => {
+      setTheme(document.body.classList.contains("light") ? "dark" : "light");
+    });
+
+    const msalConfig = {
+      auth: {
+        clientId: CLIENT_ID,
+        authority: AUTHORITY,
+        redirectUri: REDIRECT_URI,
+        postLogoutRedirectUri: REDIRECT_URI,
+        navigateToLoginRequestUrl: false
+      },
+      cache: {
+        cacheLocation: "sessionStorage"
+      },
+      system: {
+        allowNativeBroker: false
+      }
+    };
+
+    let msalInstance = null;
+    let msalReady = false;
+    let redirectResult = null;
+    let initializationError = null;
+
+    async function graphGet(accessToken, path) {
+      const response = await fetch(GRAPH_BASE + path, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "Accept": "application/json"
+        }
+      });
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const message = data?.error?.message || `Microsoft Graph retornou HTTP ${response.status}.`;
+        const error = new Error(message);
+        error.status = response.status;
+        error.code = data?.error?.code || "";
+        throw error;
+      }
+      return data;
+    }
+
+    async function getAccessToken(account) {
+      try {
+        return await msalInstance.acquireTokenSilent({
+          scopes: SCOPES,
+          account
+        });
+      } catch (error) {
+        if (error instanceof InteractionRequiredAuthError ||
+            error?.name === "InteractionRequiredAuthError") {
+          // Redirecionamento é mais confiável que popup em navegadores mobile
+          // e não depende do bloqueador de janelas pop-up.
+          await msalInstance.acquireTokenRedirect({
+            scopes: SCOPES,
+            account
+          });
+          return null;
+        }
+        throw error;
+      }
+    }
+
+    async function validateWithToken(tokenResponse) {
+      if (!tokenResponse?.accessToken) {
+        throw new Error("A Microsoft não retornou um token de acesso.");
+      }
+
+      showStatus("Token recebido. Verificando sua conta Microsoft...", "info");
+
+      const user = await graphGet(
+        tokenResponse.accessToken,
+        "/me?$select=displayName,mail,userPrincipalName"
+      );
+
+      accountInfo.textContent =
+        user.mail || user.userPrincipalName || user.displayName || "Conta autenticada";
+
+      showStatus("Identidade confirmada. Verificando a pasta do aplicativo...", "info");
+
+      // A primeira chamada ao approot pode criar a pasta especial caso ainda não exista.
+      const appFolder = await graphGet(
+        tokenResponse.accessToken,
+        "/me/drive/special/approot"
+      );
+
+      connectionStatus.textContent = "Acesso validado";
+      showStatus(
+        "✓ ACESSO VALIDADO COM SUCESSO\n\n" +
+        "Nome: " + (user.displayName || "Não informado") + "\n" +
+        "Conta: " + (user.mail || user.userPrincipalName || "Não informado") + "\n" +
+        "Pasta: " + (appFolder.name || "approot") + "\n" +
+        "ID da pasta: " + (appFolder.id || "Não retornado") + "\n\n" +
+        "A API confirmou a identidade e o acesso à pasta do aplicativo. " +
+        "Nenhum arquivo foi criado, lido, alterado ou excluído.",
+        "success"
+      );
+    }
+
+    async function initializeApp() {
+      try {
+        if (typeof PublicClientApplication !== "function") {
+          throw new Error("A biblioteca MSAL não foi carregada pelo módulo ESM. Verifique a conexão e tente recarregar a página.");
+        }
+
+        msalInstance = new PublicClientApplication(msalConfig);
+        await msalInstance.initialize();
+        redirectResult = await msalInstance.handleRedirectPromise();
+        msalReady = true;
+
+        const account = redirectResult?.account || msalInstance.getAllAccounts()[0] || null;
+        if (account) {
+          accountInfo.textContent = account.username || account.name || "Conta identificada";
+          connectionStatus.textContent = "Conta autenticada";
+        }
+
+        // Se acabou de voltar do login ou da solicitação de permissões, conclui o teste.
+        if (redirectResult?.accessToken) {
+          setBusy(true, "Concluindo validação...");
+          await validateWithToken(redirectResult);
+          setBusy(false);
+        } else if (new URLSearchParams(window.location.search).has("error")) {
+          const params = new URLSearchParams(window.location.search);
+          showStatus(
+            "Falha no retorno da autenticação: " +
+            (params.get("error_description") || params.get("error")),
+            "error"
+          );
+        }
+      } catch (error) {
+        console.error("Falha na inicialização MSAL:", error);
+        connectionStatus.textContent = "Erro de autenticação";
+        showStatus(
+          "Não foi possível inicializar a autenticação.\n\n" +
+          (error.message || String(error)),
+          "error"
+        );
+        initializationError = error?.message || String(error);
+        msalReady = false;
+        validateButton.disabled = true;
+        logoutButton.disabled = true;
+      }
+    }
+
+    validateButton.addEventListener("click", async () => {
+      if (!msalReady || !msalInstance) {
+        showStatus(
+          "A autenticação Microsoft não foi inicializada. " +
+          (initializationError || "Recarregue a página e tente novamente."),
+          "error"
+        );
+        return;
+      }
+
+      try {
+        setBusy(true, "Iniciando validação...");
+        showStatus("Preparando autenticação Microsoft...", "info");
+
+        let account = msalInstance.getAllAccounts()[0] || null;
+
+        if (!account) {
+          // Login com redirecionamento: funciona melhor em dispositivos móveis.
+          await msalInstance.loginRedirect({
+            scopes: SCOPES,
+            prompt: "select_account"
+          });
+          return;
+        }
+
+        const tokenResponse = await getAccessToken(account);
+        if (tokenResponse) {
+          await validateWithToken(tokenResponse);
+        }
+      } catch (error) {
+        console.error("Erro ao validar OneDrive:", error);
+        connectionStatus.textContent = "Falha na validação";
+        showStatus(
+          "Não foi possível validar o acesso.\n\n" +
+          (error.message || String(error)) +
+          (error.status ? "\nHTTP: " + error.status : "") +
+          (error.code ? "\nCódigo: " + error.code : "") +
+          "\n\nConfira se as permissões delegadas User.Read e Files.ReadWrite.AppFolder estão cadastradas no Entra ID.",
+          "error"
+        );
+      } finally {
+        // Não altera a tela durante o redirecionamento; o navegador sairá desta página.
+        if (msalReady && window.location.hash.indexOf("code=") === -1) {
+          setBusy(false);
+        }
+      }
+    });
+
+    logoutButton.addEventListener("click", async () => {
+      try {
+        if (!msalReady || !msalInstance) {
+          showStatus("A autenticação Microsoft não está inicializada.", "error");
+          return;
+        }
+        const account = msalInstance.getAllAccounts()[0];
+        if (!account) {
+          showStatus("Não há uma sessão Microsoft ativa neste navegador.", "info");
+          return;
+        }
+        await msalInstance.logoutRedirect({
+          account,
+          postLogoutRedirectUri: REDIRECT_URI
+        });
+      } catch (error) {
+        console.error("Erro ao sair:", error);
+        showStatus("Não foi possível encerrar a sessão: " + (error.message || String(error)), "error");
+      }
+    });
+
+    // O fluxo de redirecionamento precisa ser processado em todo carregamento.
+    initializeApp();
+  </script>
+</body>
+</html>

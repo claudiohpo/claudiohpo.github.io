@@ -1,399 +1,310 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#101114">
-  <title>Gastos Apartamento | Teste OneDrive</title>
-
-
-  <style>
-    :root {
-      color-scheme: dark;
-      --bg: #101114; --card: #1b1d22; --surface: #252830;
-      --text: #f4f5f7; --muted: #a6abb5; --border: #353943;
-      --primary: #3979ed; --primary-hover: #2864d2;
-      --success: #35c779; --danger: #ff6565; --warning: #f5c451;
-    }
-    body.light {
-      color-scheme: light;
-      --bg: #f2f4f7; --card: #fff; --surface: #f0f2f5;
-      --text: #17191e; --muted: #606775; --border: #dce0e7;
-      --primary: #2563eb; --primary-hover: #1d4ed8;
-      --success: #138a4b; --danger: #c83232; --warning: #946200;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0; min-height: 100vh; padding: 20px;
-      display: grid; place-items: center;
-      background: var(--bg); color: var(--text);
-      font-family: system-ui, -apple-system, Segoe UI, Arial, sans-serif;
-      transition: background .2s, color .2s;
-    }
-    .app { width: 100%; max-width: 470px; }
-    header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:18px; }
-    .brand { font-size: 17px; font-weight: 800; letter-spacing:.3px; }
-    .brand span { color: var(--primary); }
-    button {
-      min-height: 46px; border: 0; border-radius: 12px; padding: 12px 16px;
-      font: inherit; font-weight: 700; cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-    }
-    button:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
-    button:disabled { opacity: .58; cursor: wait; }
-    .theme {
-      min-width: 48px; background: var(--card); color: var(--text);
-      border: 1px solid var(--border); font-size: 19px;
-    }
-    .card {
-      padding: 24px; border-radius: 20px; background: var(--card);
-      border: 1px solid var(--border); box-shadow: 0 14px 40px #0002;
-    }
-    .cloud { font-size: 36px; margin-bottom: 12px; }
-    h1 { margin: 0 0 9px; font-size: 23px; }
-    .intro { color: var(--muted); font-size: 14px; line-height: 1.55; margin: 0 0 21px; }
-    .details { background: var(--surface); border-radius: 13px; padding: 15px; margin-bottom: 18px; }
-    .detail + .detail { margin-top: 13px; }
-    .label { display:block; color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.6px; margin-bottom:4px; }
-    .value { font-size:13px; overflow-wrap:anywhere; line-height:1.45; }
-    .primary { width:100%; background:var(--primary); color:white; }
-    .primary:hover:not(:disabled) { background:var(--primary-hover); }
-    .secondary {
-      width:100%; margin-top:10px; background:transparent; color:var(--text);
-      border:1px solid var(--border);
-    }
-    #status {
-      display:none; white-space:pre-wrap; overflow-wrap:anywhere;
-      margin-top:16px; padding:14px; border-radius:12px;
-      font-size:13px; line-height:1.55; border:1px solid var(--border);
-      background:var(--surface);
-    }
-    #status.success { display:block; color:var(--success); border-color:var(--success); }
-    #status.error { display:block; color:var(--danger); border-color:var(--danger); }
-    #status.info { display:block; color:var(--text); }
-    .foot { text-align:center; color:var(--muted); font-size:11px; margin-top:16px; }
-    @media (max-width:380px) { body { padding:12px; } .card { padding:19px; } h1 {font-size:21px;} }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101114">
+<title>Gastos Apartamento</title>
+<style>
+:root{color-scheme:dark;--bg:#101114;--card:#1b1d22;--sf:#252830;--tx:#f4f5f7;--mu:#a6abb5;--bd:#353943;--pr:#3979ed;--ok:#35c779;--er:#ff6565}
+body.light{color-scheme:light;--bg:#f2f4f7;--card:#fff;--sf:#f0f2f5;--tx:#17191e;--mu:#606775;--bd:#dce0e7;--pr:#2563eb;--ok:#138a4b;--er:#c83232}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 system-ui,-apple-system,Segoe UI,Arial,sans-serif;padding:max(14px,env(safe-area-inset-top)) 14px calc(96px + env(safe-area-inset-bottom));transition:background .2s,color .2s}
+.app{max-width:480px;margin:0 auto}
+[hidden]{display:none!important}
+header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px}
+.brand{font-weight:800;font-size:17px}.brand span{color:var(--pr)}
+.hbtns{display:flex;gap:8px}
+button{font:inherit;font-weight:700;border:0;border-radius:12px;min-height:46px;padding:10px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--pr);outline-offset:2px}
+button:disabled{opacity:.6}
+.ghost{background:var(--card);color:var(--tx);border:1px solid var(--bd);min-width:46px}
+.pri{background:var(--pr);color:#fff;width:100%}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:5px;margin-bottom:14px}
+.tabs button{background:transparent;color:var(--mu)}
+.tabs button.on{background:var(--pr);color:#fff}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:18px}
+label,.lb{display:block;font-size:13px;color:var(--mu);margin:0 0 5px}
+.f{margin-bottom:14px}
+input,select{width:100%;min-height:48px;padding:10px 12px;border-radius:12px;border:1px solid var(--bd);background:var(--sf);color:var(--tx);font:inherit}
+.big{font-size:26px;font-weight:700}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.seg button{background:var(--sf);color:var(--mu);border:1px solid var(--bd)}
+.seg button.on{background:var(--pr);color:#fff;border-color:var(--pr)}
+.hint{font-size:13px;color:var(--mu);min-height:18px;margin:-6px 0 14px}
+.bar{position:fixed;left:0;right:0;bottom:0;padding:14px 14px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg) 35%)}
+.bar .pri{max-width:480px;display:block;margin:0 auto}
+.it{display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid var(--bd)}
+.it:last-child{border:0}
+.it b{display:block;overflow-wrap:anywhere}
+.it small{color:var(--mu);font-size:12px}
+.val{font-weight:700;white-space:nowrap;text-align:right}
+.del{background:transparent;color:var(--er);min-height:32px;padding:2px 0;font-size:12px}
+.sum{color:var(--mu);font-size:13px;margin:0 0 6px}
+#toast{position:fixed;left:14px;right:14px;bottom:calc(84px + env(safe-area-inset-bottom));max-width:480px;margin:0 auto;padding:13px 15px;border-radius:12px;background:var(--card);border:1px solid var(--bd);font-size:14px;white-space:pre-wrap;overflow-wrap:anywhere;display:none}
+#toast.ok{display:block;border-color:var(--ok);color:var(--ok)}
+#toast.er{display:block;border-color:var(--er);color:var(--er)}
+h1{font-size:22px;margin:0 0 8px}
+p.mu{color:var(--mu);font-size:14px;margin:0 0 18px}
+</style>
 </head>
 <body>
-  <main class="app">
-    <header>
-      <div class="brand">GASTOS <span>APARTAMENTO</span></div>
-      <button type="button" class="theme" id="themeButton" aria-label="Alternar tema" title="Alternar tema">☀️</button>
-    </header>
+<div class="app">
+<header>
+  <div class="brand">GASTOS <span>APARTAMENTO</span></div>
+  <div class="hbtns">
+    <button class="ghost" id="themeBtn" type="button" aria-label="Alternar tema">☀️</button>
+    <button class="ghost" id="outBtn" type="button" hidden>Sair</button>
+  </div>
+</header>
 
-    <section class="card">
-      <div class="cloud" aria-hidden="true">☁️</div>
-      <h1>Teste de conexão com OneDrive</h1>
-      <p class="intro">
-        Autentique sua conta Microsoft e verifique se o aplicativo consegue
-        identificar você e acessar a pasta exclusiva do próprio aplicativo.
-      </p>
+<section id="login" class="card" hidden>
+  <h1>Entrar</h1>
+  <p class="mu" id="loginMsg">Use sua conta Microsoft pessoal para lançar os gastos.</p>
+  <button class="pri" id="inBtn" type="button">Entrar com Microsoft</button>
+</section>
 
-      <div class="details">
-        <div class="detail">
-          <span class="label">Aplicativo</span>
-          <div class="value">Gastos Apartamento</div>
-        </div>
-        <div class="detail">
-          <span class="label">Conta aceita</span>
-          <div class="value">Conta pessoal Microsoft (Hotmail / Outlook)</div>
-        </div>
-        <div class="detail">
-          <span class="label">Permissões solicitadas</span>
-          <div class="value">User.Read · Files.ReadWrite.AppFolder</div>
-        </div>
-        <div class="detail">
-          <span class="label">Status</span>
-          <div class="value" id="connectionStatus">Aguardando validação</div>
-        </div>
-        <div class="detail">
-          <span class="label">Conta autenticada</span>
-          <div class="value" id="accountInfo">Nenhuma</div>
+<main id="main" hidden>
+  <nav class="tabs">
+    <button type="button" data-tab="novo" class="on">Novo gasto</button>
+    <button type="button" data-tab="hist">Histórico</button>
+  </nav>
+
+  <section id="novo">
+    <div class="card">
+      <div class="f"><label for="valor">Valor total (R$)</label>
+        <input id="valor" class="big" inputmode="decimal" placeholder="0,00" autocomplete="off"></div>
+      <div class="f"><label for="item">Item</label>
+        <input id="item" placeholder="Ex.: Porcelanato da sala" autocomplete="off"></div>
+      <div class="row">
+        <div class="f"><label for="cat">Categoria</label><select id="cat"></select></div>
+        <div class="f"><label for="com">Cômodo</label><select id="com"></select></div>
+      </div>
+      <div class="f"><div class="lb">Pagamento</div>
+        <div class="seg" id="pag"><button type="button" data-v="À vista" class="on">À vista</button><button type="button" data-v="Parcelado">Parcelado</button></div></div>
+      <div id="parc" hidden>
+        <div class="row">
+          <div class="f"><label for="np">Nº de parcelas</label><input id="np" type="number" inputmode="numeric" min="1" max="420" value="2"></div>
+          <div class="f"><label for="pm">1ª parcela</label><input id="pm" type="month"></div>
         </div>
       </div>
+      <div class="hint" id="prev"></div>
+      <div class="f"><div class="lb">Entra na venda?</div>
+        <div class="seg" id="vnd"><button type="button" data-v="Sim" class="on">Sim</button><button type="button" data-v="Não">Não</button></div></div>
+      <div class="row">
+        <div class="f"><label for="forn">Fornecedor / loja</label><input id="forn" list="fl" autocomplete="off"><datalist id="fl"></datalist></div>
+        <div class="f"><label for="data">Data da compra</label><input id="data" type="date"></div>
+      </div>
+      <div class="f" style="margin:0"><label for="obs">Observação</label><input id="obs" autocomplete="off"></div>
+    </div>
+    <div class="bar"><button class="pri" id="saveBtn" type="button">Salvar gasto</button></div>
+  </section>
 
-      <button type="button" class="primary" id="validateButton">
-        Validar acesso ao OneDrive
-      </button>
-      <button type="button" class="secondary" id="logoutButton">
-        Sair da conta
-      </button>
-      <div id="status" role="status" aria-live="polite"></div>
-    </section>
+  <section id="hist" hidden>
+    <div class="card"><p class="sum" id="sum"></p><div id="list"></div></div>
+  </section>
+</main>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
 
-    <footer class="foot">Gastos Apartamento · Diagnóstico de autenticação</footer>
-  </main>
+<script type="module">
+import { PublicClientApplication, InteractionRequiredAuthError } from "https://esm.sh/@azure/msal-browser@4.26.2";
 
-  <script type="module">
-    import {
-      PublicClientApplication,
-      InteractionRequiredAuthError
-    } from "https://esm.sh/@azure/msal-browser@4.26.2";
+const CLIENT_ID = "27e745a6-42db-48ec-99ad-3fe9a61ceebe";
+const REDIRECT = "https://claudiohpo.github.io/ape/";
+const AUTHORITY = "https://login.microsoftonline.com/consumers";
+const SCOPES = ["User.Read", "Files.ReadWrite.AppFolder"];
+const FILE_URL = "https://graph.microsoft.com/v1.0/me/drive/special/approot:/lancamentos.csv:/content";
 
-    "use strict";
+// Listas iguais às da aba Configurações do Excel. Se renomear lá, renomeie aqui.
+// [nome, "entra na venda" sugerido]
+const CATS = [["Compra do imóvel","Sim"],["Documentação e taxas (ITBI, escritura)","Não"],["Reforma civil (obra)","Sim"],["Elétrica e hidráulica","Sim"],["Pisos e revestimentos","Sim"],["Pintura","Sim"],["Marcenaria","Sim"],["Esquadrias e vidros","Sim"],["Iluminação","Sim"],["Móveis e eletros","Não"],["Decoração","Não"],["Limpeza e entulho","Não"],["Mudança e frete","Não"],["Outros","Sim"]];
+const ROOMS = ["Geral","Sala","Cozinha","Área de serviço","Quarto","Escritório","Suíte","Banheiro Social","Banheiro Escritório","Banheiro Quartos","Banheiro Suíte","Varanda","Escada"];
+// Cabeçalhos iguais aos da aba Lançamentos (A–K), com ID na frente.
+const HEAD = ["ID","Data da compra","Item","Categoria","Cômodo","Fornecedor / loja","Valor total (R$)","Pagamento","Nº de parcelas","1ª parcela (mês)","Entra na venda?","Observação"];
 
-    // Dados do registro no Microsoft Entra ID.
-    const CLIENT_ID = "27e745a6-42db-48ec-99ad-3fe9a61ceebe";
-    const DIRECTORY_TENANT_ID = "8464ae23-3c79-4994-b0e4-0d3096faca1b";
-    // Object ID do registro: a04eff43-7428-4e0e-a69c-86c08a50217f
-    // Não é usado no fluxo OAuth. Para contas pessoais, a autoridade correta
-    // é /consumers, e não o ID do diretório.
+const $ = id => document.getElementById(id);
+const brl = n => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+const today = () => new Date().toLocaleDateString("en-CA");
+const monthLabel = ym => new Date(+ym.slice(0,4), +ym.slice(5,7) - 1, 1).toLocaleDateString("pt-BR", { month: "short", year: "numeric" });
+let rows = [], vendaTouched = false, toastTimer;
 
-    const REDIRECT_URI = "https://claudiohpo.github.io/ape/";
-    const AUTHORITY = "https://login.microsoftonline.com/consumers";
-    const SCOPES = ["User.Read", "Files.ReadWrite.AppFolder"];
-    const GRAPH_BASE = "https://graph.microsoft.com/v1.0";
+function toast(msg, type = "ok") {
+  const t = $("toast"); t.textContent = msg; t.className = type;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.className = "", 4000);
+}
 
-    const statusElement = document.getElementById("status");
-    const validateButton = document.getElementById("validateButton");
-    const logoutButton = document.getElementById("logoutButton");
-    const connectionStatus = document.getElementById("connectionStatus");
-    const accountInfo = document.getElementById("accountInfo");
+// ---- Tema (escuro por padrão) ----
+function setTheme(t) {
+  document.body.classList.toggle("light", t === "light");
+  $("themeBtn").textContent = t === "light" ? "🌙" : "☀️";
+  document.querySelector('meta[name="theme-color"]').content = t === "light" ? "#f2f4f7" : "#101114";
+  try { localStorage.setItem("gastosTheme", t); } catch (_) {}
+}
+let th = "dark"; try { th = localStorage.getItem("gastosTheme") || "dark"; } catch (_) {}
+setTheme(th);
+$("themeBtn").onclick = () => setTheme(document.body.classList.contains("light") ? "dark" : "light");
 
-    function showStatus(message, type = "info") {
-      statusElement.textContent = message;
-      statusElement.className = type;
+// ---- CSV ----
+function toCsv(r) {
+  return [HEAD, ...r].map(l => l.map(v => '"' + String(v ?? "").replace(/"/g, '""') + '"').join(",")).join("\r\n") + "\r\n";
+}
+function parseCsv(s) {
+  s = s.replace(/^\ufeff/, ""); const out = []; let r = [], f = "", q = false;
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (q) { if (c === '"') { if (s[i+1] === '"') { f += '"'; i++; } else q = false; } else f += c; }
+    else if (c === '"') q = true;
+    else if (c === ",") { r.push(f); f = ""; }
+    else if (c === "\n") { r.push(f); out.push(r); r = []; f = ""; }
+    else if (c !== "\r") f += c;
+  }
+  if (f !== "" || r.length) { r.push(f); out.push(r); }
+  return out.slice(1).filter(x => x.length > 1);
+}
+
+// ---- Autenticação e OneDrive ----
+const msal = new PublicClientApplication({
+  auth: { clientId: CLIENT_ID, authority: AUTHORITY, redirectUri: REDIRECT, postLogoutRedirectUri: REDIRECT, navigateToLoginRequestUrl: false },
+  cache: { cacheLocation: "localStorage" }
+});
+async function token() {
+  const account = msal.getAllAccounts()[0];
+  try { return (await msal.acquireTokenSilent({ scopes: SCOPES, account })).accessToken; }
+  catch (e) {
+    if (e instanceof InteractionRequiredAuthError || e?.name === "InteractionRequiredAuthError") {
+      await msal.acquireTokenRedirect({ scopes: SCOPES, account });
     }
+    throw e;
+  }
+}
+async function load() {
+  const r = await fetch(FILE_URL, { headers: { Authorization: "Bearer " + await token() } });
+  if (r.status === 404) return [];
+  if (!r.ok) throw new Error("Não foi possível ler o arquivo (HTTP " + r.status + ").");
+  return parseCsv(await r.text());
+}
+async function save(r) {
+  const res = await fetch(FILE_URL, {
+    method: "PUT",
+    headers: { Authorization: "Bearer " + await token(), "Content-Type": "text/csv" },
+    body: "\ufeff" + toCsv(r)
+  });
+  if (!res.ok) throw new Error("Não foi possível salvar (HTTP " + res.status + ").");
+}
 
-    function setBusy(isBusy, label) {
-      validateButton.disabled = isBusy;
-      logoutButton.disabled = isBusy;
-      validateButton.textContent = isBusy ? label : "Validar acesso ao OneDrive";
-    }
+// ---- Formulário ----
+function fillSelect(el, items) { el.innerHTML = items.map(v => `<option>${v}</option>`).join(""); }
+fillSelect($("cat"), CATS.map(c => c[0])); fillSelect($("com"), ROOMS);
+$("data").value = today(); $("pm").value = today().slice(0, 7);
 
-    // Tema: inicializa e persiste a preferência no navegador.
-    const themeButton = document.getElementById("themeButton");
-    function setTheme(theme) {
-      document.body.classList.toggle("light", theme === "light");
-      themeButton.textContent = theme === "light" ? "🌙" : "☀️";
-      themeButton.setAttribute(
-        "aria-label",
-        theme === "light" ? "Ativar tema escuro" : "Ativar tema claro"
-      );
-      try { localStorage.setItem("gastosTheme", theme); } catch (_) {}
-    }
-    let savedTheme = "dark";
-    try { savedTheme = localStorage.getItem("gastosTheme") || "dark"; } catch (_) {}
-    setTheme(savedTheme);
-    themeButton.addEventListener("click", () => {
-      setTheme(document.body.classList.contains("light") ? "dark" : "light");
-    });
+function seg(id, cb) {
+  $(id).addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    $(id).querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b));
+    cb?.(b.dataset.v);
+  });
+}
+const segVal = id => $(id).querySelector(".on").dataset.v;
+function setSeg(id, v) { $(id).querySelectorAll("button").forEach(x => x.classList.toggle("on", x.dataset.v === v)); }
 
-    const msalConfig = {
-      auth: {
-        clientId: CLIENT_ID,
-        authority: AUTHORITY,
-        redirectUri: REDIRECT_URI,
-        postLogoutRedirectUri: REDIRECT_URI,
-        navigateToLoginRequestUrl: false
-      },
-      cache: {
-        cacheLocation: "sessionStorage"
-      },
-      system: {
-        allowNativeBroker: false
-      }
-    };
+function parseValor(s) {
+  s = String(s).trim().replace(/[R$\s]/g, "");
+  if (s.includes(",")) s = s.replace(/\./g, "").replace(",", ".");
+  return parseFloat(s);
+}
+function preview() {
+  const v = parseValor($("valor").value), n = parseInt($("np").value, 10);
+  const p = $("prev");
+  if (segVal("pag") !== "Parcelado" || !(v > 0) || !(n >= 1) || !$("pm").value) { p.textContent = ""; return; }
+  const [y, m] = $("pm").value.split("-").map(Number);
+  const end = new Date(y, m - 1 + n - 1, 1);
+  p.textContent = `${n}x de ${brl(v / n)} · de ${monthLabel($("pm").value)} a ${end.toLocaleDateString("pt-BR", { month: "short", year: "numeric" })}`;
+}
+seg("pag", v => { $("parc").hidden = v !== "Parcelado"; preview(); });
+seg("vnd", () => { vendaTouched = true; });
+["valor", "np", "pm"].forEach(id => $(id).addEventListener("input", preview));
+$("cat").addEventListener("change", () => {
+  if (!vendaTouched) setSeg("vnd", CATS.find(c => c[0] === $("cat").value)[1]);
+});
 
-    let msalInstance = null;
-    let msalReady = false;
-    let redirectResult = null;
-    let initializationError = null;
+async function onSave() {
+  const valor = parseValor($("valor").value), item = $("item").value.trim();
+  if (!item) { toast("Informe o item.", "er"); $("item").focus(); return; }
+  if (!(valor > 0)) { toast("Informe um valor maior que zero.", "er"); $("valor").focus(); return; }
+  const parcelado = segVal("pag") === "Parcelado";
+  const n = parseInt($("np").value, 10);
+  if (parcelado && !(n >= 1 && n <= 420)) { toast("O nº de parcelas deve estar entre 1 e 420.", "er"); return; }
+  const row = [
+    Date.now().toString(36), $("data").value || today(), item, $("cat").value, $("com").value,
+    $("forn").value.trim(), valor.toFixed(2), segVal("pag"),
+    parcelado ? n : "", parcelado && $("pm").value ? $("pm").value + "-01" : "",
+    segVal("vnd"), $("obs").value.trim()
+  ];
+  const b = $("saveBtn"); b.disabled = true; b.textContent = "Salvando...";
+  try {
+    rows = await load(); rows.push(row); await save(rows);
+    toast("Gasto salvo: " + item + " (" + brl(valor) + ")");
+    ["valor", "item", "obs"].forEach(id => $(id).value = "");
+    vendaTouched = false; setSeg("vnd", CATS.find(c => c[0] === $("cat").value)[1]);
+    preview(); refreshSuppliers(); $("valor").focus();
+  } catch (e) {
+    if (e?.name !== "InteractionRequiredAuthError") toast("Erro ao salvar: " + e.message, "er");
+  } finally { b.disabled = false; b.textContent = "Salvar gasto"; }
+}
+$("saveBtn").onclick = onSave;
 
-    async function graphGet(accessToken, path) {
-      const response = await fetch(GRAPH_BASE + path, {
-        method: "GET",
-        headers: {
-          "Authorization": `Bearer ${accessToken}`,
-          "Accept": "application/json"
-        }
-      });
+function refreshSuppliers() {
+  const s = [...new Set(rows.map(r => r[5]).filter(Boolean))].sort();
+  $("fl").innerHTML = s.map(v => `<option value="${v.replace(/"/g, "&quot;")}">`).join("");
+}
 
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        const message = data?.error?.message || `Microsoft Graph retornou HTTP ${response.status}.`;
-        const error = new Error(message);
-        error.status = response.status;
-        error.code = data?.error?.code || "";
-        throw error;
-      }
-      return data;
-    }
+// ---- Histórico ----
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+function renderHist() {
+  const total = rows.reduce((a, r) => a + (parseFloat(r[6]) || 0), 0);
+  $("sum").textContent = rows.length ? `${rows.length} lançamentos · total ${brl(total)}` : "";
+  if (!rows.length) { $("list").innerHTML = '<p class="mu" style="margin:0">Nenhum gasto lançado ainda. Use a aba Novo gasto.</p>'; return; }
+  $("list").innerHTML = rows.slice().reverse().slice(0, 60).map(r => {
+    const v = parseFloat(r[6]) || 0, n = parseInt(r[8], 10), d = r[1].split("-").reverse().join("/");
+    const pg = r[7] === "Parcelado" && n ? ` · ${n}x de ${brl(v / n)}` : "";
+    return `<div class="it"><div><b>${esc(r[2])}</b><small>${d} · ${esc(r[3])} · ${esc(r[4])}${pg}</small><br><button class="del" data-id="${esc(r[0])}" type="button">Excluir</button></div><div class="val">${brl(v)}</div></div>`;
+  }).join("");
+}
+$("list").addEventListener("click", async e => {
+  const b = e.target.closest(".del"); if (!b || !confirm("Excluir este lançamento?")) return;
+  try { rows = (await load()).filter(r => r[0] !== b.dataset.id); await save(rows); renderHist(); refreshSuppliers(); toast("Lançamento excluído."); }
+  catch (err) { toast("Erro ao excluir: " + err.message, "er"); }
+});
+document.querySelector(".tabs").addEventListener("click", async e => {
+  const b = e.target.closest("button"); if (!b) return;
+  document.querySelectorAll(".tabs button").forEach(x => x.classList.toggle("on", x === b));
+  $("novo").hidden = b.dataset.tab !== "novo"; $("hist").hidden = b.dataset.tab !== "hist";
+  if (b.dataset.tab === "hist") {
+    try { rows = await load(); refreshSuppliers(); } catch (err) { toast("Erro ao carregar: " + err.message, "er"); }
+    renderHist();
+  }
+});
 
-    async function getAccessToken(account) {
-      try {
-        return await msalInstance.acquireTokenSilent({
-          scopes: SCOPES,
-          account
-        });
-      } catch (error) {
-        if (error instanceof InteractionRequiredAuthError ||
-            error?.name === "InteractionRequiredAuthError") {
-          // Redirecionamento é mais confiável que popup em navegadores mobile
-          // e não depende do bloqueador de janelas pop-up.
-          await msalInstance.acquireTokenRedirect({
-            scopes: SCOPES,
-            account
-          });
-          return null;
-        }
-        throw error;
-      }
-    }
+// ---- Início ----
+$("inBtn").onclick = () => msal.loginRedirect({ scopes: SCOPES, prompt: "select_account" });
+$("outBtn").onclick = () => msal.logoutRedirect({ account: msal.getAllAccounts()[0], postLogoutRedirectUri: REDIRECT });
 
-    async function validateWithToken(tokenResponse) {
-      if (!tokenResponse?.accessToken) {
-        throw new Error("A Microsoft não retornou um token de acesso.");
-      }
-
-      showStatus("Token recebido. Verificando sua conta Microsoft...", "info");
-
-      const user = await graphGet(
-        tokenResponse.accessToken,
-        "/me?$select=displayName,mail,userPrincipalName"
-      );
-
-      accountInfo.textContent =
-        user.mail || user.userPrincipalName || user.displayName || "Conta autenticada";
-
-      showStatus("Identidade confirmada. Verificando a pasta do aplicativo...", "info");
-
-      // A primeira chamada ao approot pode criar a pasta especial caso ainda não exista.
-      const appFolder = await graphGet(
-        tokenResponse.accessToken,
-        "/me/drive/special/approot"
-      );
-
-      connectionStatus.textContent = "Acesso validado";
-      showStatus(
-        "✓ ACESSO VALIDADO COM SUCESSO\n\n" +
-        "Nome: " + (user.displayName || "Não informado") + "\n" +
-        "Conta: " + (user.mail || user.userPrincipalName || "Não informado") + "\n" +
-        "Pasta: " + (appFolder.name || "approot") + "\n" +
-        "ID da pasta: " + (appFolder.id || "Não retornado") + "\n\n" +
-        "A API confirmou a identidade e o acesso à pasta do aplicativo. " +
-        "Nenhum arquivo foi criado, lido, alterado ou excluído.",
-        "success"
-      );
-    }
-
-    async function initializeApp() {
-      try {
-        if (typeof PublicClientApplication !== "function") {
-          throw new Error("A biblioteca MSAL não foi carregada pelo módulo ESM. Verifique a conexão e tente recarregar a página.");
-        }
-
-        msalInstance = new PublicClientApplication(msalConfig);
-        await msalInstance.initialize();
-        redirectResult = await msalInstance.handleRedirectPromise();
-        msalReady = true;
-
-        const account = redirectResult?.account || msalInstance.getAllAccounts()[0] || null;
-        if (account) {
-          accountInfo.textContent = account.username || account.name || "Conta identificada";
-          connectionStatus.textContent = "Conta autenticada";
-        }
-
-        // Se acabou de voltar do login ou da solicitação de permissões, conclui o teste.
-        if (redirectResult?.accessToken) {
-          setBusy(true, "Concluindo validação...");
-          await validateWithToken(redirectResult);
-          setBusy(false);
-        } else if (new URLSearchParams(window.location.search).has("error")) {
-          const params = new URLSearchParams(window.location.search);
-          showStatus(
-            "Falha no retorno da autenticação: " +
-            (params.get("error_description") || params.get("error")),
-            "error"
-          );
-        }
-      } catch (error) {
-        console.error("Falha na inicialização MSAL:", error);
-        connectionStatus.textContent = "Erro de autenticação";
-        showStatus(
-          "Não foi possível inicializar a autenticação.\n\n" +
-          (error.message || String(error)),
-          "error"
-        );
-        initializationError = error?.message || String(error);
-        msalReady = false;
-        validateButton.disabled = true;
-        logoutButton.disabled = true;
-      }
-    }
-
-    validateButton.addEventListener("click", async () => {
-      if (!msalReady || !msalInstance) {
-        showStatus(
-          "A autenticação Microsoft não foi inicializada. " +
-          (initializationError || "Recarregue a página e tente novamente."),
-          "error"
-        );
-        return;
-      }
-
-      try {
-        setBusy(true, "Iniciando validação...");
-        showStatus("Preparando autenticação Microsoft...", "info");
-
-        let account = msalInstance.getAllAccounts()[0] || null;
-
-        if (!account) {
-          // Login com redirecionamento: funciona melhor em dispositivos móveis.
-          await msalInstance.loginRedirect({
-            scopes: SCOPES,
-            prompt: "select_account"
-          });
-          return;
-        }
-
-        const tokenResponse = await getAccessToken(account);
-        if (tokenResponse) {
-          await validateWithToken(tokenResponse);
-        }
-      } catch (error) {
-        console.error("Erro ao validar OneDrive:", error);
-        connectionStatus.textContent = "Falha na validação";
-        showStatus(
-          "Não foi possível validar o acesso.\n\n" +
-          (error.message || String(error)) +
-          (error.status ? "\nHTTP: " + error.status : "") +
-          (error.code ? "\nCódigo: " + error.code : "") +
-          "\n\nConfira se as permissões delegadas User.Read e Files.ReadWrite.AppFolder estão cadastradas no Entra ID.",
-          "error"
-        );
-      } finally {
-        // Não altera a tela durante o redirecionamento; o navegador sairá desta página.
-        if (msalReady && window.location.hash.indexOf("code=") === -1) {
-          setBusy(false);
-        }
-      }
-    });
-
-    logoutButton.addEventListener("click", async () => {
-      try {
-        if (!msalReady || !msalInstance) {
-          showStatus("A autenticação Microsoft não está inicializada.", "error");
-          return;
-        }
-        const account = msalInstance.getAllAccounts()[0];
-        if (!account) {
-          showStatus("Não há uma sessão Microsoft ativa neste navegador.", "info");
-          return;
-        }
-        await msalInstance.logoutRedirect({
-          account,
-          postLogoutRedirectUri: REDIRECT_URI
-        });
-      } catch (error) {
-        console.error("Erro ao sair:", error);
-        showStatus("Não foi possível encerrar a sessão: " + (error.message || String(error)), "error");
-      }
-    });
-
-    // O fluxo de redirecionamento precisa ser processado em todo carregamento.
-    initializeApp();
-  </script>
+(async () => {
+  try {
+    await msal.initialize();
+    const res = await msal.handleRedirectPromise();
+    const acc = res?.account || msal.getAllAccounts()[0];
+    if (!acc) { $("login").hidden = false; return; }
+    msal.setActiveAccount(acc);
+    $("main").hidden = false; $("outBtn").hidden = false;
+    try { rows = await load(); refreshSuppliers(); } catch (e) { if (e?.name !== "InteractionRequiredAuthError") toast("Erro ao ler os lançamentos: " + e.message, "er"); }
+  } catch (e) {
+    $("login").hidden = false; $("inBtn").disabled = true;
+    $("loginMsg").textContent = "Falha ao iniciar a autenticação: " + (e.message || e);
+  }
+})();
+</script>
 </body>
 </html>
