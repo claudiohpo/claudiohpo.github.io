@@ -6,8 +6,6 @@
   <meta name="theme-color" content="#101114">
   <title>Gastos Apartamento | Teste OneDrive</title>
 
-  <!-- MSAL Browser 4.x -->
-  <script src="https://alcdn.msauth.net/browser/4.26.2/js/msal-browser.min.js"></script>
 
   <style>
     :root {
@@ -127,7 +125,12 @@
     <footer class="foot">Gastos Apartamento · Diagnóstico de autenticação</footer>
   </main>
 
-  <script>
+  <script type="module">
+    import {
+      PublicClientApplication,
+      InteractionRequiredAuthError
+    } from "https://esm.sh/@azure/msal-browser@4.26.2";
+
     "use strict";
 
     // Dados do registro no Microsoft Entra ID.
@@ -196,6 +199,7 @@
     let msalInstance = null;
     let msalReady = false;
     let redirectResult = null;
+    let initializationError = null;
 
     async function graphGet(accessToken, path) {
       const response = await fetch(GRAPH_BASE + path, {
@@ -224,7 +228,7 @@
           account
         });
       } catch (error) {
-        if (error instanceof msal.InteractionRequiredAuthError ||
+        if (error instanceof InteractionRequiredAuthError ||
             error?.name === "InteractionRequiredAuthError") {
           // Redirecionamento é mais confiável que popup em navegadores mobile
           // e não depende do bloqueador de janelas pop-up.
@@ -276,11 +280,11 @@
 
     async function initializeApp() {
       try {
-        if (!window.msal) {
-          throw new Error("A biblioteca Microsoft MSAL não carregou. Verifique a conexão ou o bloqueio do CDN e recarregue a página.");
+        if (typeof PublicClientApplication !== "function") {
+          throw new Error("A biblioteca MSAL não foi carregada pelo módulo ESM. Verifique a conexão e tente recarregar a página.");
         }
 
-        msalInstance = new msal.PublicClientApplication(msalConfig);
+        msalInstance = new PublicClientApplication(msalConfig);
         await msalInstance.initialize();
         redirectResult = await msalInstance.handleRedirectPromise();
         msalReady = true;
@@ -312,14 +316,20 @@
           (error.message || String(error)),
           "error"
         );
-        msalReady = true;
-        setBusy(false);
+        initializationError = error?.message || String(error);
+        msalReady = false;
+        validateButton.disabled = true;
+        logoutButton.disabled = true;
       }
     }
 
     validateButton.addEventListener("click", async () => {
-      if (!msalReady) {
-        showStatus("A autenticação ainda está sendo inicializada. Aguarde alguns segundos e tente novamente.", "info");
+      if (!msalReady || !msalInstance) {
+        showStatus(
+          "A autenticação Microsoft não foi inicializada. " +
+          (initializationError || "Recarregue a página e tente novamente."),
+          "error"
+        );
         return;
       }
 
@@ -363,7 +373,10 @@
 
     logoutButton.addEventListener("click", async () => {
       try {
-        if (!msalReady) return;
+        if (!msalReady || !msalInstance) {
+          showStatus("A autenticação Microsoft não está inicializada.", "error");
+          return;
+        }
         const account = msalInstance.getAllAccounts()[0];
         if (!account) {
           showStatus("Não há uma sessão Microsoft ativa neste navegador.", "info");
