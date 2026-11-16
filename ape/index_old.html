@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0E1726">
+<title>Apê · Gastos da obra</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#0E1726;--sf:#15233A;--ln:#2B4268;--tx:#E7EEF9;--mu:#8DA1C2;--ac:#4DB3FF;--on:#06121F;--gold:#F3C453;--er:#FF8A8A;--ok:#4FD39A}
+body.light{color-scheme:light;--bg:#EDF2F8;--sf:#FFFFFF;--ln:#B7C6DE;--tx:#0F1D33;--mu:#55688A;--ac:#1B5FC4;--on:#FFFFFF;--gold:#8A5A00;--er:#B42318;--ok:#0F7B4E}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;color:var(--tx);background-color:var(--bg);
+  background-image:linear-gradient(color-mix(in srgb,var(--ln) 30%,transparent) 1px,transparent 1px),linear-gradient(90deg,color-mix(in srgb,var(--ln) 30%,transparent) 1px,transparent 1px);
+  background-size:24px 24px;font:500 16px/1.35 "Barlow Semi Condensed","Arial Narrow",system-ui,sans-serif;
+  padding:max(16px,env(safe-area-inset-top)) 16px calc(100px + env(safe-area-inset-bottom));transition:background-color .2s,color .2s}
+.app{max-width:480px;margin:0 auto}
+header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:16px}
+h1{margin:0;font-size:26px;font-weight:700;letter-spacing:.2px}
+.sub{color:var(--mu);font-size:14px;font-variant-numeric:tabular-nums;min-height:20px}
+.hb{display:flex;gap:8px}
+button{font:inherit;font-weight:600;border:0;border-radius:8px;min-height:46px;padding:10px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+button:disabled{opacity:.6}
+.ic{background:var(--sf);color:var(--tx);border:1.5px solid var(--ln);min-width:46px;padding:10px}
+.pri{background:var(--ac);color:var(--on);width:100%;font-size:18px}
+.tabs{display:flex;gap:22px;border-bottom:1.5px solid var(--ln);margin-bottom:18px}
+.tabs button{background:none;color:var(--mu);padding:8px 2px;min-height:44px;border-radius:0;border-bottom:3px solid transparent;margin-bottom:-1.5px;font-size:17px}
+.tabs button.on{color:var(--tx);border-bottom-color:var(--ac)}
+.panel{background:color-mix(in srgb,var(--sf) 94%,transparent);border:1.5px solid var(--ln);border-radius:10px;padding:16px}
+label,.lb{display:block;color:var(--mu);font-size:14px;margin:0 0 6px}
+.f{margin-bottom:16px}
+input,select{width:100%;min-height:48px;padding:10px 12px;border-radius:8px;border:1.5px solid var(--ln);background:var(--bg);color:var(--tx);font:inherit;font-size:17px}
+#valor{font-size:34px;font-weight:700;min-height:60px;font-variant-numeric:tabular-nums;color:var(--gold)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.plan{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+.plan button{min-height:52px;padding:6px 4px;font-size:14px;line-height:1.15;background:transparent;color:var(--tx);border:1.5px solid var(--ln);border-radius:3px}
+.plan button[aria-pressed=true]{background:var(--ac);color:var(--on);border-color:var(--ac)}
+.seg{display:grid;grid-template-columns:1fr 1fr;border:1.5px solid var(--ln);border-radius:8px;overflow:hidden}
+.seg button{background:transparent;color:var(--mu);border-radius:0}
+.seg button.on{background:var(--ac);color:var(--on)}
+.hint{color:var(--mu);font-size:14px;min-height:20px;margin:-8px 0 14px;font-variant-numeric:tabular-nums}
+.sw{display:flex;align-items:center;justify-content:space-between;width:100%;background:var(--bg);color:var(--tx);border:1.5px solid var(--ln);text-align:left;margin-bottom:16px}
+.sw i{width:46px;height:26px;border-radius:13px;background:var(--ln);position:relative;transition:background .15s;flex:none}
+.sw i::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--tx);transition:transform .15s}
+.sw[aria-checked=true] i{background:var(--ac)}
+.sw[aria-checked=true] i::after{transform:translateX(20px);background:var(--on)}
+details summary{cursor:pointer;color:var(--mu);padding:6px 0 12px;list-style:none}
+details summary::before{content:"+ "}
+details[open] summary::before{content:"– "}
+.bar{position:fixed;left:0;right:0;bottom:0;padding:16px 16px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg) 40%)}
+.bar button{display:block;max-width:448px;margin:0 auto}
+.it{display:flex;justify-content:space-between;gap:12px;padding:13px 0;border-bottom:1.5px solid var(--ln)}
+.it:last-child{border:0}
+.it b{display:block;font-size:17px;overflow-wrap:anywhere}
+.it small{color:var(--mu);font-size:14px}
+.v{font-weight:700;font-size:18px;color:var(--gold);white-space:nowrap;font-variant-numeric:tabular-nums}
+.del{background:none;color:var(--er);min-height:34px;padding:2px 0;font-size:14px}
+.mu{color:var(--mu);margin:0 0 16px}
+#toast{position:fixed;left:16px;right:16px;bottom:calc(88px + env(safe-area-inset-bottom));max-width:448px;margin:0 auto;padding:13px 15px;border-radius:8px;background:var(--sf);border:1.5px solid var(--ln);display:none;white-space:pre-wrap;overflow-wrap:anywhere}
+#toast.ok{display:block;border-color:var(--ok);color:var(--ok)}
+#toast.er{display:block;border-color:var(--er);color:var(--er)}
+.ver{text-align:center;color:var(--mu);font-size:12px;margin-top:18px}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div><h1>Gastos do apê</h1><div class="sub" id="sub"></div></div>
+  <div class="hb">
+    <button class="ic" id="themeBtn" type="button" aria-label="Alternar tema">☀️</button>
+    <button class="ic" id="outBtn" type="button" hidden>Sair</button>
+  </div>
+</header>
+
+<section id="login" class="panel" hidden>
+  <p class="mu" id="loginMsg">Entre com sua conta Microsoft pessoal para lançar os gastos da obra.</p>
+  <button class="pri" id="inBtn" type="button">Entrar com Microsoft</button>
+</section>
+
+<main id="main" hidden>
+  <nav class="tabs"><button type="button" data-tab="novo" class="on">Novo gasto</button><button type="button" data-tab="hist">Histórico</button></nav>
+
+  <section id="novo">
+    <div class="panel">
+      <div class="f"><label for="valor">Valor total (R$)</label><input id="valor" inputmode="decimal" placeholder="0,00" autocomplete="off"></div>
+      <div class="f"><label for="item">Item</label><input id="item" placeholder="Ex.: Porcelanato da sala" autocomplete="off"></div>
+      <div class="f"><div class="lb">Cômodo</div><div class="plan" id="plan"></div></div>
+      <div class="f"><label for="cat">Categoria</label><select id="cat"></select></div>
+      <div class="f"><div class="lb">Pagamento</div>
+        <div class="seg" id="pag"><button type="button" data-v="À vista" class="on">À vista</button><button type="button" data-v="Parcelado">Parcelado</button></div></div>
+      <div id="parc" hidden class="two">
+        <div class="f"><label for="np">Parcelas</label><input id="np" type="number" inputmode="numeric" min="1" max="420" value="2"></div>
+        <div class="f"><label for="pm">1ª parcela</label><input id="pm" type="month"></div>
+      </div>
+      <div class="hint" id="prev"></div>
+      <button type="button" class="sw" id="vnd" role="switch" aria-checked="true"><span>Entra na venda: <b id="vndTxt">Sim</b></span><i></i></button>
+      <details>
+        <summary>Mais detalhes</summary>
+        <div class="f"><label for="forn">Fornecedor / loja</label><input id="forn" list="fl" autocomplete="off"><datalist id="fl"></datalist></div>
+        <div class="f"><label for="data">Data da compra</label><input id="data" type="date"></div>
+        <div class="f" style="margin:0"><label for="obs">Observação</label><input id="obs" autocomplete="off"></div>
+      </details>
+    </div>
+    <div class="bar"><button class="pri" id="saveBtn" type="button">Salvar gasto</button></div>
+  </section>
+
+  <section id="hist" hidden><div class="panel" id="list"></div></section>
+</main>
+<div class="ver">v2 · Gastos do apê</div>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script type="module">
+import { PublicClientApplication, InteractionRequiredAuthError } from "https://esm.sh/@azure/msal-browser@4.26.2";
+
+const CLIENT_ID = "27e745a6-42db-48ec-99ad-3fe9a61ceebe";
+const REDIRECT = "https://claudiohpo.github.io/ape/";
+const AUTHORITY = "https://login.microsoftonline.com/consumers";
+const SCOPES = ["User.Read", "Files.ReadWrite.AppFolder"];
+const FILE_URL = "https://graph.microsoft.com/v1.0/me/drive/special/approot:/lancamentos.csv:/content";
+
+// Listas iguais às da aba Configurações do Excel (se renomear lá, renomeie aqui).
+// Categoria: [nome, "entra na venda" sugerido]. Cômodo: [nome, largura na planta (de 6)].
+const CATS = [["Compra do imóvel","Sim"],["Documentação e taxas (ITBI, escritura)","Não"],["Reforma civil (obra)","Sim"],["Elétrica e hidráulica","Sim"],["Pisos e revestimentos","Sim"],["Pintura","Sim"],["Marcenaria","Sim"],["Esquadrias e vidros","Sim"],["Iluminação","Sim"],["Móveis e eletros","Não"],["Decoração","Não"],["Limpeza e entulho","Não"],["Mudança e frete","Não"],["Outros","Sim"]];
+const ROOMS = [["Geral",6],["Sala",3],["Cozinha",3],["Quarto",2],["Escritório",2],["Suíte",2],["Banheiro Social",2],["Banheiro Escritório",2],["Banheiro Quartos",2],["Banheiro Suíte",2],["Área de serviço",2],["Varanda",2],["Escada",6]];
+// Cabeçalhos iguais aos da aba Lançamentos (A–K), com ID na frente.
+const HEAD = ["ID","Data da compra","Item","Categoria","Cômodo","Fornecedor / loja","Valor total (R$)","Pagamento","Nº de parcelas","1ª parcela (mês)","Entra na venda?","Observação"];
+
+const $ = id => document.getElementById(id);
+const brl = n => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+const today = () => new Date().toLocaleDateString("en-CA");
+const mon = (y, m) => new Date(y, m, 1).toLocaleDateString("pt-BR", { month: "short", year: "numeric" });
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+let rows = [], room = "Geral", venda = true, vendaTouched = false, timer;
+
+function toast(msg, type = "ok") {
+  const t = $("toast"); t.textContent = msg; t.className = type;
+  clearTimeout(timer); timer = setTimeout(() => t.className = "", 4500);
+}
+
+// ---- Tema (escuro por padrão) ----
+function setTheme(t) {
+  document.body.classList.toggle("light", t === "light");
+  $("themeBtn").textContent = t === "light" ? "🌙" : "☀️";
+  document.querySelector('meta[name="theme-color"]').content = t === "light" ? "#EDF2F8" : "#0E1726";
+  try { localStorage.setItem("gastosTheme", t); } catch (_) {}
+}
+let th = "dark"; try { th = localStorage.getItem("gastosTheme") || "dark"; } catch (_) {}
+setTheme(th);
+$("themeBtn").onclick = () => setTheme(document.body.classList.contains("light") ? "dark" : "light");
+
+// ---- CSV ----
+const toCsv = r => [HEAD, ...r].map(l => l.map(v => '"' + String(v ?? "").replace(/"/g, '""') + '"').join(",")).join("\r\n") + "\r\n";
+function parseCsv(s) {
+  s = s.replace(/^\ufeff/, ""); const out = []; let r = [], f = "", q = false;
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (q) { if (c === '"') { if (s[i+1] === '"') { f += '"'; i++; } else q = false; } else f += c; }
+    else if (c === '"') q = true;
+    else if (c === ",") { r.push(f); f = ""; }
+    else if (c === "\n") { r.push(f); out.push(r); r = []; f = ""; }
+    else if (c !== "\r") f += c;
+  }
+  if (f !== "" || r.length) { r.push(f); out.push(r); }
+  return out.slice(1).filter(x => x.length > 1);
+}
+
+// ---- Microsoft / OneDrive ----
+const msal = new PublicClientApplication({
+  auth: { clientId: CLIENT_ID, authority: AUTHORITY, redirectUri: REDIRECT, postLogoutRedirectUri: REDIRECT, navigateToLoginRequestUrl: false },
+  cache: { cacheLocation: "localStorage" }
+});
+async function token() {
+  const account = msal.getAllAccounts()[0];
+  try { return (await msal.acquireTokenSilent({ scopes: SCOPES, account })).accessToken; }
+  catch (e) {
+    if (e instanceof InteractionRequiredAuthError || e?.name === "InteractionRequiredAuthError") await msal.acquireTokenRedirect({ scopes: SCOPES, account });
+    throw e;
+  }
+}
+async function load() {
+  const r = await fetch(FILE_URL, { headers: { Authorization: "Bearer " + await token() } });
+  if (r.status === 404) return [];
+  if (!r.ok) throw new Error("Não foi possível ler o arquivo (HTTP " + r.status + ").");
+  return parseCsv(await r.text());
+}
+async function save(r) {
+  const res = await fetch(FILE_URL, { method: "PUT", headers: { Authorization: "Bearer " + await token(), "Content-Type": "text/csv" }, body: "\ufeff" + toCsv(r) });
+  if (!res.ok) throw new Error("Não foi possível salvar (HTTP " + res.status + ").");
+}
+const total = () => rows.reduce((a, r) => a + (parseFloat(r[6]) || 0), 0);
+function refresh() {
+  $("sub").textContent = rows.length ? `${rows.length} lançamentos · ${brl(total())}` : "";
+  const s = [...new Set(rows.map(r => r[5]).filter(Boolean))].sort();
+  $("fl").innerHTML = s.map(v => `<option value="${esc(v)}">`).join("");
+}
+
+// ---- Formulário ----
+$("cat").innerHTML = CATS.map(c => `<option>${esc(c[0])}</option>`).join("");
+$("plan").innerHTML = ROOMS.map(r => `<button type="button" style="grid-column:span ${r[1]}" data-r="${esc(r[0])}" aria-pressed="${r[0] === room}">${esc(r[0])}</button>`).join("");
+$("plan").onclick = e => {
+  const b = e.target.closest("button"); if (!b) return; room = b.dataset.r;
+  $("plan").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b));
+};
+$("data").value = today(); $("pm").value = today().slice(0, 7);
+
+function setVenda(v) { venda = v; $("vnd").setAttribute("aria-checked", v); $("vndTxt").textContent = v ? "Sim" : "Não"; }
+$("vnd").onclick = () => { vendaTouched = true; setVenda(!venda); };
+$("cat").onchange = () => { if (!vendaTouched) setVenda(CATS.find(c => c[0] === $("cat").value)[1] === "Sim"); };
+
+const parcelado = () => $("pag").querySelector(".on").dataset.v === "Parcelado";
+$("pag").onclick = e => {
+  const b = e.target.closest("button"); if (!b) return;
+  $("pag").querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b));
+  $("parc").hidden = !parcelado(); preview();
+};
+function parseValor(s) {
+  s = String(s).trim().replace(/[R$\s]/g, "");
+  if (s.includes(",")) s = s.replace(/\./g, "").replace(",", ".");
+  return parseFloat(s);
+}
+function preview() {
+  const v = parseValor($("valor").value), n = parseInt($("np").value, 10), pm = $("pm").value;
+  if (!parcelado() || !(v > 0) || !(n >= 1) || !pm) { $("prev").textContent = ""; return; }
+  const y = +pm.slice(0, 4), m = +pm.slice(5, 7) - 1;
+  $("prev").textContent = `${n}x de ${brl(v / n)} · de ${mon(y, m)} a ${mon(y, m + n - 1)}`;
+}
+["valor", "np", "pm"].forEach(id => $(id).addEventListener("input", preview));
+
+$("saveBtn").onclick = async () => {
+  const valor = parseValor($("valor").value), item = $("item").value.trim(), n = parseInt($("np").value, 10), pc = parcelado();
+  if (!(valor > 0)) { toast("Informe um valor maior que zero.", "er"); $("valor").focus(); return; }
+  if (!item) { toast("Informe o item.", "er"); $("item").focus(); return; }
+  if (pc && !(n >= 1 && n <= 420)) { toast("O nº de parcelas deve estar entre 1 e 420.", "er"); return; }
+  const row = [Date.now().toString(36), $("data").value || today(), item, $("cat").value, room, $("forn").value.trim(), valor.toFixed(2),
+    pc ? "Parcelado" : "À vista", pc ? n : "", pc && $("pm").value ? $("pm").value + "-01" : "", venda ? "Sim" : "Não", $("obs").value.trim()];
+  const b = $("saveBtn"); b.disabled = true; b.textContent = "Salvando...";
+  try {
+    rows = await load(); rows.push(row); await save(rows);
+    toast(`Salvo: ${item} (${brl(valor)})`);
+    ["valor", "item", "obs"].forEach(id => $(id).value = "");
+    vendaTouched = false; setVenda(CATS.find(c => c[0] === $("cat").value)[1] === "Sim");
+    preview(); refresh(); $("valor").focus();
+  } catch (e) {
+    if (e?.name !== "InteractionRequiredAuthError") toast("Erro ao salvar: " + e.message, "er");
+  } finally { b.disabled = false; b.textContent = "Salvar gasto"; }
+};
+
+// ---- Histórico ----
+function renderHist() {
+  if (!rows.length) { $("list").innerHTML = '<p class="mu" style="margin:0">Nenhum gasto lançado ainda.</p>'; return; }
+  $("list").innerHTML = rows.slice().reverse().slice(0, 60).map(r => {
+    const v = parseFloat(r[6]) || 0, n = parseInt(r[8], 10), d = r[1].split("-").reverse().join("/");
+    const pg = r[7] === "Parcelado" && n ? ` · ${n}x de ${brl(v / n)}` : "";
+    return `<div class="it"><div><b>${esc(r[2])}</b><small>${d} · ${esc(r[4])} · ${esc(r[3])}${pg}</small><br><button class="del" data-id="${esc(r[0])}" type="button">Excluir</button></div><div class="v">${brl(v)}</div></div>`;
+  }).join("");
+}
+$("list").onclick = async e => {
+  const b = e.target.closest(".del"); if (!b || !confirm("Excluir este lançamento?")) return;
+  try { rows = (await load()).filter(r => r[0] !== b.dataset.id); await save(rows); renderHist(); refresh(); toast("Lançamento excluído."); }
+  catch (err) { toast("Erro ao excluir: " + err.message, "er"); }
+};
+document.querySelector(".tabs").onclick = async e => {
+  const b = e.target.closest("button"); if (!b) return;
+  document.querySelectorAll(".tabs button").forEach(x => x.classList.toggle("on", x === b));
+  $("novo").hidden = b.dataset.tab !== "novo"; $("hist").hidden = b.dataset.tab !== "hist";
+  if (b.dataset.tab === "hist") {
+    try { rows = await load(); refresh(); } catch (err) { if (err?.name !== "InteractionRequiredAuthError") toast("Erro ao carregar: " + err.message, "er"); }
+    renderHist();
+  }
+};
+
+// ---- Início ----
+$("inBtn").onclick = () => msal.loginRedirect({ scopes: SCOPES, prompt: "select_account" });
+$("outBtn").onclick = () => msal.logoutRedirect({ account: msal.getAllAccounts()[0], postLogoutRedirectUri: REDIRECT });
+(async () => {
+  try {
+    await msal.initialize();
+    const res = await msal.handleRedirectPromise();
+    const acc = res?.account || msal.getAllAccounts()[0];
+    if (!acc) { $("login").hidden = false; return; }
+    msal.setActiveAccount(acc);
+    $("main").hidden = false; $("outBtn").hidden = false;
+    try { rows = await load(); refresh(); } catch (e) { if (e?.name !== "InteractionRequiredAuthError") toast("Erro ao ler os lançamentos: " + e.message, "er"); }
+  } catch (e) {
+    $("login").hidden = false; $("inBtn").disabled = true;
+    $("loginMsg").textContent = "Falha ao iniciar a autenticação: " + (e.message || e);
+  }
+})();
+</script>
+</body>
+</html>
