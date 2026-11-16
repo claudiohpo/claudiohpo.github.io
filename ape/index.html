@@ -66,7 +66,7 @@ details[open] summary::before{content:"– "}
 .edit{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1.5px solid var(--gold);color:var(--gold);border-radius:8px;padding:8px 12px;margin-bottom:12px}
 .edit button{background:none;color:var(--tx);min-height:36px;padding:4px 8px;text-decoration:underline}
 .ed{background:none;color:var(--ac);min-height:34px;padding:2px 14px 2px 0;font-size:14px}
-.tabs{overflow-x:auto;white-space:nowrap;scrollbar-width:none;gap:18px}.tabs button{flex:none}
+.tabs{overflow-x:auto;white-space:nowrap;scrollbar-width:thin;scrollbar-color:var(--ln) transparent;gap:18px;padding-bottom:10px}.tabs::-webkit-scrollbar{height:8px}.tabs::-webkit-scrollbar-thumb{background:var(--ln);border-radius:4px}.tabs button{flex:none}
 .kg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
 .kp{border:1.5px solid var(--ln);border-radius:8px;padding:10px 12px}.kp small{display:block;color:var(--mu);font-size:13px}.kp b{font-size:20px;font-variant-numeric:tabular-nums}
 .br{margin:10px 0}.bl{display:flex;justify-content:space-between;gap:8px;font-size:15px}.bl b{font-variant-numeric:tabular-nums;color:var(--gold)}
@@ -96,7 +96,7 @@ dialog::backdrop{background:#000a}dialog h3{margin:16px 0 4px;font-size:17px}dia
 </section>
 
 <main id="main" hidden>
-  <nav class="tabs"><button type="button" data-tab="novo" class="on">Novo gasto</button><button type="button" data-tab="painel">Painel</button><button type="button" data-tab="parc">Parcelas</button><button type="button" data-tab="orc">Orçado x real</button><button type="button" data-tab="valor">Valorização</button><button type="button" data-tab="com">Cômodos</button><button type="button" data-tab="hist">Histórico</button></nav>
+  <nav class="tabs"><button type="button" data-tab="painel">Painel</button><button type="button" data-tab="novo" class="on">Novo gasto</button><button type="button" data-tab="parc">Parcelas</button><button type="button" data-tab="com">Cômodos</button><button type="button" data-tab="hist">Histórico</button><button type="button" data-tab="valor">Valorização</button><button type="button" data-tab="orc">Orçado x real</button></nav>
 
   <section id="novo">
     <div class="edit" id="editBar" hidden><span id="editTxt"></span><button type="button" id="cancelEdit">Cancelar</button></div>
@@ -125,7 +125,7 @@ dialog::backdrop{background:#000a}dialog h3{margin:16px 0 4px;font-size:17px}dia
 
   <section id="hist" hidden><div class="panel" id="list"></div></section>
 </main>
-<div class="ver"><button type="button" class="vb" id="verBtn">v4 · Gastos do apê · histórico de versões</button></div>
+<div class="ver"><button type="button" class="vb" id="verBtn">v5 · Gastos do apê · histórico de versões</button></div>
 <dialog id="vm"><div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:19px">Histórico de versões</b><button class="ic" id="vmClose" type="button">Fechar</button></div><div id="vmBody"></div></dialog>
 </div>
 <div id="toast" role="status" aria-live="polite"></div>
@@ -338,7 +338,7 @@ function sch(r) {
 const sum = (a, f) => a.reduce((x, y) => x + f(y), 0);
 const kp = (l, v, c = "") => `<div class="kp"><small>${l}</small><b style="${c}">${v}</b></div>`;
 const br = (l, v, max, w2 = 0) => `<div class="br"><div class="bl"><span>${esc(l)}</span><b>${brl(v)}</b></div><div class="bt"><i style="width:${max > 0 ? Math.min(100, (v - w2) / max * 100) : 0}%"></i>${w2 ? `<i style="width:${Math.min(100, w2 / max * 100)}%"></i>` : ""}</div></div>`;
-const put = (k, h) => { $(k).firstChild.innerHTML = h; };
+const put = (k, h) => { $("t-" + k).firstChild.innerHTML = h; };
 const rw = (l, v) => `<div class="rw"><span>${l}</span><b>${v}</b></div>`;
 const inp = (attr, v) => `<input class="cfg" inputmode="decimal" ${attr} value="${v}">`;
 function val() {
@@ -376,7 +376,7 @@ function renderCom() {
   const L = live(), d = ROOMS.map(r => [r[0], sum(L.filter(x => x[4] === r[0]), num), sum(L.filter(x => x[4] === r[0] && x[10] === "Sim"), num)]).filter(x => x[1] > 0).sort((a, b) => b[1] - a[1]), mx = d[0]?.[1] || 0;
   put("com", `<h2>Gasto por cômodo</h2><p class="mu" style="margin:0 0 6px">Azul: entra na venda · amarelo: fora da venda</p>${d.map(x => br(x[0], x[1], mx, x[1] - x[2])).join("") || '<p class="mu">Sem lançamentos.</p>'}`);
 }
-["painel", "parc", "orc", "valor", "com"].forEach(k => { const e = document.createElement("section"); e.id = k; e.hidden = true; e.innerHTML = '<div class="panel"></div>'; $("hist").after(e); });
+["painel", "parc", "orc", "valor", "com"].forEach(k => { const e = document.createElement("section"); e.id = "t-" + k; e.hidden = true; e.innerHTML = '<div class="panel"></div>'; $("hist").after(e); });
 const RENDER = { hist: renderHist, painel: renderPainel, parc: renderParc, orc: renderOrc, valor: renderValor, com: renderCom };
 document.addEventListener("change", e => {
   const t = e.target; if (!t.classList.contains("cfg")) return; const n = parseValor(t.value) || 0;
@@ -389,13 +389,14 @@ document.addEventListener("change", e => {
 document.querySelector(".tabs").onclick = async e => {
   const b = e.target.closest("button"); if (!b) return; const t = b.dataset.tab;
   document.querySelectorAll(".tabs button").forEach(x => x.classList.toggle("on", x === b));
-  ["novo", "hist", "painel", "parc", "orc", "valor", "com"].forEach(k => $(k).hidden = k !== t);
+  ["novo", "hist", "painel", "parc", "orc", "valor", "com"].forEach(k => $(k === "novo" || k === "hist" ? k : "t-" + k).hidden = k !== t);
   if (RENDER[t]) { try { rows = await load(); refresh(); } catch (err) { if (err?.name !== "InteractionRequiredAuthError") toast("Erro ao carregar: " + err.message, "er"); } RENDER[t](); }
 };
 
 // ---- Histórico de versões ----
 const VERS = [
- ["v4", "Atual", ["Novas abas: Painel, Parcelas, Orçado x real, Valorização e Cômodos, calculadas a partir dos seus lançamentos", "Premissas (área, valor do m², custos de venda, % de retorno) e orçamentos por categoria editáveis no app, guardados em config.json na pasta do app (separados da planilha)", "Abas rolam na horizontal no celular", "Este histórico de versões, aberto pelo rodapé"]],
+ ["v5", "Atual", ["Menu reordenado: Painel, Novo gasto, Parcelas, Cômodos, Histórico, Valorização e Orçado x real", "Barra de rolagem horizontal visível no menu (desktop), sem cobrir os nomes", "Correção: as abas Parcelas e Valorização apareciam vazias (conflito de identificadores com campos do formulário)"]],
+ ["v4", "", ["Novas abas: Painel, Parcelas, Orçado x real, Valorização e Cômodos, calculadas a partir dos seus lançamentos", "Premissas (área, valor do m², custos de venda, % de retorno) e orçamentos por categoria editáveis no app, guardados em config.json na pasta do app (separados da planilha)", "Abas rolam na horizontal no celular", "Este histórico de versões, aberto pelo rodapé"]],
  ["v3", "", ["ID único, Revisão e Excluído em cada lançamento (CSV com 14 colunas)", "Editar lançamentos pelo Histórico; a edição sobe a Revisão", "Excluir marca Excluído em vez de apagar: o lançamento continua guardado", "Sincronismo com a aba Base de dados do Excel (Power Query tblBase) sem duplicar IDs; planilha tem prioridade em empate de Revisão", "Lê CSVs antigos de 12 colunas"]],
  ["v2", "", ["Refeito do zero com design de planta de obra: azul-marinho com grade, modo escuro padrão e botão para o claro", "Cômodos escolhidos numa planta tocável com 13 cômodos", "Chave 'Entra na venda' sugerida pela categoria; fornecedor, data e observação em 'Mais detalhes'", "Resumo do parcelamento (ex.: 6x de R$ 1.600,00), fornecedores sugeridos e total no cabeçalho", "Marca de versão no rodapé para conferir qual arquivo está no ar"]],
  ["v1", "", ["Primeiro app de lançamento: valor, item, categoria, cômodo, à vista ou parcelado e entra na venda", "Grava lancamentos.csv na pasta do app no OneDrive, com login Microsoft e permissão só dessa pasta", "Aba Histórico com exclusão e total", "Modo escuro com alternância para o claro"]],
